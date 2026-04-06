@@ -30,6 +30,8 @@ logs/
 Cargo.lock
 package-lock.json
 yarn.lock
+bun.lock
+uv.lock
 *.lcov
 
 # Test coverage

@@ -1,14 +1,14 @@
-"""Pheno Retry - Unified retry logic library (tenacity)."""
+"""Pheno Retry - Unified retry logic (tenacity)."""
 from tenacity import retry, stop_after_attempt, wait_exponential, RetryError
 
-def retry_with_backoff(max_attempts: int = 3, min_wait: int = 2, max_wait: int = 10):
+def retry_with_backoff(max_attempts=3, min_wait=2, max_wait=10):
     return retry(
         stop=stop_after_attempt(max_attempts),
         wait=wait_exponential(multiplier=1, min=min_wait, max=max_wait),
         reraise=True
     )
 
-async def async_retry(max_attempts: int = 3):
+async def async_retry(max_attempts=3):
     def decorator(func):
         async def wrapper(*args, **kwargs):
             last_error = None

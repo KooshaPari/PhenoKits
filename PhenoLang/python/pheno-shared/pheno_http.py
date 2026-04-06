@@ -1,8 +1,8 @@
-"""Pheno HTTP - Unified HTTP client library (httpx)."""
+"""Pheno HTTP - Unified HTTP client (httpx)."""
 import httpx
 
 class HTTPClient:
-    def __init__(self, base_url: str | None = None, timeout: float = 30.0):
+    def __init__(self, base_url=None, timeout=30.0):
         self._client = httpx.AsyncClient(base_url=base_url or "http://localhost", timeout=timeout)
     
     async def get(self, url, **kwargs):
@@ -20,7 +20,7 @@ class HTTPClient:
     async def __aexit__(self, *args):
         await self._client.aclose()
 
-def get_http_client(base_url: str | None = None, timeout: float = 30.0) -> HTTPClient:
+def get_http_client(base_url=None, timeout=30.0):
     return HTTPClient(base_url=base_url, timeout=timeout)
 
 __all__ = ["HTTPClient", "get_http_client"]

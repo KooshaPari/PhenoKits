@@ -1,4 +1,4 @@
-"""Pheno Config - Unified configuration library (pydantic-settings)."""
+"""Pheno Config - Unified configuration (pydantic-settings)."""
 from pydantic_settings import BaseSettings
 from pydantic import Field
 
@@ -12,9 +12,9 @@ class Config(BaseSettings):
     cache_enabled: bool = Field(default=True)
     cache_path: str = Field(default=".cache")
 
-_config: Config | None = None
+_config = None
 
-def get_config() -> Config:
+def get_config():
     global _config
     if _config is None:
         _config = Config()

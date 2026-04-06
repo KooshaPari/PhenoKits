@@ -1,4 +1,4 @@
-"""Pheno Cache - Unified caching library."""
+"""Pheno Cache - Unified caching (diskcache + cachetools)."""
 from functools import wraps
 import hashlib
 import json
@@ -19,9 +19,9 @@ class Cache:
     def clear(self):
         self._store.clear()
 
-_cache: Cache | None = None
+_cache = None
 
-def get_cache() -> Cache:
+def get_cache():
     global _cache
     if _cache is None:
         _cache = Cache()

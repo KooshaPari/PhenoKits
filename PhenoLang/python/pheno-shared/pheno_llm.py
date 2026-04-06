@@ -1,4 +1,4 @@
-"""Pheno LLM - Unified LLM routing library (LiteLLM)."""
+"""Pheno LLM - Unified LLM routing (LiteLLM)."""
 import os
 
 class LLMRouter:
@@ -7,7 +7,7 @@ class LLMRouter:
     def __init__(self):
         self._fallback = ["openai", "anthropic", "gemini"]
     
-    def _get_api_key(self, provider): 
+    def _get_api_key(self, provider):
         env_map = {"openai": "OPENAI_API_KEY", "anthropic": "ANTHROPIC_API_KEY", "gemini": "GEMINI_API_KEY"}
         return os.getenv(env_map.get(provider, ""))
     
@@ -17,9 +17,9 @@ class LLMRouter:
             raise ValueError(f"No API key for {provider}")
         return {"model": model, "provider": provider, "messages": messages}
 
-_router: LLMRouter | None = None
+_router = None
 
-def get_router() -> LLMRouter:
+def get_router():
     global _router
     if _router is None:
         _router = LLMRouter()

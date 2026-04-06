@@ -14,7 +14,7 @@ class AgentConfig:
     timeout: float = 300.0
 
 class BaseAgent:
-    def __init__(self, config: AgentConfig):
+    def __init__(self, config):
         self.config = config
         self.status = AgentStatus.IDLE
     
@@ -37,7 +37,7 @@ class SimpleAgent(BaseAgent):
         return await self._handler(**kwargs)
 
 class ChainAgent(BaseAgent):
-    def __init__(self, config: AgentConfig, agents):
+    def __init__(self, config, agents):
         super().__init__(config)
         self._agents = agents
     
@@ -48,7 +48,7 @@ class ChainAgent(BaseAgent):
         return result
 
 class ParallelAgent(BaseAgent):
-    def __init__(self, config: AgentConfig, agents, max_concurrent=5):
+    def __init__(self, config, agents, max_concurrent=5):
         super().__init__(config)
         self._agents = agents
         self._max = max_concurrent

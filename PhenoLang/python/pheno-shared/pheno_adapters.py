@@ -22,15 +22,12 @@ class GitHubAdapter:
 class LinearAdapter:
     def __init__(self, api_key=None):
         self.api_key = api_key or os.getenv("LINEAR_API_KEY", "")
-        self._client = httpx.AsyncClient(
-            headers={"Authorization": self.api_key},
-            timeout=30.0
-        )
+        self._client = httpx.AsyncClient(headers={"Authorization": self.api_key}, timeout=30.0)
     
     async def list_issues(self):
         response = await self._client.post(
             "https://api.linear.app/graphql",
-            json={"query": "query { issues(first: 50) { nodes { id identifier title } } }"}
+            json={"query": "{ issues(first: 50) { nodes { id identifier title } } }"}
         )
         response.raise_for_status()
         return response.json().get("data", {}).get("issues", {}).get("nodes", [])

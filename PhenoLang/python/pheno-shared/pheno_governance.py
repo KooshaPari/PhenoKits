@@ -1,4 +1,4 @@
-"""Pheno Governance - Policy and compliance library."""
+"""Pheno Governance - Policy and compliance."""
 from dataclasses import dataclass, asdict
 from datetime import datetime
 from enum import Enum, auto
@@ -68,9 +68,9 @@ class GovernanceEngine:
                         violations.append({"policy_id": policy.id, "rule": rule})
         return {"compliant": len(violations) == 0, "violations": violations}
 
-_engine: GovernanceEngine | None = None
+_engine = None
 
-def get_engine() -> GovernanceEngine:
+def get_engine():
     global _engine
     if _engine is None:
         _engine = GovernanceEngine()

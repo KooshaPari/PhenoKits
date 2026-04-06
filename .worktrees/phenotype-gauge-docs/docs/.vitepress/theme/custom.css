@@ -1,0 +1,13 @@
+/* impeccable CSS baseline — github.com/pbakaus/impeccable */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+img, video { max-width: 100%; height: auto; }
+input, button, textarea, select { font: inherit; }
+p, h1, h2, h3, h4, h5, h6 { overflow-wrap: break-word; }
+
+:root {
+  --vp-c-brand-1: #7c6af7;
+  --vp-c-brand-2: #6457e0;
+  --vp-c-brand-3: #5348cc;
+}
+

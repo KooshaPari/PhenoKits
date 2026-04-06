@@ -1,0 +1,6 @@
+id: ADR-005
+title: CLI Interface Implementation
+context: CLI Interface requires 84 code entities
+decision: Use python for CLI Interface
+consequences: Consistent codebase in python
+status: accepted

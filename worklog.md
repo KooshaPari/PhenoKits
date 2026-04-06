@@ -35,3 +35,17 @@ See AgilePlus database for current work status:
 Historical work is documented in:
 - AgilePlus worklog: `/Users/kooshapari/CodeProjects/Phenotype/repos/AgilePlus/.work-audit/worklog.md`
 - Git history for merged work
+
+### Apisync Audit (2026-04-05)
+
+| Field | Value |
+|-------|-------|
+| **Repository** | Apisync |
+| **Type** | Documentation-only stub |
+| **Source Code** | None (docs only) |
+| **Language** | N/A |
+| **Status** | Archive - SPEC preserved |
+| **Overlap** | CLIProxyAPI (Go implementation) |
+
+**Decision:** Keep as archived specification reference. CLIProxyAPI is the canonical Go implementation. Apisync serves as the design specification document.
+

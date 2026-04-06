@@ -1,0 +1,5 @@
+{
+  "name": "phenotype-dep-guard",
+  "version": "0.1.0",
+  "traceability": "@trace DEP-001"
+}

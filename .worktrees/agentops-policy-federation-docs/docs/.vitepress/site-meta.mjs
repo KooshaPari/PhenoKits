@@ -1,0 +1,1 @@
+export function createSiteMeta({ base = '/' } = {}) { return { base, title: 'agentops-policy-federation', description: 'agentops-policy-federation documentation', themeConfig: { nav: [{ text: 'Home', link: base || '/' }, { text: 'Guide', link: '/guide/' }] } } }

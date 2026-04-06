@@ -1,0 +1,16 @@
+repos:
+  - repo: local
+    hooks:
+      - id: legacy-tooling-scan
+        name: Legacy Tooling Anti-Pattern Scan
+        entry: python3 /Users/kooshapari/CodeProjects/Phenotype/repos/tooling/legacy-enforcement/scanner/legacy_tooling_scanner.py
+        args:
+          - --repo-root
+          - .
+          - --report-only
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [commit]
+        additional_dependencies: []
+        minimum_pre_commit_version: "2.9.0"

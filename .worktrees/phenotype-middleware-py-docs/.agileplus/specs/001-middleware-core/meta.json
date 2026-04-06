@@ -1,0 +1,8 @@
+{
+  "id": "001-middleware-core",
+  "title": "Middleware Core — Python HTTP Middleware",
+  "version": "0.1.0",
+  "status": "active",
+  "layer_type": "middleware_ops",
+  "created": "2026-04-02"
+}

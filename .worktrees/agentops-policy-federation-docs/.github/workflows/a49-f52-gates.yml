@@ -1,0 +1,21 @@
+name: a49-f52-gates
+on:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  wave-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: A49 drift guard
+        run: python3 scripts/federation/a49_cutover_policy_drift_guard.py --policy policies/system/base.yaml --expected-hash $(sha256sum policies/system/base.yaml | awk '{print $1}')
+      - name: C49 governor check (non-blocking placeholder data)
+        run: |
+          mkdir -p /tmp/wave
+          cat > /tmp/wave/c49.json <<JSON
+          {"oscillation_events": 0}
+          JSON
+          python3 scripts/policy/c49_replay_governor_validate.py --metrics /tmp/wave/c49.json

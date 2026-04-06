@@ -1,0 +1,31 @@
+name: Complexity Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  complexity:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install radon xenon
+
+      - name: Check complexity with radon
+        run: |
+          echo "### Cyclomatic Complexity" >> $GITHUB_STEP_SUMMARY
+          radon cc bin/ --average --show-complexity >> $GITHUB_STEP_SUMMARY || true
+
+      - name: Check maintainability
+        run: |
+          echo "### Maintainability Index" >> $GITHUB_STEP_SUMMARY
+          radon mi bin/ >> $GITHUB_STEP_SUMMARY || true

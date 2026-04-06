@@ -1,0 +1,57 @@
+[package]
+name = "authkit"
+version = "0.1.0"
+edition = "2021"
+authors = ["Phenotype Team"]
+description = "Authentication and authorization framework with JWT, OAuth2, and RBAC/ABAC"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/KooshaPari/authkit"
+documentation = "https://docs.rs/authkit"
+keywords = ["auth", "jwt", "oauth2", "rbac", "abac", "security"]
+categories = ["web-programming", "authentication"]
+
+# Standalone workspace - not part of the Phenotype repos shelf workspace
+[workspace]
+
+[dependencies]
+# JWT
+jsonwebtoken = { version = "10.3", features = ["rust_crypto"] }
+
+# Password hashing
+argon2 = "0.5"
+bcrypt = "0.15"
+
+# Async runtime
+tokio = { version = "1.35", features = ["full"] }
+async-trait = "0.1"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Time handling
+chrono = { version = "0.4", features = ["serde"] }
+
+# UUID
+uuid = { version = "1.6", features = ["v4", "serde"] }
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Logging
+tracing = "0.1"
+
+# Crypto
+rand = "0.8"
+
+# Regex (for policy conditions)
+regex = "1.10"
+
+[dev-dependencies]
+tokio-test = "0.4"
+tempfile = "3.8"
+
+[profile.release]
+lto = true
+codegen-units = 1

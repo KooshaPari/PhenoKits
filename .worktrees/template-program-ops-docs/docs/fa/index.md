@@ -1,0 +1,3 @@
+# Docs (fa)
+
+This is the locale entry page for fa.

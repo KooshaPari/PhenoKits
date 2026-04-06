@@ -1,0 +1,13 @@
+id: US-001
+title: Core Infrastructure Capability Story
+description: As a user, I want the system shall provide core infrastructure functionality..
+acceptance_criteria:
+- 'try_acquire: /// Try to acquire a permit without blocking'
+- 'acquire: /// Acquire a permit, waiting if necessary'
+- 'new: /// - `refill_rate`: Tokens added per second'
+- "refill: /// - `refill_rate`: Tokens added per second\n    pub fn new(capacity:\
+  \ usize, refill_rate: usize) -> Self {\n        if capacity == 0 {\n           \
+  \ panic!(\"Token bucket capacity must be > 0\");\n        }\n        Self { capacity,\
+  \ tokens: capacity, refill_rate, last_refill: Instant::now() }\n    }"
+- 'try_acquire: /// Try to acquire a token'
+fr_id: FR-001

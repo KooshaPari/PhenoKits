@@ -1,0 +1,26 @@
+name: Validate Packaging
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  actionlint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install actionlint
+        run: |
+          set -euo pipefail
+          # Use GITHUB_TOKEN to avoid rate limits
+          latest="$(curl -fsSL -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/rhysd/actionlint/releases/latest | jq -r '.tag_name')"
+          curl -fsSL "https://github.com/rhysd/actionlint/releases/download/${latest}/actionlint_${latest#v}_linux_amd64.tar.gz" \
+            | tar -xz actionlint
+          sudo mv actionlint /usr/local/bin/actionlint
+
+      - name: Run actionlint
+        run: actionlint

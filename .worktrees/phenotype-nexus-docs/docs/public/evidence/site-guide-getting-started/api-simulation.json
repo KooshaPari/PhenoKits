@@ -1,0 +1,8 @@
+{
+  "bundle": "site-guide-getting-started",
+  "steps": [
+    "render doc",
+    "check evidence"
+  ],
+  "duration_ms": 55
+}

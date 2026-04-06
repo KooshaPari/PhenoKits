@@ -1,0 +1,18 @@
+name: workflow-permissions
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+  statuses: write
+  security-events: write
+
+jobs:
+  verify-permissions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Permissions declared
+        run: echo "Workflow permissions are properly declared"

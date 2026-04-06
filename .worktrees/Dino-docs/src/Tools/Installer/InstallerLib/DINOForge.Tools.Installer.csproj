@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>DINOForge.Tools.Installer</AssemblyName>
+    <RootNamespace>DINOForge.Tools.Installer</RootNamespace>
+    <Description>Installer library for detecting Steam/DINO paths and verifying DINOForge installations</Description>
+    <!-- Suppress platform compatibility warning: Steam/registry detection is guarded by RuntimeInformation checks -->
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+  </PropertyGroup>
+
+</Project>

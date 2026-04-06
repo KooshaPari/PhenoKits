@@ -1,0 +1,8 @@
+{
+  "bundle": "site-guide-architecture",
+  "steps": [
+    "render doc",
+    "check evidence"
+  ],
+  "duration_ms": 55
+}

@@ -1,0 +1,8 @@
+{
+  "bundle": "site-guide-cli-reference",
+  "steps": [
+    "render doc",
+    "check evidence"
+  ],
+  "duration_ms": 55
+}

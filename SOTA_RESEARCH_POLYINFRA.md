@@ -26,21 +26,23 @@ This SOTA research analyzes container orchestration, storage backends, and proce
 
 ## NVMS Implementations (Clarified)
 
-### BytePort/nvms (Historical)
+### 1. KooshaPari/nanovms (Standalone - ARCHIVED) ⭐
+- **URL**: https://github.com/KooshaPari/nanovms
+- **Status**: ARCHIVED (Apr 4, 2026) - Read-only but COMPLETE
+- **Language**: Go
+- **Note**: "DEPRECATED: Duplicated in KooshaPari/HexaKit/nanovms"
+- **Features**:
+  - Three-tier isolation (WASM, gVisor, Firecracker)
+  - Cross-platform: macOS (Lima/VZ), Windows (WSL2), Linux (KVM)
+  - Performance: ~1ms WASM, ~90ms gVisor, ~125ms Firecracker startup
+- **This is the real standalone NanoVMS implementation**
+
+### 2. BytePort/nvms (Historical/Contextual)
 - **Location**: `BytePort/backend/.history/nvms/deploy/`
-- **Language**: Go (80% complete in history)
-
-### KooshaPari/nvms (Standalone)
-- **Status**: Separate repository, requires further research to locate
-
----
-
-## 1. Container Orchestration
-
-### 1.1 NVMS
-**Two separate implementations exist:**
-1. BytePort/nvms - Go implementation (80% complete)
-2. KooshaPari/nvms - Standalone repo (to be located)
+- **Language**: Go
+- **Status**: Historical implementation (~80% complete)
+- **Purpose**: AWS-specific deployment layer
+- **Relationship**: May have evolved from or into nanovms
 
 ### 1.2 OrbStack Benchmarks
 - **CPU**: 2x faster than Docker Desktop

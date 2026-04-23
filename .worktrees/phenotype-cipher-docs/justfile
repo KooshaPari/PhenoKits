@@ -1,0 +1,43 @@
+# phenotype-cipher - Cryptographic library
+# Native task runner (just)
+
+# Default recipe
+default: help
+
+# Help
+help:
+  @echo "phenotype-cipher - Cryptographic library"
+  @echo ""
+  @just --list
+
+# Quality checks
+check: fmt clippy test
+  @echo "All checks passed!"
+
+# Format code
+fmt:
+  cargo fmt --all
+
+# Lint
+clippy:
+  cargo clippy --workspace -- -D warnings
+
+# Run tests
+test:
+  cargo test --workspace
+
+# Build
+build:
+  cargo build --release
+
+# Clean
+clean:
+  cargo clean --workspace
+
+# Documentation
+doc:
+  cargo doc --workspace --no-deps --all
+
+# Benchmarks
+bench:
+  cargo bench --workspace

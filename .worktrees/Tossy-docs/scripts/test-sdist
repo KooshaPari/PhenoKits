@@ -1,0 +1,33 @@
+#!/bin/bash
+set -xe
+
+function my_python() {
+    if which python >/dev/null
+    then
+        python "$@"
+    else
+        python3 "$@"
+    fi
+}
+
+pip install --upgrade pip
+pip install --upgrade build
+pip install --upgrade setuptools
+version="$(my_python -c 'import setuptools; setuptools.setup()' --version)"
+rm -f dist/*.tar.gz
+my_python -m build --sdist
+
+pip install dist/trash[_-]cli-$version.tar.gz
+
+trash --version
+trash-put --version
+trash-list --version
+trash-rm --version
+trash-restore --version
+trash-empty --version
+
+touch foo bar
+trash-put foo bar
+trash-list
+trash-rm bar
+echo | trash-empty

@@ -1,0 +1,47 @@
+# phenotype-xdd-lib - Rust cross-document exchange library
+# Native task runner (just)
+
+# Default recipe
+default: help
+
+# Help
+help:
+  @echo "phenotype-xdd-lib - Rust cross-document exchange library"
+  @echo ""
+  @just --list
+
+# Quality checks
+check: fmt clippy test
+  @echo "All checks passed!"
+
+# Format code
+fmt:
+  cargo fmt --all
+
+# Lint
+clippy:
+  cargo clippy --workspace -- -D warnings
+
+# Run tests
+test:
+  cargo test --workspace
+
+# Build
+build:
+  cargo build --release
+
+# Clean
+clean:
+  cargo clean --workspace
+
+# Documentation
+doc:
+  cargo doc --workspace --no-deps --all
+
+# Property-based tests
+prop-test:
+  cargo test --test property_tests
+
+# Benchmarks
+bench:
+  cargo bench --workspace

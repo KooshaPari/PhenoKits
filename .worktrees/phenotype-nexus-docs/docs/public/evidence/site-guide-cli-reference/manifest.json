@@ -1,0 +1,15 @@
+{
+  "bundle_id": "site-guide-cli-reference",
+  "title": "Site Guide Cli Reference",
+  "updated_at": "2026-04-01T15:00:00Z",
+  "artifacts": {
+    "screenshot_gif": "/evidence/site-guide-cli-reference/overview.gif",
+    "api_simulation": "/evidence/site-guide-cli-reference/api-simulation.json",
+    "vhs_tape": "/evidence/site-guide-cli-reference/api-simulation.vhs.tape"
+  },
+  "checks": [
+    "playwright",
+    "vhs",
+    "api simulation"
+  ]
+}

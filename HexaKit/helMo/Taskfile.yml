@@ -1,0 +1,23 @@
+version: "3"
+
+tasks:
+  lint:
+    desc: "Run linters"
+    cmds:
+      - echo "Add linters for your stack"
+
+  test:
+    desc: "Run tests"
+    cmds:
+      - echo "Add tests for your stack"
+
+  quality:
+    desc: "Run quality checks"
+    cmds:
+      - task: lint
+      - task: test
+
+  build:
+    desc: "Build project"
+    cmds:
+      - echo "Add build command for your stack"

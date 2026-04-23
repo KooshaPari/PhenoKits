@@ -1,0 +1,4 @@
+# file: /Users/kooshapari/CodeProjects/Phenotype/repos/Portalis/src/portkey/infrastructure/anthropic_provider.py
+# hypothesis_version: 6.151.10
+
+[1.0, 1024, 'ANTHROPIC_API_KEY', 'anthropic', 'assistant', 'claude-3-opus-latest', 'claude-opus-4-5', 'claude-sonnet-4-5', 'content', 'role', 'text', 'user', '|']

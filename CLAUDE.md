@@ -108,3 +108,10 @@ See thegent governance base for:
 - Worktree Discipline guidelines
 
 Location: `platforms/thegent/dotfiles/governance/CLAUDE.base.md`
+
+## Scripting Language Hierarchy
+
+All scripts and tools (CI, hooks, sync, codegen, dev-env) follow the Phenotype-org scripting hierarchy: **Rust default; Zig/Mojo/Go with a one-line justification; Python/TS only when embedded in an existing Python/TS runtime; Bash only as ≤5-line glue with an inline justification comment.** No new shell; migrate existing shell when you touch it.
+
+- Canonical long-form: `docs/governance/scripting_policy.md` (relative to `repos/`)
+- Canonical wording (global): `~/.claude/CLAUDE.md` → "Scripting Language Hierarchy"

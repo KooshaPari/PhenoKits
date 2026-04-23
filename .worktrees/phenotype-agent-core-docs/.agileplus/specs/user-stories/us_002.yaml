@@ -1,0 +1,9 @@
+id: US-002
+title: Agent Management Capability Story
+description: As a user, I want the system shall provide agent management functionality..
+acceptance_criteria:
+- 'AgentRoleSpec: Specification for an agent role with metadata and capabilities'
+- 'SubagentType: Subagent type enumeration'
+- 'validate_allowed_agents: Validate allowed_agents is set when visibility is restricted'
+- 'AgentSource: Source of the agent process for session registry (WP-9001)'
+fr_id: FR-002

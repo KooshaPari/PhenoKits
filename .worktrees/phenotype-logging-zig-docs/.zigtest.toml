@@ -1,0 +1,25 @@
+# Zig Test Configuration
+# Modern Zig testing with coverage and fuzzing
+
+[test]
+# Test output format
+output_format = "tap"  # TAP for CI integration
+
+# Enable coverage
+coverage = true
+coverage_format = "html"
+
+[test.fuzz]
+# Fuzzing configuration
+max_input_size = 65536
+max_iterations = 10000
+
+[build]
+# Optimization for tests
+optimize = Debug  # Use Debug for tests, ReleaseSafe for production
+
+[build.test]
+# Test-specific build options
+strip = false
+loop_unroll = false
+single_threaded = false

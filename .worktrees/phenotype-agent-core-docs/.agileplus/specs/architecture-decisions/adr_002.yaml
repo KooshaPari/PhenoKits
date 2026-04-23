@@ -1,0 +1,6 @@
+id: ADR-002
+title: Agent Management Implementation
+context: Agent Management requires 4 code entities
+decision: Use python for Agent Management
+consequences: Consistent codebase in python
+status: accepted

@@ -1,0 +1,167 @@
+{
+  "failures": [],
+  "generated_at": "2026-03-12T06:31:31.207122+00:00",
+  "rows": [
+    {
+      "actual": "allow",
+      "exit_code": 0,
+      "expected": "allow",
+      "harness": "codex",
+      "name": "exec_allow_git_commit_in_worktree",
+      "policy_decision": "allow"
+    },
+    {
+      "actual": "deny",
+      "exit_code": 2,
+      "expected": "deny",
+      "harness": "codex",
+      "name": "exec_deny_git_commit_outside_worktree",
+      "policy_decision": "deny"
+    },
+    {
+      "actual": "allow",
+      "exit_code": 0,
+      "expected": "allow",
+      "harness": "codex",
+      "name": "exec_ask_network_install",
+      "policy_decision": "ask"
+    },
+    {
+      "actual": "deny",
+      "exit_code": 2,
+      "expected": "deny",
+      "harness": "codex",
+      "name": "write_deny_outside_worktree",
+      "policy_decision": "deny"
+    },
+    {
+      "actual": "ask",
+      "exit_code": 3,
+      "expected": "ask",
+      "harness": "codex",
+      "name": "network_check_ask_outside_allow_mode",
+      "policy_decision": "ask"
+    },
+    {
+      "actual": "allow",
+      "exit_code": 0,
+      "expected": "allow",
+      "harness": "cursor-agent",
+      "name": "exec_allow_git_commit_in_worktree",
+      "policy_decision": "allow"
+    },
+    {
+      "actual": "deny",
+      "exit_code": 2,
+      "expected": "deny",
+      "harness": "cursor-agent",
+      "name": "exec_deny_git_commit_outside_worktree",
+      "policy_decision": "deny"
+    },
+    {
+      "actual": "allow",
+      "exit_code": 0,
+      "expected": "allow",
+      "harness": "cursor-agent",
+      "name": "exec_ask_network_install",
+      "policy_decision": "ask"
+    },
+    {
+      "actual": "deny",
+      "exit_code": 2,
+      "expected": "deny",
+      "harness": "cursor-agent",
+      "name": "write_deny_outside_worktree",
+      "policy_decision": "deny"
+    },
+    {
+      "actual": "ask",
+      "exit_code": 3,
+      "expected": "ask",
+      "harness": "cursor-agent",
+      "name": "network_check_ask_outside_allow_mode",
+      "policy_decision": "ask"
+    },
+    {
+      "actual": "allow",
+      "exit_code": 0,
+      "expected": "allow",
+      "harness": "factory-droid",
+      "name": "exec_allow_git_commit_in_worktree",
+      "policy_decision": "allow"
+    },
+    {
+      "actual": "deny",
+      "exit_code": 2,
+      "expected": "deny",
+      "harness": "factory-droid",
+      "name": "exec_deny_git_commit_outside_worktree",
+      "policy_decision": "deny"
+    },
+    {
+      "actual": "allow",
+      "exit_code": 0,
+      "expected": "allow",
+      "harness": "factory-droid",
+      "name": "exec_ask_network_install",
+      "policy_decision": "ask"
+    },
+    {
+      "actual": "deny",
+      "exit_code": 2,
+      "expected": "deny",
+      "harness": "factory-droid",
+      "name": "write_deny_outside_worktree",
+      "policy_decision": "deny"
+    },
+    {
+      "actual": "ask",
+      "exit_code": 3,
+      "expected": "ask",
+      "harness": "factory-droid",
+      "name": "network_check_ask_outside_allow_mode",
+      "policy_decision": "ask"
+    },
+    {
+      "actual": "allow",
+      "exit_code": 0,
+      "expected": "allow",
+      "harness": "claude-code",
+      "name": "exec_allow_git_commit_in_worktree",
+      "policy_decision": "allow"
+    },
+    {
+      "actual": "deny",
+      "exit_code": 2,
+      "expected": "deny",
+      "harness": "claude-code",
+      "name": "exec_deny_git_commit_outside_worktree",
+      "policy_decision": "deny"
+    },
+    {
+      "actual": "allow",
+      "exit_code": 0,
+      "expected": "allow",
+      "harness": "claude-code",
+      "name": "exec_ask_network_install",
+      "policy_decision": "ask"
+    },
+    {
+      "actual": "deny",
+      "exit_code": 2,
+      "expected": "deny",
+      "harness": "claude-code",
+      "name": "write_deny_outside_worktree",
+      "policy_decision": "deny"
+    },
+    {
+      "actual": "ask",
+      "exit_code": 3,
+      "expected": "ask",
+      "harness": "claude-code",
+      "name": "network_check_ask_outside_allow_mode",
+      "policy_decision": "ask"
+    }
+  ],
+  "status": "pass"
+}

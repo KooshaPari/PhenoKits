@@ -12,3 +12,8 @@ docs/bun.lock
 docs/tests/
 docs/vitest.config.ts
 vendor/
+
+# Build artifacts
+target/
+*.profraw
+.DS_Store

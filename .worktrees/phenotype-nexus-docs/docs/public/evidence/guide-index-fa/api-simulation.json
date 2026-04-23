@@ -1,0 +1,9 @@
+{
+  "bundle": "guide-index-fa",
+  "locale": "fa",
+  "steps": [
+    "nexus guide",
+    "api surface"
+  ],
+  "duration_ms": 37
+}

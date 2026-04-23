@@ -1,0 +1,6 @@
+id: ADR-001
+title: Core Infrastructure Implementation
+context: Core Infrastructure requires 16 code entities
+decision: Use typescript for Core Infrastructure
+consequences: Consistent codebase in typescript
+status: accepted

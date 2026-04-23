@@ -69,6 +69,9 @@ crates/
 
 ---
 
+## Disk & coordination policies
+See `docs/governance/disk_budget_policy.md`, `multi_session_coordination.md`, `long_push_pattern.md`, `enospc_playbook.md`.
+
 ## Local Quality Checks
 
 From this repository root:

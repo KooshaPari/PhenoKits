@@ -539,3 +539,61 @@ Actual repo state:
 **Effort to Extract:** If visualization subsystem (canvasApp, phenodocs) is ever built, extraction is a 2–3 week effort per library (design APIs, version independently, integrate into phenotype-design ecosystem). For now, archive-as-reference suffices.
 
 **Result:** Comprehensive archive manifest created (`docs/org-audit-2026-04/archive_contents_audit.md`). All 29 archives have consistent metadata + restore commands. Extractable patterns documented for future reference if new subsystems require these capabilities.
+
+## Phenotype Org Architecture Map (2026-04-24)
+
+**Task:** Visualize entire Phenotype org as single architecture diagram—products, collections, shared tools, dependencies.
+
+**Deliverable:** `/repos/docs/architecture/phenotype_org_map.md` (455 lines, 3 Mermaid diagrams)
+
+### Diagrams Included
+
+**Diagram 1: Org-Wide Architecture (Graph TB)**
+- **Nodes:** 68 major entities:
+  - 5 productized collections (Sidekick, Observably, Vault, Eidolon, Tools)
+  - 12 active products (AgilePlus, Tracera, FocalPoint, Eidolon Core, thegent, hwLedger, Civis, chatta, Benchora, Stashly, KDesktopVirt, KVirtualStage, kmobile, Paginary)
+  - 6 shared infrastructure tools (phenotype-bus, phenotype-tooling, phenotype-org-audits, phenotype-ops-mcp, org-github, phenotype-shared, phenotype-go-kit, @phenotype/design)
+- **Edges:** 87 dependencies (product→shared lib, product→bus, product→vault, cross-collection)
+- **Color scheme:** Collection-specific (orange for Sidekick, sky-blue for Observably, pale-green for Vault, plum for Eidolon, khaki for Tools, gray for Infrastructure)
+- **Status labels:** Active (v0.5.0+), Planned, Beta (v0.x)
+
+**Diagram 2: Data Flow—Observability & Storage**
+- **Hub pattern:** Observably Hub ← all products → Vault Hub
+- **Observably flows:** Metrics/logs/traces from AP/TR/FP/ED/TG → dashboards, alerts, compliance audits
+- **Vault flows:** Work state, requirements, user data, device logs → backup, archive, search indexing
+- **Cross-hub sync:** Audit logs, ledger state eventual consistency
+
+**Diagram 3: Release Registries & Artifact Pipeline**
+- **Master index:** phenotype-collections.toml (source of truth for all versioned crates/packages)
+- **Per-collection registries:** observably.toml, sidekick.toml, tools.toml, eidolon.toml, vault.toml
+- **Publishing targets:** crates.io (Rust), npmjs (JS), GitHub Releases (Go, binaries)
+- **Dependency pinning:** Collections declare version constraints; products consume via registry
+
+### Statistics
+
+| Metric | Count |
+|--------|-------|
+| Active Products | 12 |
+| Planned Products | 5 |
+| Shared Tools | 8 |
+| Total Rust Crates | 24 |
+| Collections | 6 |
+| Dependency Edges | 87 |
+| Diagram Nodes | 68 |
+| Document Size | 455 lines |
+
+### Editor's Guide Included
+
+- Adding new products (node template + collection grouping + dependencies)
+- Adding shared tools (infrastructure vs. Tools collection)
+- Updating data flows (source → hub → consumer patterns)
+- Versioning registries (toml structure)
+
+### References Updated
+
+- Links to CONSOLIDATED_DOMAIN_MAP.md, tool registry (to be created), brand playbook
+- Monthly review cadence (next: 2026-05-24)
+- Maintainer: Phenotype Org Architecture Council
+
+**Status:** ✅ Complete. Ready for integration into docs site and product docsites.
+

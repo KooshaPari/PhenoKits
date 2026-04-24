@@ -119,17 +119,17 @@ export const useMCP = (config: MCPClientConfig): UseMCPState => {
       }
     };
 
-    initializeClient();
+    void initializeClient();
 
     return () => {
       mounted = false;
       if (clientRef.current) {
-        clientRef.current.close().catch(() => {
+        void clientRef.current.close().catch(() => {
           // Ignore errors on cleanup
         });
       }
     };
-  }, [config.baseUrl, config.token, config.timeout]);
+  }, [config]);
 
   return state;
 };
@@ -213,7 +213,7 @@ export const useTools = (
   }, [client]);
 
   useEffect(() => {
-    refresh();
+    void refresh();
   }, [refresh]);
 
   return { error, isLoading, refresh, tools };
@@ -253,7 +253,7 @@ export const useResources = (
   }, [client]);
 
   useEffect(() => {
-    refresh();
+    void refresh();
   }, [refresh]);
 
   return { error, isLoading, refresh, resources };
@@ -293,7 +293,7 @@ export const usePrompts = (
   }, [client]);
 
   useEffect(() => {
-    refresh();
+    void refresh();
   }, [refresh]);
 
   return { error, isLoading, prompts, refresh };

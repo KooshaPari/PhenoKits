@@ -45,6 +45,13 @@ class MockWebSocket {
       if (this.onopen) {
         this.onopen(new Event('open'));
       }
+      if (this.onmessage) {
+        this.onmessage(
+          new MessageEvent('message', {
+            data: JSON.stringify({ type: 'auth_success' }),
+          }),
+        );
+      }
     }, 0);
   }
 
@@ -103,6 +110,7 @@ vi.mock('@/api/client', () => ({
 describe('WebSocket API', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    getWebSocketManager(() => 'test-token').disconnect();
     // Reset singleton by clearing the module cache
     vi.resetModules();
     // Re-import to get fresh singleton
@@ -124,33 +132,33 @@ describe('WebSocket API', () => {
 
   describe(WebSocketManager, () => {
     it('should create a WebSocketManager instance', () => {
-      const manager = getWebSocketManager();
+      const manager = getWebSocketManager(() => 'test-token');
       expect(manager).toBeInstanceOf(WebSocketManager);
     });
 
     it('should return same instance (singleton)', () => {
-      const manager1 = getWebSocketManager();
-      const manager2 = getWebSocketManager();
+      const manager1 = getWebSocketManager(() => 'test-token');
+      const manager2 = getWebSocketManager(() => 'test-token');
       expect(manager1).toBe(manager2);
     });
   });
 
   describe(connectWebSocket, () => {
     it('should connect to WebSocket', () => {
-      connectWebSocket();
-      const manager = getWebSocketManager();
+      connectWebSocket(() => 'test-token');
+      const manager = getWebSocketManager(() => 'test-token');
       expect(manager).toBeDefined();
     });
 
     it('should handle connection errors gracefully', () => {
       // Connection errors are caught internally
-      expect(() => connectWebSocket()).not.toThrow();
+      expect(() => connectWebSocket(() => 'test-token')).not.toThrow();
     });
   });
 
   describe(disconnectWebSocket, () => {
     it('should disconnect WebSocket', () => {
-      connectWebSocket();
+      connectWebSocket(() => 'test-token');
       expect(() => disconnectWebSocket()).not.toThrow();
     });
 
@@ -161,21 +169,21 @@ describe('WebSocket API', () => {
 
   describe(subscribeToChannel, () => {
     it('should subscribe to a channel', () => {
-      connectWebSocket();
+      connectWebSocket(() => 'test-token');
       const unsubscribe = subscribeToChannel('test-channel', vi.fn());
       expect(unsubscribe).toBeDefined();
       expect(typeof unsubscribe).toBe('function');
     });
 
     it('should call callback when message received', async () => {
-      connectWebSocket();
+      connectWebSocket(() => 'test-token');
       await new Promise((resolve) => setTimeout(resolve, 10)); // Wait for connection
 
       const callback = vi.fn();
       subscribeToChannel('items:created', callback);
 
       // Simulate message
-      const manager = getWebSocketManager();
+      const manager = getWebSocketManager(() => 'test-token');
       if ((manager as any).ws?.onmessage) {
         const mockEvent = new MessageEvent('message', {
           data: JSON.stringify({
@@ -194,13 +202,13 @@ describe('WebSocket API', () => {
     });
 
     it('should unsubscribe from channel', () => {
-      connectWebSocket();
+      connectWebSocket(() => 'test-token');
       const unsubscribe = subscribeToChannel('test-channel', vi.fn());
       expect(() => unsubscribe()).not.toThrow();
     });
 
     it('should handle multiple subscriptions', () => {
-      connectWebSocket();
+      connectWebSocket(() => 'test-token');
       const unsubscribe1 = subscribeToChannel('channel-1', vi.fn());
       const unsubscribe2 = subscribeToChannel('channel-2', vi.fn());
 
@@ -216,7 +224,7 @@ describe('WebSocket API', () => {
     let manager: WebSocketManager;
 
     beforeEach(() => {
-      manager = getWebSocketManager();
+      manager = getWebSocketManager(() => 'test-token');
     });
 
     it('should connect when connect is called', () => {
@@ -333,18 +341,18 @@ describe('WebSocket API', () => {
     });
 
     it('should handle connection when already connected', () => {
-      const manager = getWebSocketManager();
+      const manager = getWebSocketManager(() => 'test-token');
       manager.connect();
       expect(() => manager.connect()).not.toThrow();
     });
 
     it('should handle disconnect when not connected', () => {
-      const manager = getWebSocketManager();
+      const manager = getWebSocketManager(() => 'test-token');
       expect(() => manager.disconnect()).not.toThrow();
     });
 
     it('should handle messages for non-existent channels', async () => {
-      const manager = getWebSocketManager();
+      const manager = getWebSocketManager(() => 'test-token');
       manager.connect();
       await new Promise((resolve) => setTimeout(resolve, 10));
 
@@ -365,7 +373,7 @@ describe('WebSocket API', () => {
     });
 
     it('should handle malformed messages', async () => {
-      const manager = getWebSocketManager();
+      const manager = getWebSocketManager(() => 'test-token');
       manager.connect();
       await new Promise((resolve) => setTimeout(resolve, 10));
 
@@ -380,7 +388,7 @@ describe('WebSocket API', () => {
     });
 
     it('should handle messages with invalid structure', async () => {
-      const manager = getWebSocketManager();
+      const manager = getWebSocketManager(() => 'test-token');
       manager.connect();
       await new Promise((resolve) => setTimeout(resolve, 10));
 

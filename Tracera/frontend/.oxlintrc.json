@@ -50,6 +50,7 @@
     "eslint/max-lines-per-function": "off",
     "eslint/max-statements": "off",
     "eslint/no-console": "off",
+    "react/react-in-jsx-scope": "off",
     "react-perf/jsx-no-new-object-as-prop": "off",
     "react-perf/jsx-no-new-array-as-prop": "off",
     "react-perf/jsx-no-new-function-as-prop": "off"

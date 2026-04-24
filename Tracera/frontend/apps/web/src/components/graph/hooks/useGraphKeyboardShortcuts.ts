@@ -51,7 +51,10 @@ export function useGraphKeyboardShortcuts({
       }
 
       // Ignore if user is typing in an input
-      const target = event.target as HTMLElement;
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) {
+        return;
+      }
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
         return;
       }
@@ -65,7 +68,7 @@ export function useGraphKeyboardShortcuts({
         if (onZoomIn) {
           onZoomIn();
         } else {
-          undefined;
+          void zoomIn();
         }
         return;
       }
@@ -76,7 +79,7 @@ export function useGraphKeyboardShortcuts({
         if (onZoomOut) {
           onZoomOut();
         } else {
-          undefined;
+          void zoomOut();
         }
         return;
       }
@@ -87,7 +90,7 @@ export function useGraphKeyboardShortcuts({
         if (onFitView) {
           onFitView();
         } else {
-          undefined;
+          void fitView();
         }
         return;
       }

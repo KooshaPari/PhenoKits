@@ -44,21 +44,21 @@ describe('API Client Integration', () => {
       };
       const mockToken = 'access-token-123';
 
-      vi.stubGlobal(
-        'fetch',
-        vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
+      const fetchMock = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
           const path = typeof url === 'string' ? url : url instanceof Request ? url.url : url.href;
-          if (path.includes('/api/v1/auth/login') && init?.method === 'POST') {
+          if (path.includes('/api/v1/auth/authkit/callback') && init?.method === 'POST') {
             return createJsonResponse({
               access_token: mockToken,
+              refresh_token: 'refresh-token-123',
               user: mockUser,
             });
           }
           return createJsonResponse({}, 404);
-        }),
-      );
+        });
 
-      await useAuthStore.getState().login('test@example.com', 'password');
+      vi.stubGlobal('fetch', fetchMock);
+
+      await useAuthStore.getState().loginWithCode('auth-code-123', 'state-123');
 
       const state = useAuthStore.getState();
       expect(state.isAuthenticated).toBeTruthy();
@@ -66,6 +66,13 @@ describe('API Client Integration', () => {
       expect(state.user?.email).toBe('test@example.com');
       expect(state.token).toBe(mockToken);
       expect(localStorage.getItem('auth_token')).toBe(mockToken);
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining('/api/v1/auth/authkit/callback'),
+        expect.objectContaining({
+          body: JSON.stringify({ code: 'auth-code-123', state: 'state-123' }),
+          method: 'POST',
+        }),
+      );
     });
   });
 

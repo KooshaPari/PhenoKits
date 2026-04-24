@@ -8,7 +8,17 @@
  * @module graphLayoutBenchmark
  */
 
-import type { LayoutNode, LayoutEdge, LayoutOptions } from '@/workers/graphLayout.worker';
+import type { LayoutNode, LayoutEdge } from '@/workers/graphLayout.worker';
+
+interface PerformanceMemory {
+  usedJSHeapSize?: number;
+}
+
+declare global {
+  interface Performance {
+    memory?: PerformanceMemory;
+  }
+}
 
 // ============================================================================
 // TEST DATA GENERATION
@@ -129,7 +139,7 @@ export async function benchmarkLayoutWithMonitoring(
   algorithm: string,
 ): Promise<BenchmarkResult> {
   // Measure memory before
-  const memoryBefore = (performance as any).memory?.usedJSHeapSize || 0;
+  const memoryBefore = performance.memory?.usedJSHeapSize ?? 0;
 
   // Measure layout computation time
   const startTime = performance.now();
@@ -141,7 +151,7 @@ export async function benchmarkLayoutWithMonitoring(
   const duration = performance.now() - startTime;
 
   // Measure memory after
-  const memoryAfter = (performance as any).memory?.usedJSHeapSize || 0;
+  const memoryAfter = performance.memory?.usedJSHeapSize ?? 0;
   const memoryDelta = memoryAfter - memoryBefore;
 
   return {
@@ -197,7 +207,7 @@ export function formatComparisonResult(result: ComparisonResult): string {
   const lines = [
     `\n${'='.repeat(60)}`,
     `COMPARISON: ${result.nodeCount} nodes, ${result.edgeCount} edges`,
-    `${'='.repeat(60)}`,
+    '='.repeat(60),
     '',
     'SYNCHRONOUS (Main Thread):',
     formatBenchmarkResult(result.synchronous),
@@ -209,7 +219,7 @@ export function formatComparisonResult(result: ComparisonResult): string {
     `Duration: ${result.improvement.durationImprovement > 0 ? '+' : ''}${result.improvement.durationImprovement.toFixed(1)}% ${result.improvement.durationImprovement > 0 ? 'slower' : 'faster'}`,
     `FPS: ${result.improvement.fpsImprovement > 0 ? '+' : ''}${result.improvement.fpsImprovement.toFixed(1)}%`,
     `Main Thread Blocking: ${result.improvement.mainThreadBlockingRemoved ? 'REMOVED ✓' : 'Still present'}`,
-    `${'='.repeat(60)}`,
+    '='.repeat(60),
   ];
 
   return lines.join('\n');

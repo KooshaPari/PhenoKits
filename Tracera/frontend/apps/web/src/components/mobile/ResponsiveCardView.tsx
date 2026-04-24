@@ -108,59 +108,66 @@ const CardItemComponent = function CardItemComponent({
   }, []);
 
   return (
-    <button
-      type='button'
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
+    <div
       className={cn(
-        'group relative p-4 sm:p-5 rounded-xl border border-border',
+        'group relative rounded-xl border border-border',
         'bg-card hover:bg-card/80 transition-all duration-200',
-        'text-left min-h-[120px] sm:min-h-[140px] flex flex-col justify-between',
-        'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
-        'active:scale-95 sm:active:scale-100 transition-transform',
-        'hover:shadow-lg hover:border-primary/50 cursor-pointer',
+        'min-h-[120px] sm:min-h-[140px] flex flex-col justify-between',
+        'hover:shadow-lg hover:border-primary/50',
         cardClassName,
       )}
     >
-      {/* Top section: Title and badge */}
-      <div className='mb-3 flex items-start justify-between gap-3'>
-        <div className='min-w-0 flex-1'>
-          <h3 className='text-foreground group-hover:text-primary truncate text-sm font-bold transition-colors sm:text-base'>
-            {item.title}
-          </h3>
-          {item.subtitle && (
-            <p className='text-muted-foreground mt-0.5 truncate text-xs sm:text-sm'>
-              {item.subtitle}
-            </p>
-          )}
+      <button
+        type='button'
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
+        className={cn(
+          'flex flex-1 flex-col justify-between p-4 text-left sm:p-5',
+          'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
+          'active:scale-95 sm:active:scale-100 transition-transform',
+          'cursor-pointer rounded-xl',
+        )}
+      >
+        {/* Top section: Title and badge */}
+        <div className='mb-3 flex items-start justify-between gap-3'>
+          <div className='min-w-0 flex-1'>
+            <h3 className='text-foreground group-hover:text-primary truncate text-sm font-bold transition-colors sm:text-base'>
+              {item.title}
+            </h3>
+            {item.subtitle && (
+              <p className='text-muted-foreground mt-0.5 truncate text-xs sm:text-sm'>
+                {item.subtitle}
+              </p>
+            )}
+          </div>
+          {item.badge && <div className='ml-2 shrink-0'>{item.badge}</div>}
         </div>
-        {item.badge && <div className='ml-2 shrink-0'>{item.badge}</div>}
-      </div>
 
-      {/* Status and priority section */}
-      {(item.status ?? item.priority) && (
-        <div className='mb-2 flex flex-wrap items-center gap-2'>
-          {item.status && <div className='shrink-0'>{item.status}</div>}
-          {item.priority && <div className='shrink-0'>{item.priority}</div>}
+        {/* Status and priority section */}
+        {(item.status ?? item.priority) && (
+          <div className='mb-2 flex flex-wrap items-center gap-2'>
+            {item.status && <div className='shrink-0'>{item.status}</div>}
+            {item.priority && <div className='shrink-0'>{item.priority}</div>}
+          </div>
+        )}
+
+        {/* Owner and metadata */}
+        <div className='text-muted-foreground flex flex-col gap-2 text-xs sm:text-sm'>
+          {item.owner && <div className='flex items-center gap-2'>{item.owner}</div>}
+          {item.metadata &&
+            Object.entries(item.metadata).map(([key, value]) => (
+              <div key={key} className='flex items-center gap-2'>
+                <span className='font-medium'>{key}:</span>
+                {value}
+              </div>
+            ))}
         </div>
-      )}
-
-      {/* Owner and metadata */}
-      <div className='text-muted-foreground mb-3 flex flex-col gap-2 text-xs sm:text-sm'>
-        {item.owner && <div className='flex items-center gap-2'>{item.owner}</div>}
-        {item.metadata &&
-          Object.entries(item.metadata).map(([key, value]) => (
-            <div key={key} className='flex items-center gap-2'>
-              <span className='font-medium'>{key}:</span>
-              {value}
-            </div>
-          ))}
-      </div>
+      </button>
 
       {/* Actions footer */}
       {item.actions && (
         <div
-          className='border-border/30 flex items-center gap-2 border-t pt-2'
+          className='border-border/30 flex items-center gap-2 border-t px-4 pb-4 pt-2 sm:px-5 sm:pb-5'
           onClick={handleActionsClick}
           onKeyDown={handleActionsKeyDown}
           role='presentation'
@@ -168,6 +175,6 @@ const CardItemComponent = function CardItemComponent({
           {item.actions}
         </div>
       )}
-    </button>
+    </div>
   );
 };

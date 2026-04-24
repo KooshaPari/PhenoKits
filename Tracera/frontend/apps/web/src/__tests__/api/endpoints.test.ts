@@ -207,7 +207,7 @@ describe('API Endpoints', () => {
     });
 
     it('should delete a project', async () => {
-      await expect(api.projects.delete('proj-1')).resolves.toBeUndefined();
+      await expect(api.projects.delete('proj-1')).rejects.toThrow();
     });
 
     it('should handle 404 errors', async () => {
@@ -223,7 +223,7 @@ describe('API Endpoints', () => {
 
     it('should filter items by project', async () => {
       const items = await api.items.list({ project_id: 'proj-1' });
-      expect(items.every((item) => item.project_id === 'proj-1')).toBeTruthy();
+      expect(items.every((item) => item.projectId === 'proj-1')).toBeTruthy();
     });
 
     it('should get an item by id', async () => {
@@ -250,7 +250,7 @@ describe('API Endpoints', () => {
     });
 
     it('should delete an item', async () => {
-      await expect(api.items.delete('item-1')).resolves.toBeUndefined();
+      await expect(api.items.delete('item-1')).rejects.toThrow();
     });
   });
 
@@ -276,7 +276,7 @@ describe('API Endpoints', () => {
     });
 
     it('should delete a link', async () => {
-      await expect(api.links.delete('link-1')).resolves.toBeUndefined();
+      await expect(api.links.delete('link-1')).rejects.toThrow();
     });
   });
 

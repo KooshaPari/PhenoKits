@@ -5,10 +5,12 @@
  * Optimized for large graphs (10k+ nodes) with caching and performance monitoring.
  */
 
-import Graph from 'graphology';
+import * as Graphology from 'graphology';
 import louvain from 'graphology-communities-louvain';
 
 import type { Item, Link } from '@tracertm/types';
+
+type Graph = InstanceType<typeof Graphology.default>;
 
 // Community color palette - visually distinct colors for up to 12 communities
 export const COMMUNITY_COLORS = [
@@ -101,11 +103,11 @@ const MAX_CACHE_SIZE = 10;
 function generateCacheKey(items: Item[], links: Link[], options: ClusteringOptions): string {
   const itemIds = items
     .map((i) => i['id'])
-    .sort()
+    .toSorted()
     .join(',');
   const linkIds = links
     .map((l) => `${l.sourceId}-${l.targetId}`)
-    .sort()
+    .toSorted()
     .join(',');
   const opts = `${options.resolution || 1}-${options.minCommunitySize || 0}`;
   return `${itemIds}-${linkIds}-${opts}`;
@@ -115,7 +117,7 @@ function generateCacheKey(items: Item[], links: Link[], options: ClusteringOptio
  * Build graphology Graph from items and links
  */
 function buildGraph(items: Item[], links: Link[]): Graph {
-  const graph = new Graph({ type: 'undirected' });
+  const graph = new Graphology.default({ type: 'undirected' });
 
   // Add nodes
   for (const item of items) {
@@ -135,7 +137,7 @@ function buildGraph(items: Item[], links: Link[]): Graph {
     }
 
     // Create normalized edge key (alphabetically sorted for undirected)
-    const [nodeA, nodeB] = [link.sourceId, link.targetId].sort();
+    const [nodeA, nodeB] = [link.sourceId, link.targetId].toSorted();
     const edgeKey = `${nodeA}-${nodeB}`;
 
     // Skip if edge already added
@@ -149,7 +151,7 @@ function buildGraph(items: Item[], links: Link[]): Graph {
         type: link.type,
       });
       addedEdges.add(edgeKey);
-    } catch (error) {
+    } catch {
       // Edge may already exist (shouldn't happen with our Set check, but handle it)
       // Silently skip duplicate edges
     }
@@ -193,7 +195,7 @@ function assignColors(communityIds: Set<string>): Map<string, string> {
   const colorPalette =
     communityIds.size <= COMMUNITY_COLORS.length ? COMMUNITY_COLORS : EXTENDED_COMMUNITY_COLORS;
 
-  const sortedIds = Array.from(communityIds).sort();
+  const sortedIds = Array.from(communityIds).toSorted();
 
   sortedIds.forEach((id, index) => {
     // Cycle through colors if more communities than colors
@@ -257,7 +259,7 @@ export async function detectCommunities(
   if (nodeCount === 1) {
     const singleNode = graph.nodes()[0]!;
     const communities = new Map([[singleNode, '0']]);
-    const colors = new Map([['0', COMMUNITY_COLORS[0]!]]);
+    const colors = new Map([['0', COMMUNITY_COLORS[0]]]);
 
     return {
       communities,
@@ -288,8 +290,12 @@ export async function detectCommunities(
 
   // Extract community assignments
   const communities = new Map<string, string>();
-  graph.forEachNode((node, attributes) => {
-    const communityId = String(attributes['community'] || '0');
+  graph.forEachNode((node: string, attributes: Record<string, unknown>) => {
+    const communityValue = attributes['community'];
+    const communityId =
+      typeof communityValue === 'string' || typeof communityValue === 'number'
+        ? String(communityValue)
+        : '0';
     communities.set(node, communityId);
   });
 

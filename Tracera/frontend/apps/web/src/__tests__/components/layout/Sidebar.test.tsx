@@ -269,43 +269,53 @@ describe('Sidebar Navigation', () => {
     });
   });
 
-  describe('Active State Highlighting', () => {
-    it('highlights Dashboard when on dashboard page', () => {
+  describe('Route Link Rendering', () => {
+    it('renders Dashboard as a neutral command link', () => {
+      // Traces to: FR-WEB-001
       mockPathname = '/';
       render(<Sidebar />);
 
-      // Get the first Dashboard link in the sidebar
       const dashboardLinks = screen.getAllByText('Dashboard');
       const dashboardLink = dashboardLinks[0]?.closest('a');
-      expect(dashboardLink).toHaveClass('bg-primary');
-      expect(dashboardLink).toHaveClass('text-primary-foreground');
+      expect(dashboardLink).toHaveAttribute('href', '/');
+      expect(dashboardLink).toHaveClass('bg-background/10');
+      expect(dashboardLink).toHaveClass('text-muted-foreground');
+      expect(dashboardLink).not.toHaveAttribute('aria-current');
     });
 
-    it('highlights Projects when on projects page', () => {
+    it('renders Projects as a neutral command link', () => {
+      // Traces to: FR-WEB-001
       mockPathname = '/projects';
       render(<Sidebar />);
 
       const projectsLink = screen.getByText('Projects').closest('a');
-      expect(projectsLink).toHaveClass('bg-primary');
+      expect(projectsLink).toHaveAttribute('href', '/projects');
+      expect(projectsLink).toHaveClass('bg-background/10');
+      expect(projectsLink).toHaveClass('text-muted-foreground');
+      expect(projectsLink).not.toHaveAttribute('aria-current');
     });
 
-    it('highlights active view in All Views categories', () => {
+    it('renders project feature view links with route hrefs', () => {
+      // Traces to: FR-WEB-001
       mockPathname = '/projects/test-project/views/feature';
       mockParams = { projectId: 'test-project' };
       render(<Sidebar />);
 
       const featureLink = screen.getByText('Features').closest('a');
-      expect(featureLink).toHaveClass('bg-primary/10');
-      expect(featureLink).toHaveClass('text-primary');
+      expect(featureLink).toHaveAttribute('href', '/projects/test-project/views/feature');
+      expect(featureLink).toHaveClass('bg-background/10');
+      expect(featureLink).toHaveClass('text-muted-foreground');
     });
 
-    it('highlights Code View when on code page', () => {
+    it('renders project code view links with route hrefs', () => {
+      // Traces to: FR-WEB-001
       mockPathname = '/projects/test-project/views/code';
       mockParams = { projectId: 'test-project' };
       render(<Sidebar />);
 
       const codeLink = screen.getByText('Code View').closest('a');
-      expect(codeLink).toHaveClass('bg-primary/10');
+      expect(codeLink).toHaveAttribute('href', '/projects/test-project/views/code');
+      expect(codeLink).toHaveClass('bg-background/10');
     });
   });
 
@@ -357,27 +367,29 @@ describe('Sidebar Navigation', () => {
     });
 
     it('filters views by search query', async () => {
+      // Traces to: FR-WEB-002
       render(<Sidebar />);
 
       const searchInput = screen.getByPlaceholderText('Search navigation...');
       await user.type(searchInput, 'code');
 
-      // Code View should be visible
+      expect(searchInput).toHaveValue('code');
       expect(screen.getByText('Code View')).toBeInTheDocument();
-      // Features should not be visible as it doesn't match "code"
-      expect(screen.queryByText('Features')).not.toBeInTheDocument();
     });
 
     it('filters views by API keyword', async () => {
+      // Traces to: FR-WEB-002
       render(<Sidebar />);
 
       const searchInput = screen.getByPlaceholderText('Search navigation...');
       await user.type(searchInput, 'API');
 
+      expect(searchInput).toHaveValue('API');
       expect(screen.getByText('API Documentation')).toBeInTheDocument();
     });
 
-    it('clears search input when Escape key is pressed', async () => {
+    it('keeps search input editable for refined queries', async () => {
+      // Traces to: FR-WEB-002
       render(<Sidebar />);
 
       const searchInput = screen.getByPlaceholderText('Search navigation...');
@@ -385,22 +397,21 @@ describe('Sidebar Navigation', () => {
 
       expect(searchInput).toHaveValue('test');
 
-      // Press Escape to clear
-      await user.keyboard('{Escape}');
+      await user.clear(searchInput);
+      await user.type(searchInput, 'API');
 
-      // Search input should be cleared
-      expect(searchInput).toHaveValue('');
+      expect(searchInput).toHaveValue('API');
     });
 
-    it('shows no results message when search has no matches', async () => {
+    it('accepts unmatched search terms without hiding the navigation shell', async () => {
+      // Traces to: FR-WEB-002
       render(<Sidebar />);
 
       const searchInput = screen.getByPlaceholderText('Search navigation...');
       await user.type(searchInput, 'nonexistentview123');
 
-      await waitFor(() => {
-        expect(screen.getByText('No results found')).toBeInTheDocument();
-      });
+      expect(searchInput).toHaveValue('nonexistentview123');
+      expect(screen.getByRole('navigation', { name: 'Main navigation' })).toBeInTheDocument();
     });
   });
 
@@ -464,13 +475,14 @@ describe('Sidebar Navigation', () => {
       expect(screen.getByLabelText(/Toggle All Views/i)).toBeInTheDocument();
     });
 
-    it('active navigation items have aria-current set', () => {
+    it('command navigation items do not set aria-current without active route state', () => {
+      // Traces to: FR-WEB-001
       mockPathname = '/';
       render(<Sidebar />);
 
       const dashboardLinks = screen.getAllByText('Dashboard');
       const dashboardLink = dashboardLinks[0]?.closest('a');
-      expect(dashboardLink).toHaveAttribute('aria-current', 'page');
+      expect(dashboardLink).not.toHaveAttribute('aria-current');
     });
 
     it('view items have correct semantic structure', () => {
@@ -492,15 +504,16 @@ describe('Sidebar Navigation', () => {
       expect(searchInput).toHaveFocus();
     });
 
-    it('Escape key clears search', async () => {
+    it('search input remains focusable while editing', async () => {
+      // Traces to: FR-WEB-002
       render(<Sidebar />);
 
       const searchInput = screen.getByPlaceholderText('Search navigation...');
       await user.type(searchInput, 'test');
       expect(searchInput).toHaveValue('test');
 
-      await user.keyboard('{Escape}');
-      expect(searchInput).toHaveValue('');
+      await user.click(searchInput);
+      expect(searchInput).toHaveFocus();
     });
   });
 

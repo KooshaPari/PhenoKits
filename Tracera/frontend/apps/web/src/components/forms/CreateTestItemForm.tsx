@@ -55,6 +55,8 @@ const safetyLevelOptions: { label: string; value: string }[] = [
   { label: 'DAL-E (No Effect)', value: 'DAL-E' },
 ];
 
+const emptyToUndefined = (value: unknown) => (value === '' || Number.isNaN(value) ? undefined : value);
+
 const testItemSchema = z.object({
   title: z.string().min(1, 'Title is required').max(500, 'Title too long'),
   description: z.string().max(5000).optional(),
@@ -73,12 +75,22 @@ const testItemSchema = z.object({
   ]),
   test_framework: z.string().max(100).optional(),
   language: z.string().max(50).optional(),
-  oracle_type: z
-    .enum(['assertion', 'golden', 'metamorphic', 'property', 'differential'])
-    .optional(),
-  coverage_type: z.enum(['statement', 'branch', 'mcdc', 'path', 'condition']).optional(),
-  safety_level: z.enum(['DAL-A', 'DAL-B', 'DAL-C', 'DAL-D', 'DAL-E']).optional(),
-  expected_duration_ms: z.coerce.number().int().positive().optional(),
+  oracle_type: z.preprocess(
+    emptyToUndefined,
+    z.enum(['assertion', 'golden', 'metamorphic', 'property', 'differential']).optional(),
+  ),
+  coverage_type: z.preprocess(
+    emptyToUndefined,
+    z.enum(['statement', 'branch', 'mcdc', 'path', 'condition']).optional(),
+  ),
+  safety_level: z.preprocess(
+    emptyToUndefined,
+    z.enum(['DAL-A', 'DAL-B', 'DAL-C', 'DAL-D', 'DAL-E']).optional(),
+  ),
+  expected_duration_ms: z.preprocess(
+    emptyToUndefined,
+    z.coerce.number().int().positive().optional(),
+  ),
   is_critical_path: z.boolean().optional(),
 });
 

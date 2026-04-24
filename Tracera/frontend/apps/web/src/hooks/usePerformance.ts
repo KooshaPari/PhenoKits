@@ -114,9 +114,14 @@ export function usePerformance<T extends Node>(
   useEffect(() => {
     const interval = setInterval(() => {
       // Check if performance.memory is available (Chrome only)
-      const perfMemory = performance as any;
-      if (perfMemory.memory?.usedJSHeapSize) {
-        const memoryMB = (perfMemory.memory.usedJSHeapSize / 1_048_576).toFixed(2);
+      const memory = Reflect.get(performance, 'memory');
+      if (typeof memory === 'object' && memory !== null) {
+        const usedJSHeapSize = Reflect.get(memory, 'usedJSHeapSize');
+        if (typeof usedJSHeapSize !== 'number' || usedJSHeapSize <= 0) {
+          return;
+        }
+
+        const memoryMB = (usedJSHeapSize / 1_048_576).toFixed(2);
         metricsRef.current.memoryUsage = Number.parseFloat(memoryMB);
         setMetrics({ ...metricsRef.current });
       }
@@ -218,10 +223,9 @@ export function useMemoizedCalculation<T>(
 ) {
   const cacheRef = useRef<Map<string, T>>(new Map());
   const keysRef = useRef<string[]>([]);
+  const depKey = JSON.stringify(dependencies);
 
   return useMemo(() => {
-    const depKey = JSON.stringify(dependencies);
-
     // Check cache
     if (cacheRef.current.has(depKey)) {
       return cacheRef.current.get(depKey)!;
@@ -242,7 +246,7 @@ export function useMemoizedCalculation<T>(
     }
 
     return result;
-  }, [...dependencies, cacheSize, calculateFn, dependencies]);
+  }, [cacheSize, calculateFn, depKey]);
 }
 
 /**

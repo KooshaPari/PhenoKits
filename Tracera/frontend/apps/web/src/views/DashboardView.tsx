@@ -60,7 +60,7 @@ import {
   TabsTrigger,
 } from '@tracertm/ui';
 
-import { useDeleteProject, useProjects } from '../hooks/useProjects';
+import { useProjects } from '../hooks/useProjects';
 
 interface DashboardViewProps {
   systemStatus?: {
@@ -87,7 +87,6 @@ function isSortBy(value: unknown): value is SortBy {
 
 export function DashboardView({ systemStatus }: DashboardViewProps) {
   const { data: projects, isLoading: projectsLoading } = useProjects();
-  const deleteProject = useDeleteProject();
   const { data: summaryData, isLoading: summaryLoading } = useDashboardSummary();
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [searchQuery, setSearchQuery] = useState('');
@@ -543,30 +542,6 @@ export function DashboardView({ systemStatus }: DashboardViewProps) {
                 }
               };
 
-              const handleDelete = async (e: React.MouseEvent) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const projectDisplayName = project.displayName || project.name;
-                if (
-                  !confirm(
-                    `Are you sure you want to delete "${projectDisplayName}"? This action cannot be undone.`,
-                  )
-                ) {
-                  return;
-                }
-                try {
-                  await deleteProject.mutateAsync(project.id);
-                  toast.success(`Project "${projectDisplayName}" deleted`);
-                  if (pinnedProjectId === project.id) {
-                    setPinnedProjectId(null);
-                  }
-                } catch {
-                  toast.error('Failed to delete project');
-                }
-              };
-
-              const handleEdit = (e: React.MouseEvent) => {};
-
               return (
                 <div key={project.id} className='group relative'>
                   <Link to={`/projects/${project.id}`} className='cursor-pointer'>
@@ -609,7 +584,9 @@ export function DashboardView({ systemStatus }: DashboardViewProps) {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align='end' className='w-48'>
                           <DropdownMenuItem
-                            onClick={(e) => {}}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                            }}
                             className='hover:bg-accent hover:text-accent-foreground cursor-pointer gap-2 transition-colors'
                           >
                             <ExternalLink className='h-4 w-4' />
@@ -618,7 +595,6 @@ export function DashboardView({ systemStatus }: DashboardViewProps) {
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleEdit(e);
                             }}
                             className='hover:bg-accent hover:text-accent-foreground cursor-pointer gap-2 transition-colors'
                           >
@@ -627,7 +603,9 @@ export function DashboardView({ systemStatus }: DashboardViewProps) {
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
-                            onClick={(e) => {}}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                            }}
                             className='text-destructive focus:text-destructive focus:bg-destructive/10 hover:bg-destructive/10 hover:text-destructive cursor-pointer gap-2 transition-colors'
                           >
                             <Trash2 className='h-4 w-4' />
@@ -678,30 +656,6 @@ export function DashboardView({ systemStatus }: DashboardViewProps) {
                   toast.success(`Pinned ${project.displayName || project.name} to dashboard`);
                 }
               };
-
-              const handleDelete = async (e: React.MouseEvent) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const projectDisplayName = project.displayName || project.name;
-                if (
-                  !confirm(
-                    `Are you sure you want to delete "${projectDisplayName}"? This action cannot be undone.`,
-                  )
-                ) {
-                  return;
-                }
-                try {
-                  await deleteProject.mutateAsync(project.id);
-                  toast.success(`Project "${projectDisplayName}" deleted`);
-                  if (pinnedProjectId === project.id) {
-                    setPinnedProjectId(null);
-                  }
-                } catch {
-                  toast.error('Failed to delete project');
-                }
-              };
-
-              const handleEdit = (e: React.MouseEvent) => {};
 
               return (
                 <div key={project.id} className='group relative'>
@@ -780,7 +734,9 @@ export function DashboardView({ systemStatus }: DashboardViewProps) {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align='end' className='w-48'>
                       <DropdownMenuItem
-                        onClick={(e) => {}}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
                         className='hover:bg-accent hover:text-accent-foreground cursor-pointer gap-2 transition-colors'
                       >
                         <ExternalLink className='h-4 w-4' />
@@ -789,7 +745,6 @@ export function DashboardView({ systemStatus }: DashboardViewProps) {
                       <DropdownMenuItem
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleEdit(e);
                         }}
                         className='hover:bg-accent hover:text-accent-foreground cursor-pointer gap-2 transition-colors'
                       >
@@ -798,7 +753,9 @@ export function DashboardView({ systemStatus }: DashboardViewProps) {
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        onClick={(e) => {}}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
                         className='text-destructive focus:text-destructive focus:bg-destructive/10 hover:bg-destructive/10 hover:text-destructive cursor-pointer gap-2 transition-colors'
                       >
                         <Trash2 className='h-4 w-4' />

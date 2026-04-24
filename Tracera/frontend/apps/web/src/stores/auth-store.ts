@@ -193,7 +193,10 @@ const createInitialState = (): AuthStateData => ({
 
 const normalizeToken = (token: string | null): string | null => {
   const normalized = token?.trim();
-  return normalized ?? null;
+  if (!normalized) {
+    return null;
+  }
+  return normalized;
 };
 
 const persistToken = (token: string | null): void => {

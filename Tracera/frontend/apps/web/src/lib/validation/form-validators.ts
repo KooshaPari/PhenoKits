@@ -4,6 +4,8 @@ import { z } from 'zod';
  * Common form validation utilities
  */
 
+const NULL_CHARACTER = String.fromCharCode(0);
+
 // UUID validation
 export const isValidUUID = (value: string): boolean => {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -34,7 +36,7 @@ export const isValidURL = (value: string): boolean => {
   try {
     const url = new URL(value);
     return url.protocol === 'http:' || url.protocol === 'https:';
-  } catch (error) {
+  } catch {
     return false;
   }
 };
@@ -222,7 +224,7 @@ export const validateNoSQLInjection = (
 
 // Sanitization helpers
 export const sanitizeString = (value: string): string => {
-  return value.trim().replace(/\0/g, '');
+  return value.trim().replaceAll(NULL_CHARACTER, '');
 };
 
 export const sanitizeHTML = (value: string): string => {
@@ -237,7 +239,7 @@ export const validateEnum = <T extends string>(
   allowedValues: readonly T[],
   fieldName = 'This field',
 ): string | undefined => {
-  if (!allowedValues.includes(value as T)) {
+  if (!allowedValues.some((allowedValue) => allowedValue === value)) {
     return `${fieldName} must be one of: ${allowedValues.join(', ')}`;
   }
   return undefined;
@@ -253,7 +255,7 @@ export const createAsyncValidator = <T>(
     try {
       const isValid = await validator(value);
       return isValid ? undefined : errorMessage;
-    } catch (error) {
+    } catch {
       return 'Validation error';
     }
   };
@@ -311,10 +313,10 @@ export const createZodResolver = <T extends z.ZodType>(schema: T) => {
     try {
       const validated = await schema.parseAsync(data);
       return { values: validated, errors: {} };
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof z.ZodError) {
         const errors: Record<string, { type: string; message: string }> = {};
-        error.issues.forEach((err: any) => {
+        error.issues.forEach((err) => {
           const path = err.path.join('.');
           errors[path] = {
             type: err.code,
@@ -334,15 +336,28 @@ export const createDebouncedValidator = <T>(
   delay = 300,
 ) => {
   let timeoutId: NodeJS.Timeout;
+  let version = 0;
 
-  return (value: T): Promise<string | undefined> => {
-    return new Promise((resolve) => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(async () => {
-        const error = await validator(value);
-        resolve(error);
+  return async (value: T): Promise<string | undefined> => {
+    version += 1;
+    const currentVersion = version;
+    clearTimeout(timeoutId);
+
+    await new Promise<void>((resolve) => {
+      timeoutId = setTimeout(() => {
+        resolve();
       }, delay);
     });
+
+    if (currentVersion !== version) {
+      return undefined;
+    }
+
+    try {
+      return await validator(value);
+    } catch {
+      return 'Validation error';
+    }
   };
 };
 

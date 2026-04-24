@@ -3,8 +3,10 @@
  * Coverage targets: All hooks, fetch functions, transformations, error handling
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { cleanup, renderHook as rtlRenderHook, waitFor } from '@testing-library/react';
+import { createElement, type ReactNode } from 'react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   useCreateItem,
@@ -15,9 +17,20 @@ import {
   useUpdateItem,
 } from '../../hooks/useItems';
 
+const { mockUseAuthStore } = vi.hoisted(() => ({
+  mockUseAuthStore: vi.fn(),
+}));
+
+function seedAuthStoreMock(token: string | undefined = 'test-token') {
+  mockUseAuthStore.mockImplementation((selector?: (state: { token: string | undefined }) => unknown) => {
+    const state = { token };
+    return selector ? selector(state) : state;
+  });
+}
+
 // Mock auth store
 vi.mock('../../stores/authStore', () => ({
-  useAuthStore: vi.fn(() => ({ token: 'test-token' })),
+  useAuthStore: mockUseAuthStore,
 }));
 
 // Mock sonner toast
@@ -53,10 +66,47 @@ async function createMockResponse(data: unknown, status = 200) {
   });
 }
 
-describe('useItems Hooks - P1 Coverage', () => {
+const queryClients: QueryClient[] = [];
+
+function createWrapper() {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      mutations: { retry: false },
+      queries: { gcTime: 0, retry: false },
+    },
+  });
+  queryClients.push(queryClient);
+
+  return function QueryClientTestWrapper({ children }: { children: ReactNode }) {
+    return createElement(QueryClientProvider, { client: queryClient }, children);
+  };
+}
+
+function renderHook<TResult>(callback: () => TResult) {
+  return rtlRenderHook(callback, { wrapper: createWrapper() });
+}
+
+describe.sequential('useItems Hooks - P1 Coverage', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    global.fetch = vi.fn();
+    vi.resetAllMocks();
+    seedAuthStoreMock();
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (/\/api\/v1\/items\/[^?]+/.test(url)) {
+        return createMockResponse(mockItem);
+      }
+      return createMockResponse(mockItemResponse);
+    });
+    global.fetch = fetchMock;
+    globalThis.fetch = fetchMock;
+    window.fetch = fetchMock;
+  });
+
+  afterEach(async () => {
+    cleanup();
+    await Promise.all(queryClients.map((queryClient) => queryClient.cancelQueries()));
+    queryClients.forEach((queryClient) => queryClient.clear());
+    queryClients.length = 0;
   });
 
   // ============================================================================
@@ -242,8 +292,9 @@ describe('useItems Hooks - P1 Coverage', () => {
     it('should be disabled when no ID provided', async () => {
       const { result } = renderHook(() => useItem(''));
 
-      // With empty ID, query should be disabled
-      expect(result.current.isDisabled).toBeTruthy();
+      expect(result.current.fetchStatus).toBe('idle');
+      expect(result.current.isFetching).toBeFalsy();
+      expect(global.fetch as any).not.toHaveBeenCalled();
     });
 
     it('should handle fetch error', async () => {
@@ -451,6 +502,10 @@ describe('useItems Hooks - P1 Coverage', () => {
   describe('Item Transformation', () => {
     it('should transform snake_case to camelCase', async () => {
       const snakeCaseItem = {
+        id: 'item-1',
+        status: 'open',
+        title: 'Snake Case Item',
+        type: 'requirement',
         created_at: '2024-01-01T00:00:00Z',
         project_id: 'proj-1',
         updated_at: '2024-01-02T00:00:00Z',
@@ -482,10 +537,11 @@ describe('useItems Hooks - P1 Coverage', () => {
       const { result } = renderHook(() => useItem('item-1'));
 
       await waitFor(() => {
-        expect(result.current.isLoading).toBeFalsy();
+        if (result.current.error) {
+          throw result.current.error;
+        }
+        expect(result.current.data).toBeDefined();
       });
-
-      expect(result.current.data).toBeDefined();
     });
 
     it('should handle test type fields', async () => {
@@ -504,10 +560,8 @@ describe('useItems Hooks - P1 Coverage', () => {
       const { result } = renderHook(() => useItem('item-1'));
 
       await waitFor(() => {
-        expect(result.current.isLoading).toBeFalsy();
+        expect(result.current.data).toBeDefined();
       });
-
-      expect(result.current.data).toBeDefined();
     });
 
     it('should handle epic type fields', async () => {
@@ -524,10 +578,8 @@ describe('useItems Hooks - P1 Coverage', () => {
       const { result } = renderHook(() => useItem('item-1'));
 
       await waitFor(() => {
-        expect(result.current.isLoading).toBeFalsy();
+        expect(result.current.data).toBeDefined();
       });
-
-      expect(result.current.data).toBeDefined();
     });
 
     it('should handle user story type fields', async () => {
@@ -546,10 +598,8 @@ describe('useItems Hooks - P1 Coverage', () => {
       const { result } = renderHook(() => useItem('item-1'));
 
       await waitFor(() => {
-        expect(result.current.isLoading).toBeFalsy();
+        expect(result.current.data).toBeDefined();
       });
-
-      expect(result.current.data).toBeDefined();
     });
 
     it('should handle task type fields', async () => {
@@ -639,10 +689,8 @@ describe('useItems Hooks - P1 Coverage', () => {
       const { result } = renderHook(() => useItems());
 
       await waitFor(() => {
-        expect(result.current.isLoading).toBeFalsy();
+        expect(result.current.data).toBeDefined();
       });
-
-      expect(result.current.data).toBeDefined();
     });
 
     it('should trim whitespace from token', async () => {

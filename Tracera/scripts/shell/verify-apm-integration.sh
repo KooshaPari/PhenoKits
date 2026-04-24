@@ -31,7 +31,7 @@ if [ -f "$PROJECT_ROOT/.env" ]; then
         echo -e "${GREEN}✓${NC} Shared Phenotype OTLP gRPC endpoint configured: $endpoint"
     else
         echo -e "${YELLOW}⚠${NC} Shared Phenotype OTLP endpoint not configured"
-        echo "  Add PHENO_OBSERVABILITY_OTLP_GRPC_ENDPOINT=127.0.0.1:4317 to .env"
+        echo "  Add PHENO_OBSERVABILITY_OTLP_GRPC_ENDPOINT=127.0.0.1:4319 to .env"
     fi
 
 else
@@ -209,7 +209,7 @@ echo "APM Integration Verification Complete!"
 echo ""
 echo "To use APM:"
 echo "  1. Start the org stack from PhenoObservability or run repo-local make dev"
-echo "  2. Export traces to PHENO_OBSERVABILITY_OTLP_GRPC_ENDPOINT"
+echo "  2. Export app traces to PHENO_OBSERVABILITY_OTLP_GRPC_ENDPOINT (repo-local default: 127.0.0.1:4319)"
 echo "  3. View dashboards: http://localhost:3000"
 echo "  4. Point Grafana at PHENO_OBSERVABILITY_TEMPO_URL for trace search"
 echo ""

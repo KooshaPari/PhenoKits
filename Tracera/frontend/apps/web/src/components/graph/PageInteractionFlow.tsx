@@ -39,9 +39,11 @@ import { Button } from '@tracertm/ui/components/Button';
 import { Card } from '@tracertm/ui/components/Card';
 import { Input } from '@tracertm/ui/components/Input';
 
-import '@xyflow/react/dist/style.css';
+import _xyflowStyle from '@xyflow/react/dist/style.css';
 import { ScrollArea } from '@tracertm/ui/components/ScrollArea';
 import { Tabs, TabsList, TabsTrigger } from '@tracertm/ui/components/Tabs';
+
+void _xyflowStyle;
 
 // UI-related item types
 const UI_PAGE_TYPES = new Set(['page', 'screen', 'view', 'modal', 'dialog']);
@@ -49,6 +51,9 @@ const UI_WIREFRAME_TYPES = new Set(['wireframe', 'mockup', 'prototype']);
 
 // Interaction types (link types that represent user interactions)
 const INTERACTION_LINK_TYPES = new Set(['navigates_to', 'opens', 'triggers', 'related_to']);
+const PAGE_TABS = ['flow', 'journeys', 'matrix'] as const;
+
+type PageInteractionTab = (typeof PAGE_TABS)[number];
 
 // Page node data
 interface PageNodeData {
@@ -65,6 +70,37 @@ interface PageNodeData {
   // Index signature for React Flow compatibility
   [key: string]: unknown;
 }
+
+const isPageInteractionTab = (value: string): value is PageInteractionTab => {
+  switch (value) {
+    case 'flow':
+    case 'journeys':
+    case 'matrix':
+      return true;
+    default:
+      return false;
+  }
+};
+
+const readMetadataString = (
+  metadata: Record<string, unknown> | undefined,
+  key: string,
+): string | undefined => {
+  const value = metadata?.[key];
+  return typeof value === 'string' ? value : undefined;
+};
+
+const readDeviceType = (metadata: Record<string, unknown> | undefined): PageNodeData['deviceType'] => {
+  const value = metadata?.['deviceType'];
+  switch (value) {
+    case 'desktop':
+    case 'mobile':
+    case 'tablet':
+      return value;
+    default:
+      return 'desktop';
+  }
+};
 
 // Page node component
 function PageNodeComponent({ data, selected }: NodeProps<Node<PageNodeData, 'page'>>) {
@@ -184,7 +220,7 @@ function PageInteractionFlowInner({
 }: PageInteractionFlowProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedJourney, setSelectedJourney] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'flow' | 'journeys' | 'matrix'>('flow');
+  const [activeTab, setActiveTab] = useState<PageInteractionTab>('flow');
   const { fitView } = useReactFlow();
 
   // Filter to UI pages only
@@ -305,18 +341,16 @@ function PageInteractionFlowInner({
   const createNodeData = useCallback(
     (page: Item): PageNodeData => {
       const data: PageNodeData = {
-        description: page.description ?? undefined,
-        deviceType:
-          ((page.metadata?.['deviceType'] as 'desktop' | 'tablet' | 'mobile') ?? undefined) ||
-          'desktop',
+        description: page.description,
+        deviceType: readDeviceType(page.metadata),
         id: page.id,
         interactionCount: interactionCounts.get(page.id) ?? 0,
         item: page,
         label: page.title || 'Untitled',
-        onPreview: onPreviewItem ?? undefined,
-        onSelect: onSelectItem ?? undefined,
-        screenshotUrl: (page.metadata?.['screenshotUrl'] as string) ?? undefined,
-        thumbnailUrl: (page.metadata?.['thumbnailUrl'] as string) ?? undefined,
+        onPreview: onPreviewItem,
+        onSelect: onSelectItem,
+        screenshotUrl: readMetadataString(page.metadata, 'screenshotUrl'),
+        thumbnailUrl: readMetadataString(page.metadata, 'thumbnailUrl'),
       };
       return data;
     },
@@ -332,20 +366,21 @@ function PageInteractionFlowInner({
 
       if (journey) {
         // Linear layout for journey
-        return journey.steps
-          .map((pageId, index) => {
-            const page = pages.find((p) => p.id === pageId);
-            if (!page) {
-              return null;
-            }
-            return {
+        return journey.steps.flatMap((pageId, index): Node<PageNodeData>[] => {
+          const page = pages.find((p) => p.id === pageId);
+          if (!page) {
+            return [];
+          }
+
+          return [
+            {
               data: createNodeData(page),
               id: page.id,
               position: { x: index * (nodeWidth + padding), y: 100 },
               type: 'page',
-            };
-          })
-          .filter(Boolean) as Node<PageNodeData>[];
+            },
+          ];
+        });
       }
 
       // Grid layout for all pages
@@ -388,7 +423,7 @@ function PageInteractionFlowInner({
     return filteredPages.filter((p) => journey.steps.includes(p.id));
   }, [filteredPages, selectedJourney, userJourneys]);
 
-  const initialNodes = useMemo(() => {
+  const initialNodes = useMemo<Node<PageNodeData>[]>(() => {
     const journey = selectedJourney
       ? userJourneys.find((j) => j.id === selectedJourney)
       : undefined;
@@ -414,14 +449,14 @@ function PageInteractionFlowInner({
       }));
   }, [journeyPages, pageLinks]);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes as Node[]);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   useEffect(() => {
     const journey = selectedJourney
       ? userJourneys.find((j) => j.id === selectedJourney)
       : undefined;
-    setNodes(calculateLayout(journeyPages, journey) as Node[]);
+    setNodes(calculateLayout(journeyPages, journey));
     setEdges(initialEdges);
     setTimeout(async () => fitView({ padding: 0.2 }), 100);
   }, [
@@ -463,10 +498,12 @@ function PageInteractionFlowInner({
         </div>
 
         {/* Tabs */}
-        <Tabs
+          <Tabs
           value={activeTab}
           onValueChange={(v) => {
-            setActiveTab(v as typeof activeTab);
+            if (isPageInteractionTab(v)) {
+              setActiveTab(v);
+            }
           }}
         >
           <TabsList className='w-full'>

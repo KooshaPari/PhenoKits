@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(ls -d /Users/kooshapari/CodeProjects/Phenotype/repos/*/)"
+      "Bash(ls -d /Users/kooshapari/CodeProjects/Phenotype/repos/*/)",
+      "Bash(rm -rf .archive/colab/.git/worktrees/colab-docs)",
+      "Bash([ -d \".archive/$r\" ])"
     ]
   }
 }

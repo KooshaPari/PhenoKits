@@ -18,7 +18,6 @@
 
 import { useCallback, useState } from 'react';
 
-import type { CreateItemInput } from '@/lib/validation/schemas';
 import type { ViewType } from '@/types';
 
 import { createItem } from '@/api/items';
@@ -27,10 +26,10 @@ import {
   buildErrorMetadata,
   extractValidationErrors,
   formatValidationErrorMessage,
+  isAuthError,
 } from '@/lib/api-error-handler';
-import { isAuthError } from '@/lib/api-error-handler';
 import { logger } from '@/lib/logger';
-import { queueMutation, removeMutationFromQueue, updateMutationError } from '@/lib/mutation-queue';
+import { queueMutation, removeMutationFromQueue } from '@/lib/mutation-queue';
 import { withRetry } from '@/lib/retry';
 
 import { CreateDefectItemForm } from './CreateDefectItemForm';
@@ -50,6 +49,23 @@ interface CreateItemDialogProps {
   title?: string | undefined;
 }
 
+type CreateItemPayload = Parameters<typeof createItem>[0];
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const readString = (value: unknown): string | undefined => (typeof value === 'string' ? value : undefined);
+
+const isPriority = (value: unknown): value is NonNullable<CreateItemPayload['priority']> =>
+  value === 'low' || value === 'medium' || value === 'high' || value === 'critical';
+
+const isStatus = (value: unknown): value is NonNullable<CreateItemPayload['status']> =>
+  value === 'todo' ||
+  value === 'in_progress' ||
+  value === 'done' ||
+  value === 'blocked' ||
+  value === 'cancelled';
+
 export function CreateItemDialog({
   open,
   onOpenChange,
@@ -60,56 +76,64 @@ export function CreateItemDialog({
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Reset state when dialog closes
-  const handleOpenChange = (newOpen: boolean) => {
-    if (!newOpen) {
-      // Reset to step 1 when dialog closes
-      setSelectedType(null);
-      setIsSubmitting(false);
-    }
-    onOpenChange(newOpen);
-  };
+  const closeDialog = useCallback((): void => {
+    setSelectedType(null);
+    setIsSubmitting(false);
+    onOpenChange(false);
+  }, [onOpenChange]);
 
   // Handle type selection (step 1 -> step 2)
-  const handleTypeSelect = (type: string) => {
+  const handleTypeSelect = (type: string): void => {
     setSelectedType(type);
   };
 
   // Handle form submission (step 2)
   const handleFormSubmit = useCallback(
-    async (data: unknown) => {
+    async (data: unknown): Promise<void> => {
       setIsSubmitting(true);
       const toastId = `create_item_${Date.now()}`;
 
       try {
         // Validate form data
-        if (!data || typeof data !== 'object') {
+        if (!isRecord(data)) {
           toast.error('Invalid form data', { id: toastId });
           setIsSubmitting(false);
           return;
         }
 
-        const formData = data as Record<string, unknown>;
+        if (!selectedType) {
+          toast.error('Invalid form data', { id: toastId });
+          setIsSubmitting(false);
+          return;
+        }
+
+        const formData = data;
+        const title = readString(formData['name']) ?? readString(formData['title']);
+        if (!title) {
+          toast.error('Invalid form data', { id: toastId });
+          setIsSubmitting(false);
+          return;
+        }
 
         // Build CreateItemInput with required fields
         const itemInput = {
-          description: (formData['description'] as string | undefined) ?? '',
-          priority: (formData['priority'] as string) ?? 'medium',
+          ...data,
+          description: readString(data['description']) ?? '',
+          priority: isPriority(data['priority']) ? data['priority'] : 'medium',
           projectId,
-          status: (formData['status'] as string) ?? 'draft',
-          title: (formData['name'] ?? formData['title']) as string,
-          type: (selectedType ?? 'item') as CreateItemInput['type'],
-          view: (formData['view'] as string) ?? defaultView,
-          ...formData,
-        } as CreateItemInput;
+          status: isStatus(data['status']) ? data['status'] : undefined,
+          title,
+          type: selectedType,
+          view: readString(data['view']) ?? defaultView,
+        };
 
         // Show retrying toast
         const retryingToastId = `create_item_retrying_${Date.now()}`;
 
         // Attempt to create item with retry logic
-        const result = await withRetry(async () => createItem(itemInput), {
-          maxAttempts: 3,
+        const result = await withRetry(() => createItem(itemInput), {
           baseDelayMs: 1000,
+          maxAttempts: 3,
           onRetry: (attempt, error) => {
             toast.loading(`Retrying... (Attempt ${attempt}/3)`, {
               id: retryingToastId,
@@ -154,7 +178,7 @@ export function CreateItemDialog({
               createdAt: new Date().toISOString(),
               data: itemInput,
               failedAttempts: result.attempts,
-              lastError: result.error?.message,
+              lastError: result.error ? result.error.message : undefined,
               type: 'create_item',
             });
 
@@ -171,7 +195,7 @@ export function CreateItemDialog({
             });
 
             // Still close the dialog since mutation is queued
-            handleOpenChange(false);
+            closeDialog();
             setIsSubmitting(false);
             return;
           }
@@ -186,15 +210,23 @@ export function CreateItemDialog({
         }
 
         // Success!
+        if (!result.data) {
+          logger.error('Item creation succeeded without returned data');
+          toast.error('Item created successfully, but no item data was returned.', {
+            id: toastId,
+          });
+          return;
+        }
+
         logger.info('Item created successfully:', {
-          itemId: (result.data as { id?: string }).id,
+          itemId: result.data.id,
           type: selectedType,
         });
 
         toast.success('Item created successfully', { id: toastId });
 
         // Close dialog and reset
-        handleOpenChange(false);
+        closeDialog();
       } catch (error) {
         // Catch any unexpected errors not caught by retry logic
         const errorMetadata = buildErrorMetadata(error);
@@ -208,17 +240,17 @@ export function CreateItemDialog({
         setIsSubmitting(false);
       }
     },
-    [selectedType, handleOpenChange],
+    [closeDialog, defaultView, projectId, selectedType],
   );
 
   // Handle cancel (go back to step 1 or close dialog)
-  const handleCancel = () => {
+  const handleCancel = (): void => {
     if (selectedType) {
       // If on step 2, go back to step 1
       setSelectedType(null);
     } else {
       // If on step 1, close dialog
-      handleOpenChange(false);
+      closeDialog();
     }
   };
 

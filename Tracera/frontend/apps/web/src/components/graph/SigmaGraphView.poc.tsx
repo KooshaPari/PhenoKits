@@ -1,4 +1,4 @@
-/**
+/*
  * Sigma.js Proof of Concept - 100k Node Graph Renderer
  *
  * This is a working proof-of-concept demonstrating sigma.js capability
@@ -58,7 +58,13 @@ interface PerformanceStats {
   renderTime: number;
 }
 
-type LayoutAlgorithm = 'force' | 'circular' | 'random' | 'none';
+const LAYOUT_OPTIONS = ['force', 'circular', 'random', 'none'] as const;
+
+type LayoutAlgorithm = (typeof LAYOUT_OPTIONS)[number];
+
+function isLayoutAlgorithm(value: string): value is LayoutAlgorithm {
+  return value === 'force' || value === 'circular' || value === 'random' || value === 'none';
+}
 
 // =============================================================================
 // GRAPH GENERATION (for POC testing)
@@ -70,6 +76,7 @@ type LayoutAlgorithm = 'force' | 'circular' | 'random' | 'none';
 function generateRandomGraph(nodeCount: number, avgDegree = 4): { items: Item[]; links: Link[] } {
   const items: Item[] = [];
   const links: Link[] = [];
+  const itemTypes = ['feature', 'requirement', 'task', 'test'] as const;
 
   // Generate nodes
   for (let i = 0; i < nodeCount; i += 1) {
@@ -80,7 +87,7 @@ function generateRandomGraph(nodeCount: number, avgDegree = 4): { items: Item[];
       projectId: 'test',
       status: 'todo',
       title: `Node ${i}`,
-      type: ['feature', 'requirement', 'task', 'test'][i % 4] as any,
+      type: itemTypes[i % itemTypes.length] ?? 'feature',
       updatedAt: new Date().toISOString(),
       version: 1,
       view: 'feature',
@@ -100,7 +107,7 @@ function generateRandomGraph(nodeCount: number, avgDegree = 4): { items: Item[];
         projectId: 'test',
         sourceId: `node-${source}`,
         targetId: `node-${target}`,
-        type: 'relates_to' as any,
+        type: 'related_to',
         updatedAt: new Date().toISOString(),
         version: 1,
       });
@@ -205,17 +212,23 @@ Function GraphEventController({
   useEffect(() => {
     registerEvents({
       clickNode: (event) => {
-        onNodeClick?.(event.node);
+        if (onNodeClick !== undefined) {
+          onNodeClick(event.node);
+        }
         // Highlight clicked node
         sigma.getGraph().setNodeAttribute(event.node, 'highlighted', true);
       },
       enterNode: (event) => {
         document.body.style.cursor = 'pointer';
-        onNodeHover?.(event.node);
+        if (onNodeHover !== undefined) {
+          onNodeHover(event.node);
+        }
       },
       leaveNode: () => {
         document.body.style.cursor = 'default';
-        onNodeHover?.(null);
+        if (onNodeHover !== undefined) {
+          onNodeHover(null);
+        }
       },
     });
   }, [sigma, registerEvents, onNodeClick, onNodeHover]);
@@ -264,14 +277,21 @@ function usePerformanceMonitor(enabled: boolean): PerformanceStats | undefined {
 
       if (now - lastTime >= 1000) {
         const fps = Math.round((frameCount * 1000) / (now - lastTime));
-        const memory = Math.round(((performance as any).memory?.usedJSHeapSize ?? 0) / 1024 / 1024);
+        const performanceMemory = Reflect.get(performance, 'memory');
+        const usedJSHeapSize =
+          typeof performanceMemory === 'object' && performanceMemory !== null
+            ? Reflect.get(performanceMemory, 'usedJSHeapSize')
+            : 0;
+        const memory = Math.round(
+          (typeof usedJSHeapSize === 'number' ? usedJSHeapSize : 0) / 1024 / 1024,
+        );
 
         setStats((prev) => ({
-          edgeCount: prev?.edgeCount ?? 0,
+          edgeCount: prev === undefined ? 0 : prev.edgeCount,
           fps,
           memory,
-          nodeCount: prev?.nodeCount ?? 0,
-          renderTime: prev?.renderTime ?? 0,
+          nodeCount: prev === undefined ? 0 : prev.nodeCount,
+          renderTime: prev === undefined ? 0 : prev.renderTime,
         }));
 
         frameCount = 0;
@@ -412,8 +432,11 @@ export function SigmaProofOfConcept() {
       {/* Controls */}
       <div className='bg-background flex flex-wrap items-center gap-4 border-b p-4'>
         <div className='flex items-center gap-2'>
-          <label className='text-sm font-medium'>Nodes:</label>
+          <label htmlFor='sigma-nodes' className='text-sm font-medium'>
+            Nodes:
+          </label>
           <input
+            id='sigma-nodes'
             type='range'
             min='100'
             max='100000'
@@ -428,8 +451,11 @@ export function SigmaProofOfConcept() {
         </div>
 
         <div className='flex items-center gap-2'>
-          <label className='text-sm font-medium'>Avg Degree:</label>
+          <label htmlFor='sigma-avg-degree' className='text-sm font-medium'>
+            Avg Degree:
+          </label>
           <input
+            id='sigma-avg-degree'
             type='range'
             min='2'
             max='20'
@@ -443,14 +469,18 @@ export function SigmaProofOfConcept() {
         </div>
 
         <div className='flex items-center gap-2'>
-          <label className='text-sm font-medium'>Layout:</label>
+          <label htmlFor='sigma-layout' className='text-sm font-medium'>
+            Layout:
+          </label>
           <Select
             value={layout}
-            onValueChange={(v) => {
-              setLayout(v as LayoutAlgorithm);
+            onValueChange={(value) => {
+              if (isLayoutAlgorithm(value)) {
+                setLayout(value);
+              }
             }}
           >
-            <SelectTrigger className='h-9 w-32'>
+            <SelectTrigger id='sigma-layout' className='h-9 w-32'>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

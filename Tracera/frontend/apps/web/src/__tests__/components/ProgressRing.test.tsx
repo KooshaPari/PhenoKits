@@ -4,6 +4,9 @@ import { describe, expect, it } from 'vitest';
 
 import { LinearProgress, ProgressBar, ProgressRing } from '../../components/temporal/ProgressRing';
 
+const getProgressFill = (container: HTMLElement) =>
+  container.querySelector('[style*="width"]');
+
 describe(ProgressRing, () => {
   it('renders with correct percentage', () => {
     const { container } = render(<ProgressRing percentage={50} />);
@@ -112,19 +115,20 @@ describe(ProgressBar, () => {
 
   it('handles 0% progress', () => {
     const { container } = render(<ProgressBar percentage={0} />);
-    const progressDiv = container.querySelector('div > div');
+    const progressDiv = getProgressFill(container);
     expect(progressDiv).toHaveStyle('width: 0%');
   });
 
   it('handles 100% progress', () => {
     const { container } = render(<ProgressBar percentage={100} />);
-    const progressDiv = container.querySelector('div > div');
+    const progressDiv = getProgressFill(container);
     expect(progressDiv).toHaveStyle('width: 100%');
   });
 
-  it('caps percentage at 100', () => {
-    render(<ProgressBar percentage={150} showLabel />);
-    expect(screen.getByText('100%')).toBeInTheDocument();
+  it('caps visual bar width at 100 while preserving the raw label', () => {
+    const { container } = render(<ProgressBar percentage={150} showLabel />);
+    expect(getProgressFill(container)).toHaveStyle('width: 100%');
+    expect(screen.getByText('150%')).toBeInTheDocument();
   });
 
   it('handles animation prop', () => {

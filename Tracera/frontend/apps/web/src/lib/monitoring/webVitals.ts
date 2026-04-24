@@ -70,6 +70,12 @@ const THRESHOLDS = {
   INP: { good: 200, poor: 500 },
 } as const;
 
+type ThresholdMetricName = keyof typeof THRESHOLDS;
+
+function isThresholdMetricName(name: string): name is ThresholdMetricName {
+  return name in THRESHOLDS;
+}
+
 // ============================================================================
 // Rating Functions
 // ============================================================================
@@ -111,7 +117,9 @@ class WebVitalsCollector {
       const webVital: WebVitalsMetric = {
         name: metric.name,
         value: metric.value,
-        rating: getRating(metric.name as keyof typeof THRESHOLDS, metric.value),
+        rating: isThresholdMetricName(metric.name)
+          ? getRating(metric.name, metric.value)
+          : 'needs-improvement',
         delta: metric.delta,
         id: metric.id,
         navigationType: metric.navigationType || 'navigate',
@@ -142,7 +150,7 @@ class WebVitalsCollector {
     if (typeof window === 'undefined') return;
 
     window.addEventListener('load', () => {
-      const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
+      const resources = performance.getEntriesByType('resource');
 
       const bundleSize: BundleSizeMetric = {
         total: 0,
@@ -166,7 +174,7 @@ class WebVitalsCollector {
       });
 
       // Report bundle size
-      this.reportBundleSize(bundleSize);
+      void this.reportBundleSize(bundleSize);
     });
   }
 
@@ -185,7 +193,7 @@ class WebVitalsCollector {
         timestamp: Date.now(),
         severity: 'error',
       };
-      this.reportError(errorMetric);
+      void this.reportError(errorMetric);
     });
 
     // Unhandled promise rejections
@@ -195,7 +203,7 @@ class WebVitalsCollector {
         timestamp: Date.now(),
         severity: 'error',
       };
-      this.reportError(errorMetric);
+      void this.reportError(errorMetric);
     });
   }
 
@@ -233,12 +241,12 @@ class WebVitalsCollector {
     if (this.batchTimer) return;
 
     this.batchTimer = setTimeout(() => {
-      this.flush();
+      void this.flush();
     }, this.batchTimeout);
 
     // Also flush if we hit the batch size
     if (this.metrics.length >= this.batchSize) {
-      this.flush();
+      void this.flush();
     }
   }
 
@@ -313,7 +321,7 @@ class WebVitalsCollector {
   // --------------------------------------------------------------------------
 
   public reportComponentRender(metric: ComponentRenderMetric): void {
-    fetch('/api/v1/metrics/component-render', {
+    void fetch('/api/v1/metrics/component-render', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -362,30 +370,40 @@ export function createProfilerOnRender(componentName: string) {
 // Singleton Instance & Initialization
 // ============================================================================
 
-let webVitalsCollector: WebVitalsCollector;
+interface WebVitalsCollectorApi {
+  reportComponentRender(metric: ComponentRenderMetric): void;
+  getMetrics(): WebVitalsMetric[];
+  forceFlush(): Promise<void>;
+}
 
-export function initWebVitals(): WebVitalsCollector {
+function createNoopWebVitalsCollector(): WebVitalsCollectorApi {
+  return {
+    reportComponentRender: (): void => {},
+    getMetrics: (): WebVitalsMetric[] => [],
+    forceFlush: async (): Promise<void> => {},
+  };
+}
+
+let webVitalsCollector: WebVitalsCollectorApi = createNoopWebVitalsCollector();
+
+export function initWebVitals(): WebVitalsCollectorApi {
   if (typeof window === 'undefined') {
-    // Return a no-op collector for SSR
-    return {
-      reportComponentRender: () => {},
-      getMetrics: () => [],
-      forceFlush: async () => {},
-    } as any;
+    // Return the no-op collector for SSR.
+    return webVitalsCollector;
   }
 
-  if (!webVitalsCollector) {
+  if (!(webVitalsCollector instanceof WebVitalsCollector)) {
     webVitalsCollector = new WebVitalsCollector();
 
     // Flush metrics before page unload
     window.addEventListener('beforeunload', () => {
-      webVitalsCollector.forceFlush();
+      void webVitalsCollector.forceFlush();
     });
 
     // Flush metrics on visibility change (tab switch)
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') {
-        webVitalsCollector.forceFlush();
+        void webVitalsCollector.forceFlush();
       }
     });
   }

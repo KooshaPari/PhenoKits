@@ -3,16 +3,67 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useAuth, useIsAuthenticated, useUser } from '../../hooks/useAuth';
 import { useAuthStore } from '../../stores/authStore';
 
+const mockFetch = vi.fn();
+globalThis.fetch = mockFetch as unknown as typeof fetch;
+
+const TEST_USER = {
+  email: 'test@example.com',
+  id: 'user-1',
+  name: 'Test User',
+};
+const TEST_TOKEN = 'test-token';
+
+const resetAuthStore = () => {
+  useAuthStore.getState().stopAutoRefresh();
+  useAuthStore.setState({
+    account: null,
+    authKitRefreshToken: null,
+    isAuthenticated: false,
+    isLoading: false,
+    refreshTimer: null,
+    token: null,
+    user: null,
+  });
+};
+
+const seedAuthenticatedUser = () => {
+  useAuthStore.setState({
+    isAuthenticated: true,
+    token: TEST_TOKEN,
+    user: TEST_USER,
+  });
+};
+
+const mockAuthKitCallback = () => {
+  mockFetch.mockResolvedValueOnce({
+    json: async () => ({
+      refresh_token: 'refresh-token',
+      token: TEST_TOKEN,
+      user: TEST_USER,
+    }),
+    ok: true,
+  });
+};
+
 describe(useAuth, () => {
   beforeEach(() => {
-    const { logout } = useAuthStore.getState();
-    logout();
+    globalThis.fetch = mockFetch as unknown as typeof fetch;
+    mockFetch.mockReset();
+    act(() => {
+      resetAuthStore();
+    });
     localStorage.clear();
+  });
+
+  afterEach(() => {
+    act(() => {
+      resetAuthStore();
+    });
   });
 
   describe(useAuth, () => {
@@ -30,44 +81,57 @@ describe(useAuth, () => {
     });
 
     it('should handle login', async () => {
+      mockAuthKitCallback();
       const { result } = renderHook(() => useAuth());
 
       await act(async () => {
-        await result.current.login('test@example.com', 'password');
+        await result.current.login('auth-code', 'auth-state');
       });
 
       expect(result.current.isAuthenticated).toBeTruthy();
-      expect(result.current.user).toBeTruthy();
+      expect(result.current.user).toEqual(TEST_USER);
+      expect(result.current.token).toBe(TEST_TOKEN);
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/api/v1/auth/authkit/callback'),
+        expect.objectContaining({
+          body: JSON.stringify({ code: 'auth-code', state: 'auth-state' }),
+          credentials: 'include',
+          method: 'POST',
+        }),
+      );
     });
 
     it('should handle logout', async () => {
       const { result } = renderHook(() => useAuth());
 
-      await act(async () => {
-        await result.current.login('test@example.com', 'password');
+      act(() => {
+        seedAuthenticatedUser();
       });
 
-      act(() => {
-        result.current.logout();
+      mockFetch.mockResolvedValueOnce({
+        json: async () => ({}),
+        ok: true,
+      });
+
+      await act(async () => {
+        await result.current.logout();
       });
 
       expect(result.current.isAuthenticated).toBeFalsy();
       expect(result.current.user).toBeNull();
+      expect(result.current.token).toBeNull();
     });
   });
 
   describe(useUser, () => {
-    it('should return user when authenticated', async () => {
-      const { result: authResult } = renderHook(() => useAuth());
-
-      await act(async () => {
-        await authResult.current.login('test@example.com', 'password');
+    it('should return user when authenticated', () => {
+      act(() => {
+        seedAuthenticatedUser();
       });
 
       const { result } = renderHook(() => useUser());
 
-      expect(result.current).toBeTruthy();
-      expect(result.current?.email).toBe('test@example.com');
+      expect(result.current).toEqual(TEST_USER);
     });
 
     it('should return null when not authenticated', () => {
@@ -78,11 +142,9 @@ describe(useAuth, () => {
   });
 
   describe(useIsAuthenticated, () => {
-    it('should return true when authenticated', async () => {
-      const { result: authResult } = renderHook(() => useAuth());
-
-      await act(async () => {
-        await authResult.current.login('test@example.com', 'password');
+    it('should return true when authenticated', () => {
+      act(() => {
+        seedAuthenticatedUser();
       });
 
       const { result } = renderHook(() => useIsAuthenticated());

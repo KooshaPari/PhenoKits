@@ -7,15 +7,7 @@
  */
 
 import { Bug, CheckCircle2, FileCode, FileText, Layers, ListTodo, Plus, Users } from 'lucide-react';
-
-import type {
-  DefectSpec,
-  EpicSpec,
-  RequirementSpec,
-  TaskSpec,
-  TestSpec,
-  UserStorySpec,
-} from '@/hooks/useItemSpecs';
+import type { ComponentType } from 'react';
 
 import {
   useDefectSpecByItem,
@@ -52,7 +44,16 @@ interface ItemSpecTabsProps {
   className?: string;
 }
 
-const specTypes = [
+type SpecKind = 'requirement' | 'test' | 'epic' | 'user_story' | 'task' | 'defect';
+
+type SpecConfig = {
+  description: string;
+  icon: ComponentType<{ className?: string }>;
+  id: SpecKind;
+  label: string;
+};
+
+const specTypes: SpecConfig[] = [
   {
     description: 'EARS patterns, constraints, quality metrics',
     icon: FileText,
@@ -91,7 +92,7 @@ const specTypes = [
   },
 ];
 
-function getRecommendedSpecs(itemType?: string): string[] {
+function getRecommendedSpecs(itemType?: string): SpecKind[] {
   switch (itemType?.toLowerCase()) {
     case 'requirement':
     case 'functional_requirement':
@@ -130,27 +131,18 @@ export function ItemSpecTabs({
   className,
 }: ItemSpecTabsProps) {
   // Fetch all specs for this item (by item ID)
-  const { data: reqSpec, isLoading: reqLoading } = useRequirementSpecByItem(
-    projectId,
-    itemId,
-  ) as any;
-  const { data: testSpec, isLoading: testLoading } = useTestSpecByItem(projectId, itemId) as any;
-  const { data: epicSpec, isLoading: epicLoading } = useEpicSpecByItem(projectId, itemId) as any;
-  const { data: storySpec, isLoading: storyLoading } = useUserStorySpecByItem(
-    projectId,
-    itemId,
-  ) as any;
-  const { data: taskSpec, isLoading: taskLoading } = useTaskSpecByItem(projectId, itemId) as any;
-  const { data: defectSpec, isLoading: defectLoading } = useDefectSpecByItem(
-    projectId,
-    itemId,
-  ) as any;
+  const { data: reqSpec, isLoading: reqLoading } = useRequirementSpecByItem(projectId, itemId);
+  const { data: testSpec, isLoading: testLoading } = useTestSpecByItem(projectId, itemId);
+  const { data: epicSpec, isLoading: epicLoading } = useEpicSpecByItem(projectId, itemId);
+  const { data: storySpec, isLoading: storyLoading } = useUserStorySpecByItem(projectId, itemId);
+  const { data: taskSpec, isLoading: taskLoading } = useTaskSpecByItem(projectId, itemId);
+  const { data: defectSpec, isLoading: defectLoading } = useDefectSpecByItem(projectId, itemId);
 
   const isLoading =
     ((reqLoading ?? testLoading ?? epicLoading) || storyLoading || taskLoading) ?? defectLoading;
 
   // Determine which specs exist
-  const existingSpecs = {
+  const existingSpecs: Record<SpecKind, boolean> = {
     defect: Boolean(defectSpec),
     epic: Boolean(epicSpec),
     requirement: Boolean(reqSpec),
@@ -165,7 +157,7 @@ export function ItemSpecTabs({
 
   // Find first existing spec for default tab
   const defaultTab =
-    specTypes.find((s) => existingSpecs[s.id as keyof typeof existingSpecs])?.id ??
+    specTypes.find((spec) => existingSpecs[spec.id])?.id ??
     recommendedSpecs[0] ??
     'requirement';
 
@@ -184,7 +176,7 @@ export function ItemSpecTabs({
         <TabsList className='bg-muted/50 h-auto w-full flex-wrap justify-start gap-1 rounded-xl p-1'>
           {specTypes.map((spec) => {
             const Icon = spec.icon;
-            const exists = existingSpecs[spec.id as keyof typeof existingSpecs];
+            const exists = existingSpecs[spec.id];
             const isRecommended = recommendedSpecs.includes(spec.id);
 
             return (

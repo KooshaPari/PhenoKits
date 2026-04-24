@@ -14,10 +14,13 @@ vi.mock('../../lib/csrf', () => ({
 }));
 
 // Mock connection status store
+const { mockSetLost } = vi.hoisted(() => ({
+  mockSetLost: vi.fn(),
+}));
 vi.mock('../../stores/connection-status-store', () => ({
   useConnectionStatusStore: {
     getState: () => ({
-      setLost: vi.fn(),
+      setLost: mockSetLost,
     }),
   },
 }));
@@ -157,7 +160,10 @@ describe('Client Response Handlers - P1 Coverage', () => {
       const response = new Response(JSON.stringify({ error: 'Bad credentials' }), {
         headers: { 'Content-Type': 'application/json' },
         status: 401,
-        url: 'http://localhost:4000/auth/login',
+      });
+      Object.defineProperty(response, 'url', {
+        configurable: true,
+        value: 'http://localhost:4000/auth/login',
       });
 
       await responseHandlers.handleResponse(response, mockLogout);
@@ -284,7 +290,10 @@ describe('Client Response Handlers - P1 Coverage', () => {
       await responseHandlers.handleResponse(response, mockLogout);
 
       const { toast } = await import('sonner');
-      expect(toast.error).toHaveBeenCalledWith('Rate limited', expect.stringContaining('30'));
+      expect(toast.error).toHaveBeenCalledWith(
+        'Rate limited',
+        expect.objectContaining({ description: expect.stringContaining('30') }),
+      );
     });
 
     it('should parse retry_after from body', async () => {
@@ -293,7 +302,10 @@ describe('Client Response Handlers - P1 Coverage', () => {
       await responseHandlers.handleResponse(response, mockLogout);
 
       const { toast } = await import('sonner');
-      expect(toast.error).toHaveBeenCalledWith('Rate limited', expect.stringContaining('2'));
+      expect(toast.error).toHaveBeenCalledWith(
+        'Rate limited',
+        expect.objectContaining({ description: expect.stringContaining('2') }),
+      );
     });
 
     it('should use default retry time if not provided', async () => {
@@ -584,7 +596,7 @@ describe('Client Response Handlers - P1 Coverage', () => {
       const response = createMockResponse(401);
 
       // Should not throw even with null logout
-      const noOpLogout = () => {};
+      const noOpLogout = vi.fn();
       await responseHandlers.handleResponse(response, noOpLogout);
 
       expect(noOpLogout).toHaveBeenCalled();

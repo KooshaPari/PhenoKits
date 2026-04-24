@@ -30,6 +30,8 @@ interface InfraDisplay {
   state: PreflightState;
 }
 
+type JsonObject = Record<string, unknown>;
+
 const DEFAULT_TIMEOUT_MS = Number('8000');
 const FULL_PERCENT = Number('100');
 const RELOAD_DELAY_MS = Number('240');
@@ -161,6 +163,21 @@ const fetchWithTimeout = async (url: string, timeoutMs = DEFAULT_TIMEOUT_MS): Pr
   }
 };
 
+const isJsonObject = (value: unknown): value is JsonObject =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const getNestedString = (source: JsonObject, key: string, nestedKey: string): string | null => {
+  const value = source[key];
+  if (!isJsonObject(value)) {
+    return null;
+  }
+  const nestedValue = value[nestedKey];
+  if (typeof nestedValue !== 'string') {
+    return null;
+  }
+  return nestedValue;
+};
+
 const buildCheckItems = (checks: PreflightCheck[]): string =>
   checks
     .map(
@@ -235,9 +252,9 @@ const renderPreflightLoading = (checks: PreflightCheck[]): void => {
 };
 
 const revealFailurePanel = (): void => {
-  const list = document.querySelector('[data-preflight-list]') as HTMLElement | null;
-  const infra = document.querySelector('[data-infra-panel]') as HTMLElement | null;
-  const footer = document.querySelector('[data-preflight-footer]') as HTMLElement | null;
+  const list = document.querySelector<HTMLElement>('[data-preflight-list]');
+  const infra = document.querySelector<HTMLElement>('[data-infra-panel]');
+  const footer = document.querySelector<HTMLElement>('[data-preflight-footer]');
   if (list) {
     list.style.display = 'block';
   }
@@ -250,7 +267,7 @@ const revealFailurePanel = (): void => {
 };
 
 const revealItem = (name: string): void => {
-  const item = document.querySelector(`[data-check="${name}"]`) as HTMLElement | null;
+  const item = document.querySelector<HTMLElement>(`[data-check="${name}"]`);
   if (item) {
     item.style.display = 'flex';
     item.dataset['active'] = 'true';
@@ -282,7 +299,7 @@ const revealNext = (): void => {
 };
 
 const setListOpacity = (): void => {
-  const list = document.querySelector('[data-preflight-list]') as HTMLElement | null;
+  const list = document.querySelector<HTMLElement>('[data-preflight-list]');
   if (!list) {
     return;
   }
@@ -296,8 +313,8 @@ const setListOpacity = (): void => {
 };
 
 const scrollToLatest = (name: string): void => {
-  const list = document.querySelector('[data-preflight-list]') as HTMLElement | null;
-  const item = document.querySelector(`[data-check="${name}"]`) as HTMLElement | null;
+  const list = document.querySelector<HTMLElement>('[data-preflight-list]');
+  const item = document.querySelector<HTMLElement>(`[data-check="${name}"]`);
   if (!list || !item) {
     return;
   }
@@ -344,13 +361,13 @@ const setCheckStatusVisuals = (
   state: PreflightState,
   update: PreflightUpdate,
 ): void => {
-  const status = item.querySelector('[data-status]') as HTMLElement | null;
-  const icon = item.querySelector('[data-icon]') as HTMLElement | null;
-  const errorEl = item.querySelector('[data-error]') as HTMLElement | null;
-  const hintEl = item.querySelector('[data-hint]') as HTMLElement | null;
-  const skeleton = item.querySelector('[data-skeleton]') as HTMLElement | null;
-  const retryBtn = item.querySelector('[data-retry]') as HTMLButtonElement | null;
-  const statusText = item.querySelector('[data-status-text]') as HTMLElement | null;
+  const status = item.querySelector<HTMLElement>('[data-status]');
+  const icon = item.querySelector<HTMLElement>('[data-icon]');
+  const errorEl = item.querySelector<HTMLElement>('[data-error]');
+  const hintEl = item.querySelector<HTMLElement>('[data-hint]');
+  const skeleton = item.querySelector<HTMLElement>('[data-skeleton]');
+  const retryBtn = item.querySelector<HTMLButtonElement>('[data-retry]');
+  const statusText = item.querySelector<HTMLElement>('[data-status-text]');
 
   if (status) {
     status.style.background = PREFLIGHT_STATE_COLORS[state];
@@ -407,7 +424,7 @@ const updatePreflightCheck = (name: string, update: PreflightUpdate): void => {
 };
 
 const updatePreflightProgress = (percent: number): void => {
-  const bar = document.querySelector('[data-progress]') as HTMLElement | null;
+  const bar = document.querySelector<HTMLElement>('[data-progress]');
   if (bar) {
     bar.style.width = `${percent}%`;
     bar.style.background =
@@ -430,11 +447,11 @@ const updateInfraStatus = (map: Record<string, InfraStatus>): void => {
   const entries = [...list.querySelectorAll('[data-infra]')];
   entries.forEach((entry) => {
     const key = entry instanceof HTMLElement ? entry.dataset['infra'] || '' : '';
-    const status = (map[key] || 'unknown') as InfraStatus;
+    const status = map[key] || 'unknown';
     const display = getInfraDisplay(status);
-    const dot = entry.querySelector('[data-infra-status]') as HTMLElement | null;
-    const shimmer = entry.querySelector('.preflight-skeleton') as HTMLElement | null;
-    const text = entry.querySelector('[data-infra-text]') as HTMLElement | null;
+    const dot = entry.querySelector<HTMLElement>('[data-infra-status]');
+    const shimmer = entry.querySelector<HTMLElement>('.preflight-skeleton');
+    const text = entry.querySelector<HTMLElement>('[data-infra-text]');
     if (dot) {
       dot.style.background = display.color;
     }
@@ -460,7 +477,7 @@ const pulseItem = (element: Element | null): void => {
 };
 
 const fadeOutAndReload = (): void => {
-  const card = document.querySelector('[data-preflight-card]') as HTMLElement | null;
+  const card = document.querySelector<HTMLElement>('[data-preflight-card]');
   if (!card) {
     window.location.reload();
     return;
@@ -538,26 +555,32 @@ const fetchPythonInfra = async (baseUrl: string): Promise<Record<string, InfraSt
     if (!response.ok) {
       return status;
     }
-    const data = (await response.json()) as {
-      components?: Record<string, { status?: string }> | undefined;
-      integration?: Record<string, { status?: string }> | undefined;
-    };
+    const data = await response.json();
+    if (!isJsonObject(data)) {
+      return status;
+    }
 
-    const components = data.components || {};
-    const integration = data.integration || {};
-    const databaseStatus = normalizeInfraStatus(components['database']?.status);
+    const components = data['components'];
+    const integration = data['integration'];
+    const componentStatuses = isJsonObject(components) ? components : {};
+    const integrationStatuses = isJsonObject(integration) ? integration : {};
+    const databaseStatus = normalizeInfraStatus(
+      getNestedString(componentStatuses, 'database', 'status'),
+    );
     if (databaseStatus) {
       status['database'] = databaseStatus;
     }
-    const redisStatus = normalizeInfraStatus(components['redis']?.status);
+    const redisStatus = normalizeInfraStatus(getNestedString(componentStatuses, 'redis', 'status'));
     if (redisStatus) {
       status['redis'] = redisStatus;
     }
-    const natsStatus = normalizeInfraStatus(components['nats']?.status);
+    const natsStatus = normalizeInfraStatus(getNestedString(componentStatuses, 'nats', 'status'));
     if (natsStatus) {
       status['nats'] = natsStatus;
     }
-    const goStatus = normalizeInfraStatus(integration['go_backend']?.status);
+    const goStatus = normalizeInfraStatus(
+      getNestedString(integrationStatuses, 'go_backend', 'status'),
+    );
     if (goStatus) {
       status['go_backend'] = goStatus;
     }
@@ -575,8 +598,12 @@ const fetchMcpStatus = async (baseUrl: string): Promise<Record<string, InfraStat
     if (!response.ok) {
       return { mcp: 'unhealthy' };
     }
-    const data = (await response.json()) as { mcp_base_url?: string | null };
-    if (data.mcp_base_url && data.mcp_base_url.trim().length > 0) {
+    const data = await response.json();
+    if (!isJsonObject(data)) {
+      return { mcp: 'degraded' };
+    }
+    const mcpBaseUrl = data['mcp_base_url'];
+    if (typeof mcpBaseUrl === 'string' && mcpBaseUrl.trim().length > 0) {
       return { mcp: 'healthy' };
     }
     return { mcp: 'degraded' };
@@ -634,13 +661,13 @@ const updateProgress = (completed: number, total: number): void => {
 
 const wireRetryButton = (check: PreflightCheck, retryHandler: () => Promise<void>): void => {
   const item = document.querySelector(`[data-check="${check.name}"]`);
-  const retryBtn = item?.querySelector('[data-retry]') as HTMLButtonElement | null;
+  const retryBtn = item?.querySelector<HTMLButtonElement>('[data-retry]');
   if (retryBtn) {
-    retryBtn.onclick = (): void => {
+    retryBtn.addEventListener('click', (): void => {
       retryHandler().catch((error: unknown) => {
         throw error;
       });
-    };
+    });
   }
 };
 
@@ -720,7 +747,7 @@ export const renderPreflightFailure = (result: PreflightResult): void => {
   revealFailurePanel();
 
   const details = result.errors.map((err) => `<li>${err}</li>`).join('');
-  const footer = root.querySelector('[data-preflight-footer]') as HTMLElement | null;
+  const footer = root.querySelector<HTMLElement>('[data-preflight-footer]');
   if (!footer) {
     return;
   }
@@ -740,10 +767,10 @@ export const renderPreflightFailure = (result: PreflightResult): void => {
 
   const retry = document.querySelector<HTMLElement>('#preflight-retry');
   if (retry) {
-    retry.onclick = (): void => fadeOutAndReload();
+    retry.addEventListener('click', (): void => fadeOutAndReload());
   }
   const refresh = document.querySelector<HTMLElement>('#preflight-refresh');
   if (refresh) {
-    refresh.onclick = (): void => fadeOutAndReload();
+    refresh.addEventListener('click', (): void => fadeOutAndReload());
   }
 };

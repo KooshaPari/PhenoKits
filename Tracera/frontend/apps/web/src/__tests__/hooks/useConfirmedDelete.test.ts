@@ -118,7 +118,7 @@ describe(useConfirmedDelete, () => {
       });
     });
 
-    void act(async () => {
+    await act(async () => {
       await result.current.executeDelete(deleteFunction);
     });
 

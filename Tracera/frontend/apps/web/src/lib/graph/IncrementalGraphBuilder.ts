@@ -82,6 +82,7 @@ export class IncrementalGraphBuilder {
   private batchTimer?: ReturnType<typeof setTimeout> | undefined;
 
   private abortController?: AbortController;
+  private streamReader?: ReadableStreamDefaultReader<Uint8Array> | undefined;
   private isComplete = false;
 
   constructor(options: BuildOptions = {}) {
@@ -173,18 +174,18 @@ export class IncrementalGraphBuilder {
   processChunk(chunk: StreamChunk): void {
     switch (chunk.type) {
       case 'metadata':
-        this.metadata = chunk.data as StreamMetadata;
+        this.metadata = chunk.data;
         break;
 
       case 'node':
-        this.addNode(chunk.data as GraphNode);
+        this.addNode(chunk.data);
         if (chunk.progress) {
           this.options.onProgress?.(chunk.progress);
         }
         break;
 
       case 'edge':
-        this.addEdge(chunk.data as GraphEdge);
+        this.addEdge(chunk.data);
         if (chunk.progress) {
           this.options.onProgress?.(chunk.progress);
         }
@@ -243,15 +244,16 @@ export class IncrementalGraphBuilder {
     this.abortController = new AbortController();
 
     try {
+      const { headers: requestHeaders, ...requestOptions } = options;
+      const headers = new Headers(requestHeaders);
+      headers.set('Content-Type', 'application/json');
+
       const response = await fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.headers,
-        },
+        headers,
         body: JSON.stringify(viewportRequest),
         signal: this.abortController.signal,
-        ...options,
+        ...requestOptions,
       });
 
       if (!response.ok) {
@@ -279,12 +281,15 @@ export class IncrementalGraphBuilder {
    */
   private async parseNDJSONStream(stream: ReadableStream<Uint8Array>): Promise<void> {
     const reader = stream.getReader();
+    this.streamReader = reader;
     const decoder = new TextDecoder();
     let buffer = '';
 
     try {
       while (true) {
+        this.throwIfAborted();
         const { done, value } = await reader.read();
+        this.throwIfAborted();
 
         if (done) break;
 
@@ -298,7 +303,7 @@ export class IncrementalGraphBuilder {
         for (const line of lines) {
           if (line.trim()) {
             try {
-              const chunk = JSON.parse(line) as StreamChunk;
+              const chunk = JSON.parse(line);
               this.processChunk(chunk);
             } catch (err) {
               console.error('Failed to parse chunk:', err, line);
@@ -310,14 +315,21 @@ export class IncrementalGraphBuilder {
       // Process remaining buffer
       if (buffer.trim()) {
         try {
-          const chunk = JSON.parse(buffer) as StreamChunk;
+          const chunk = JSON.parse(buffer);
           this.processChunk(chunk);
         } catch (err) {
           console.error('Failed to parse final chunk:', err);
         }
       }
     } finally {
-      reader.releaseLock();
+      if (this.streamReader === reader) {
+        this.streamReader = undefined;
+      }
+      try {
+        reader.releaseLock();
+      } catch {
+        // Some test and browser stream implementations throw after cancellation.
+      }
     }
   }
 
@@ -325,8 +337,28 @@ export class IncrementalGraphBuilder {
    * Cancel ongoing stream
    */
   abort(): void {
+    const abortError = this.createAbortError();
     this.abortController?.abort();
+    void this.streamReader?.cancel(abortError).catch(() => {
+      // Abort is best-effort; loadFromStream still observes the controller signal.
+    });
     this.flushBatch();
+  }
+
+  private throwIfAborted(): void {
+    if (this.abortController?.signal.aborted) {
+      throw this.createAbortError();
+    }
+  }
+
+  private createAbortError(): Error {
+    if (typeof DOMException !== 'undefined') {
+      return new DOMException('Graph stream loading was aborted', 'AbortError');
+    }
+
+    const error = new Error('Graph stream loading was aborted');
+    error.name = 'AbortError';
+    return error;
   }
 
   /**
@@ -373,7 +405,10 @@ export class IncrementalGraphBuilder {
 }
 
 /**
- * Parse NDJSON stream utility
+ * Parse NDJSON stream utility.
+ *
+ * @param response - Streaming HTTP response containing NDJSON payload.
+ * @yields Parsed chunk values as they are decoded from the stream.
  */
 export async function* parseNDJSON<T = any>(response: Response): AsyncGenerator<T, void, unknown> {
   if (!response.body) {
@@ -385,30 +420,30 @@ export async function* parseNDJSON<T = any>(response: Response): AsyncGenerator<
   let buffer = '';
 
   try {
-    while (true) {
-      const { done, value } = await reader.read();
+      while (true) {
+        const { done, value } = await reader.read();
 
-      if (done) break;
+        if (done) break;
 
-      buffer += decoder.decode(value, { stream: true });
+        buffer += decoder.decode(value, { stream: true });
 
-      const lines = buffer.split('\n');
-      buffer = lines.pop() || '';
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
 
-      for (const line of lines) {
-        if (line.trim()) {
-          try {
-            yield JSON.parse(line) as T;
-          } catch (err) {
-            console.error('Failed to parse NDJSON line:', err, line);
+        for (const line of lines) {
+          if (line.trim()) {
+            try {
+              yield JSON.parse(line);
+            } catch (err) {
+              console.error('Failed to parse NDJSON line:', err, line);
+            }
           }
         }
-      }
     }
 
     if (buffer.trim()) {
       try {
-        yield JSON.parse(buffer) as T;
+        yield JSON.parse(buffer);
       } catch (err) {
         console.error('Failed to parse final NDJSON:', err);
       }

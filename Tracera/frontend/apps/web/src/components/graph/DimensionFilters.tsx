@@ -79,7 +79,6 @@ interface DimensionValues {
 const NOT_FOUND_INDEX = -1;
 const DEFAULT_DIMENSION_SIZE = 0.5;
 const MIN_DIMENSION_SIZE = 0.3;
-const MAX_DIMENSION_SIZE = 1;
 const SIZE_SCALING_FACTOR = 0.7;
 
 // =============================================================================
@@ -158,6 +157,38 @@ const RISK_COLORS: Record<RiskLevel, string> = {
   medium: '#f59e0b',
   none: '#22c55e',
 };
+
+function stringifyDimensionValue(value: unknown): string {
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  if (typeof value === 'number') {
+    return value.toString();
+  }
+
+  if (typeof value === 'boolean') {
+    return value ? 'true' : 'false';
+  }
+
+  if (typeof value === 'bigint') {
+    return value.toString();
+  }
+
+  if (typeof value === 'symbol') {
+    return value.description ?? value.toString();
+  }
+
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  if (typeof value === 'object') {
+    return JSON.stringify(value) ?? '';
+  }
+
+  return '';
+}
 
 // =============================================================================
 // COMPONENT
@@ -416,7 +447,11 @@ function DimensionFilterEditor({ config, value, onChange, onClear }: DimensionFi
   }
 
   // Enum type
-  const selectedValues = Array.isArray(value) ? value : value ? [value] : [];
+  const selectedValues = Array.isArray(value)
+    ? value.filter((entry): entry is string => typeof entry === 'string')
+    : typeof value === 'string'
+      ? [value]
+      : [];
 
   return (
     <div className='space-y-3'>
@@ -446,11 +481,29 @@ function DimensionFilterEditor({ config, value, onChange, onClear }: DimensionFi
                   if (newValues.length === 0) {
                     onClear();
                   } else {
-                    onChange((newValues.length === 1 ? newValues[0] : newValues) as any);
+                    if (newValues.length === 1) {
+                      const singleValue = newValues[0];
+                      if (singleValue === undefined) {
+                        onClear();
+                      } else {
+                        onChange(singleValue);
+                      }
+                    } else {
+                      onChange(newValues);
+                    }
                   }
                 } else {
                   const newValues = [...selectedValues, v];
-                  onChange((newValues.length === 1 ? newValues[0] : newValues) as any);
+                  if (newValues.length === 1) {
+                    const singleValue = newValues[0];
+                    if (singleValue === undefined) {
+                      onClear();
+                    } else {
+                      onChange(singleValue);
+                    }
+                  } else {
+                    onChange(newValues);
+                  }
                 }
               }}
             >
@@ -528,13 +581,64 @@ function formatFilterValue(
 
 function getDimensionValueColor(dimension: string, value: string): string {
   if (dimension === 'maturity') {
-    return MATURITY_COLORS[value as MaturityLevel] || '#64748b';
+    if (value === 'defined') {
+      return MATURITY_COLORS.defined;
+    }
+    if (value === 'deprecated') {
+      return MATURITY_COLORS.deprecated;
+    }
+    if (value === 'draft') {
+      return MATURITY_COLORS.draft;
+    }
+    if (value === 'idea') {
+      return MATURITY_COLORS.idea;
+    }
+    if (value === 'implemented') {
+      return MATURITY_COLORS.implemented;
+    }
+    if (value === 'stable') {
+      return MATURITY_COLORS.stable;
+    }
+    if (value === 'verified') {
+      return MATURITY_COLORS.verified;
+    }
+    return '#64748b';
   }
   if (dimension === 'complexity') {
-    return COMPLEXITY_COLORS[value as ComplexityLevel] || '#64748b';
+    if (value === 'complex') {
+      return COMPLEXITY_COLORS.complex;
+    }
+    if (value === 'moderate') {
+      return COMPLEXITY_COLORS.moderate;
+    }
+    if (value === 'simple') {
+      return COMPLEXITY_COLORS.simple;
+    }
+    if (value === 'trivial') {
+      return COMPLEXITY_COLORS.trivial;
+    }
+    if (value === 'very_complex') {
+      return COMPLEXITY_COLORS.very_complex;
+    }
+    return '#64748b';
   }
   if (dimension === 'risk') {
-    return RISK_COLORS[value as RiskLevel] || '#64748b';
+    if (value === 'critical') {
+      return RISK_COLORS.critical;
+    }
+    if (value === 'high') {
+      return RISK_COLORS.high;
+    }
+    if (value === 'low') {
+      return RISK_COLORS.low;
+    }
+    if (value === 'medium') {
+      return RISK_COLORS.medium;
+    }
+    if (value === 'none') {
+      return RISK_COLORS.none;
+    }
+    return '#64748b';
   }
   return '#64748b';
 }
@@ -575,25 +679,39 @@ export function applyDimensionFilters<T extends { dimensions?: Record<string, un
           return itemValue !== filter.value;
         }
         case 'gt': {
-          return typeof itemValue === 'number' && itemValue > (filter.value as number);
+          return (
+            typeof itemValue === 'number' &&
+            typeof filter.value === 'number' &&
+            itemValue > filter.value
+          );
         }
         case 'gte': {
-          return typeof itemValue === 'number' && itemValue >= (filter.value as number);
+          return (
+            typeof itemValue === 'number' &&
+            typeof filter.value === 'number' &&
+            itemValue >= filter.value
+          );
         }
         case 'lt': {
-          return typeof itemValue === 'number' && itemValue < (filter.value as number);
+          return (
+            typeof itemValue === 'number' &&
+            typeof filter.value === 'number' &&
+            itemValue < filter.value
+          );
         }
         case 'lte': {
-          return typeof itemValue === 'number' && itemValue <= (filter.value as number);
+          return (
+            typeof itemValue === 'number' &&
+            typeof filter.value === 'number' &&
+            itemValue <= filter.value
+          );
         }
         case 'in': {
-          return (
-            Array.isArray(filter.value) && (filter.value as any[]).includes(itemValue as string)
-          );
+          return Array.isArray(filter.value) && filter.value.some((candidate) => candidate === itemValue);
         }
         case 'not_in': {
           return (
-            Array.isArray(filter.value) && !(filter.value as any[]).includes(itemValue as string)
+            Array.isArray(filter.value) && !filter.value.some((candidate) => candidate === itemValue)
           );
         }
         default: {
@@ -619,9 +737,7 @@ export function getDimensionColor(
     return undefined;
   }
 
-  const safeStr =
-    typeof value === 'object' && value !== null ? JSON.stringify(value) : String(value);
-  return getDimensionValueColor(colorDimension, safeStr);
+  return getDimensionValueColor(colorDimension, stringifyDimensionValue(value));
 }
 
 /**
@@ -647,7 +763,7 @@ export function getDimensionSize(
   // For enum types, map to size
   const config = DIMENSION_CONFIGS.find((c) => c.id === sizeDimension);
   if (config?.values) {
-    const index = config.values.indexOf(value as string);
+    const index = config.values.indexOf(stringifyDimensionValue(value));
     if (index !== NOT_FOUND_INDEX) {
       return MIN_DIMENSION_SIZE + (index / (config.values.length - 1)) * SIZE_SCALING_FACTOR;
     }

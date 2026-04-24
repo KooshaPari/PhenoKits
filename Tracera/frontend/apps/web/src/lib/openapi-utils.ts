@@ -52,6 +52,10 @@ export interface SwaggerConfig {
   tryItOut: boolean;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
 /**
  * Fetch OpenAPI specification from URL
  */
@@ -67,19 +71,17 @@ export async function fetchOpenAPISpec(url: string): Promise<OpenAPISpec> {
  * Validate OpenAPI specification structure
  */
 export function validateOpenAPISpec(spec: unknown): spec is OpenAPISpec {
-  if (!spec || typeof spec !== 'object') {
+  if (!isRecord(spec)) {
     return false;
   }
 
-  const candidate = spec as Record<string, unknown>;
-
   // Check required fields
-  if (!candidate['openapi'] || !candidate['info'] || !candidate['paths']) {
+  if (!('openapi' in spec) || !('info' in spec) || !('paths' in spec)) {
     return false;
   }
 
   // Check OpenAPI version
-  if (typeof candidate['openapi'] === 'string' && !candidate['openapi'].startsWith('3.')) {
+  if (typeof spec['openapi'] === 'string' && !spec['openapi'].startsWith('3.')) {
     logger.warn('Only OpenAPI 3.x is fully supported');
   }
 
@@ -152,16 +154,15 @@ export function getSupportedAuthTypes(
   const authTypes: Array<'bearer' | 'apiKey' | 'oauth2' | 'basic'> = [];
 
   Object.values(securitySchemes).forEach((scheme) => {
-    if (!scheme || typeof scheme !== 'object') return;
+    if (!isRecord(scheme)) return;
 
-    const schemeObj = scheme as Record<string, unknown>;
-    if (schemeObj['type'] === 'http' && schemeObj['scheme'] === 'bearer') {
+    if (scheme['type'] === 'http' && scheme['scheme'] === 'bearer') {
       authTypes.push('bearer');
-    } else if (schemeObj['type'] === 'http' && schemeObj['scheme'] === 'basic') {
+    } else if (scheme['type'] === 'http' && scheme['scheme'] === 'basic') {
       authTypes.push('basic');
-    } else if (schemeObj['type'] === 'apiKey') {
+    } else if (scheme['type'] === 'apiKey') {
       authTypes.push('apiKey');
-    } else if (schemeObj['type'] === 'oauth2') {
+    } else if (scheme['type'] === 'oauth2') {
       authTypes.push('oauth2');
     }
   });
@@ -397,30 +398,24 @@ export interface ResponseExamples {
 export function getResponseExamples(operation: unknown): ResponseExamples {
   const examples: ResponseExamples = {};
 
-  if (
-    !operation ||
-    typeof operation !== 'object' ||
-    !('responses' in operation) ||
-    !operation.responses ||
-    typeof operation.responses !== 'object'
-  ) {
+  if (!isRecord(operation) || !('responses' in operation) || !isRecord(operation['responses'])) {
     return examples;
   }
 
-  Object.entries(operation.responses).forEach(([status, response]) => {
-    if (!response || typeof response !== 'object') return;
+  Object.entries(operation['responses']).forEach(([status, response]) => {
+    if (!isRecord(response)) return;
 
-    const responseObj = response as Record<string, unknown>;
-    const content = responseObj['content'] as Record<string, unknown> | undefined;
-    if (!content) return;
+    const content = response['content'];
+    if (!isRecord(content)) return;
 
-    const jsonContent = content['application/json'] as Record<string, unknown> | undefined;
-    if (!jsonContent) return;
+    const jsonContent = content['application/json'];
+    if (!isRecord(jsonContent)) return;
 
     if (jsonContent['example']) {
       examples[status] = jsonContent['example'];
     } else if (jsonContent['examples'] && typeof jsonContent['examples'] === 'object') {
-      const examplesObj = jsonContent['examples'] as Record<string, unknown>;
+      const examplesObj = jsonContent['examples'];
+      if (!isRecord(examplesObj)) return;
       const firstExample = Object.values(examplesObj)[0];
       if (firstExample) {
         examples[status] = firstExample;

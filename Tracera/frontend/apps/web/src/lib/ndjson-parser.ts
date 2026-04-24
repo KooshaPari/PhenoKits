@@ -51,6 +51,29 @@ export interface StreamingStats {
   errors: string[];
 }
 
+const parseJSONLine = <T>(line: string): T => JSON.parse(line);
+
+const isNDJSONMetadata = (value: unknown): value is NDJSONMetadata => {
+  if (typeof value !== 'object' || value === null || !('type' in value)) {
+    return false;
+  }
+
+  const type = Reflect.get(value, 'type');
+  if (type === 'progress') {
+    return typeof Reflect.get(value, 'count') === 'number';
+  }
+  if (type === 'complete') {
+    return true;
+  }
+  if (type === 'error') {
+    return typeof Reflect.get(value, 'error') === 'string';
+  }
+  if (type === 'section') {
+    return typeof Reflect.get(value, 'name') === 'string' && typeof Reflect.get(value, 'count') === 'number';
+  }
+  return false;
+};
+
 /**
  * Parse NDJSON stream from a Response object
  * @param response - Fetch API Response object
@@ -73,7 +96,7 @@ export async function* parseNDJSON<T = any>(response: Response): AsyncGenerator<
         // Process any remaining data in buffer
         if (buffer.trim()) {
           try {
-            yield JSON.parse(buffer) as T;
+            yield parseJSONLine<T>(buffer);
           } catch (err) {
             console.error('Failed to parse final NDJSON line:', err);
           }
@@ -95,7 +118,7 @@ export async function* parseNDJSON<T = any>(response: Response): AsyncGenerator<
         const trimmed = line.trim();
         if (trimmed) {
           try {
-            yield JSON.parse(trimmed) as T;
+            yield parseJSONLine<T>(trimmed);
           } catch (err) {
             console.error('Failed to parse NDJSON line:', err, 'Line:', trimmed);
           }
@@ -114,7 +137,7 @@ export async function* parseNDJSON<T = any>(response: Response): AsyncGenerator<
  * @param onMetadata - Optional metadata callback for non-data events
  * @yields Parsed JSON objects (excluding metadata events)
  */
-export async function* parseNDJSONWithProgress<T = any>(
+export async function* parseNDJSONWithProgress<T = unknown>(
   response: Response,
   onProgress?: (stats: StreamingStats) => void,
   onMetadata?: (metadata: NDJSONMetadata) => void,
@@ -132,16 +155,14 @@ export async function* parseNDJSONWithProgress<T = any>(
     stats.itemsReceived++;
 
     // Handle metadata events
-    if (typeof item === 'object' && item !== null && 'type' in item) {
-      const metadata = item as NDJSONMetadata;
-
-      switch (metadata.type) {
+    if (isNDJSONMetadata(item)) {
+      switch (item.type) {
         case 'progress':
           if (onProgress) {
             onProgress({ ...stats });
           }
           if (onMetadata) {
-            onMetadata(metadata);
+            onMetadata(item);
           }
           continue; // Don't yield progress events
 
@@ -151,30 +172,30 @@ export async function* parseNDJSONWithProgress<T = any>(
             onProgress({ ...stats });
           }
           if (onMetadata) {
-            onMetadata(metadata);
+            onMetadata(item);
           }
           continue; // Don't yield complete events
 
         case 'error':
-          stats.errors.push(metadata.error);
+          stats.errors.push(item.error);
           if (onMetadata) {
-            onMetadata(metadata);
+            onMetadata(item);
           }
           continue; // Don't yield error events
 
         case 'section':
           if (onMetadata) {
-            onMetadata(metadata);
+            onMetadata(item);
           }
           continue; // Don't yield section events
 
         default:
           // Regular data item, yield it
-          yield item as T;
+          yield item;
       }
     } else {
       // Regular data item without type field
-      yield item as T;
+      yield item;
     }
   }
 
@@ -195,13 +216,9 @@ export async function* fetchNDJSON<T = any>(
   url: string,
   options?: RequestInit,
 ): AsyncGenerator<T, void, unknown> {
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      Accept: 'application/x-ndjson',
-      ...options?.headers,
-    },
-  });
+  const headers = new Headers(options?.headers);
+  headers.set('Accept', 'application/x-ndjson');
+  const response = await fetch(url, { ...options, headers });
 
   if (!response.ok) {
     throw new Error(`HTTP ${response.status}: ${response.statusText}`);

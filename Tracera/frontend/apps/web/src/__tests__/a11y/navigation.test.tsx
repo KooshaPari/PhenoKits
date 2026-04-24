@@ -5,7 +5,7 @@
 /// <reference path="../../test/user-event.d.ts" />
 /// <reference path="../../test/jest-axe.d.ts" />
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { CommandPalette } from '@/components/CommandPalette';
@@ -30,6 +30,16 @@ vi.mock('@tanstack/react-router', async () => {
   };
 });
 
+const getCommandInput = () => document.querySelector<HTMLInputElement>('#command-input');
+
+const waitForCommandInput = async () => {
+  await waitFor(() => {
+    expect(getCommandInput()).toBeInTheDocument();
+  });
+
+  return getCommandInput()!;
+};
+
 describe('Command Palette Keyboard Navigation', () => {
   it('should not have accessibility violations', async () => {
     const { container } = render(<CommandPalette />);
@@ -37,9 +47,7 @@ describe('Command Palette Keyboard Navigation', () => {
     // Open command palette
     pressKey('k', { metaKey: true });
 
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText(/search commands/i)).toBeInTheDocument();
-    });
+    await waitForCommandInput();
 
     const results = await axe(container);
     expect(results).toHaveNoViolations();
@@ -50,31 +58,25 @@ describe('Command Palette Keyboard Navigation', () => {
 
     // Test Cmd+K (Mac)
     pressKey('k', { metaKey: true });
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText(/search commands/i)).toBeInTheDocument();
-    });
+    await waitForCommandInput();
 
     // Close
     pressEscape();
 
     // Test Ctrl+K (Windows/Linux)
     pressKey('k', { ctrlKey: true });
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText(/search commands/i)).toBeInTheDocument();
-    });
+    await waitForCommandInput();
   });
 
   it('should close with Escape key', async () => {
     render(<CommandPalette />);
 
     pressKey('k', { metaKey: true });
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText(/search commands/i)).toBeInTheDocument();
-    });
+    await waitForCommandInput();
 
     pressEscape();
     await waitFor(() => {
-      expect(screen.queryByPlaceholderText(/search commands/i)).not.toBeInTheDocument();
+      expect(getCommandInput()).not.toBeInTheDocument();
     });
   });
 
@@ -82,9 +84,7 @@ describe('Command Palette Keyboard Navigation', () => {
     render(<CommandPalette />);
 
     pressKey('k', { metaKey: true });
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText(/search commands/i)).toBeInTheDocument();
-    });
+    await waitForCommandInput();
 
     // Test arrow down
     pressArrowDown();
@@ -99,9 +99,7 @@ describe('Command Palette Keyboard Navigation', () => {
     render(<CommandPalette />);
 
     pressKey('k', { metaKey: true });
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText(/search commands/i)).toBeInTheDocument();
-    });
+    await waitForCommandInput();
 
     // Press enter to execute first command
     pressEnter();
@@ -112,9 +110,8 @@ describe('Command Palette Keyboard Navigation', () => {
     render(<CommandPalette />);
 
     pressKey('k', { metaKey: true });
+    const searchInput = await waitForCommandInput();
     await waitFor(() => {
-      const searchInput = screen.getByPlaceholderText(/search commands/i);
-      expect(searchInput).toBeInTheDocument();
       expect(searchInput).toHaveFocus();
     });
   });
@@ -123,9 +120,10 @@ describe('Command Palette Keyboard Navigation', () => {
     render(<CommandPalette />);
 
     pressKey('k', { metaKey: true });
-    const searchInput = await screen.findByPlaceholderText(/search commands/i);
+    const searchInput = await waitForCommandInput();
 
-    await globalThis.user.type(searchInput, 'dashboard');
+    fireEvent.change(searchInput, { target: { value: 'dashboard' } });
+    expect(searchInput).toHaveValue('dashboard');
     // Should filter to dashboard-related commands
   });
 });

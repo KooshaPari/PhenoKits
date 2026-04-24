@@ -5,7 +5,7 @@
  * Currently, the app uses OpenAPI/REST endpoints via apiClient.
  *
  * When TRPC backend is ready, this file will be updated to:
- * - Import actual AppRouter from @/server/trpc
+ * - Import actual AppRouter from the server trpc module
  * - Replace REST calls with type-safe TRPC procedures
  * - Enable real-time subscriptions
  */
@@ -58,6 +58,12 @@ export type AppRouter = {
     onItemUpdate: { useSubscription: (params: any, options?: any) => any };
     onLinkChange: { useSubscription: (params: any, options?: any) => any };
   };
+};
+
+type PlaceholderTRPCClient = AppRouter & {
+  createClient: (_config: unknown) => { links: never[] };
+  graph: Record<string, unknown>;
+  search: Record<string, unknown>;
 };
 
 // Placeholder TRPC React client - will be replaced when @trpc/react-query is properly configured
@@ -319,7 +325,7 @@ export const trpc = {
       }),
     },
   },
-} as any;
+} satisfies PlaceholderTRPCClient;
 
 /**
  * Placeholder TRPC client factory

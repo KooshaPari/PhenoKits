@@ -41,7 +41,7 @@ export function useKeyboardShortcuts(
   unregister: (id: string) => void;
 } {
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
-  const [_registeredShortcuts, setRegisteredShortcuts] = useState<RegisteredShortcut[]>([]);
+  const [registeredShortcuts, setRegisteredShortcuts] = useState<RegisteredShortcut[]>([]);
 
   // Add provided shortcuts to registry
   useEffect(() => {
@@ -67,7 +67,7 @@ export function useKeyboardShortcuts(
 
   const allShortcuts = useMemo(
     () =>
-      shortcutRegistry.map((item) => ({
+      registeredShortcuts.map((item) => ({
         alt: item.shortcut.alt,
         category: item.shortcut.category,
         context: item.shortcut.context,
@@ -77,7 +77,7 @@ export function useKeyboardShortcuts(
         meta: item.shortcut.meta,
         shift: item.shortcut.shift,
       })),
-    [],
+    [registeredShortcuts],
   );
 
   // Global keyboard listener

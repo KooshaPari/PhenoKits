@@ -83,27 +83,30 @@ export function GraphToolbar({
   visibleEdges = 0,
   onExport,
   variant = 'full',
-  onReset,
+  onReset: _onReset,
   className,
 }: GraphToolbarProps) {
-  const { fitView, zoomIn, zoomOut, getViewport } = useReactFlow();
+  const { fitView, zoomIn, zoomOut, getViewport, setViewport } = useReactFlow();
   const [showFilters, setShowFilters] = useState(false);
   const [showExport, setShowExport] = useState(false);
 
   // Zoom controls
-  const handleZoomIn = useCallback(() => {}, [zoomIn]);
+  const handleZoomIn = useCallback(() => {
+    void zoomIn();
+  }, [zoomIn]);
 
-  const handleZoomOut = useCallback(() => {}, [zoomOut]);
+  const handleZoomOut = useCallback(() => {
+    void zoomOut();
+  }, [zoomOut]);
 
-  const handleFitView = useCallback(() => {}, [fitView]);
+  const handleFitView = useCallback(() => {
+    void fitView();
+  }, [fitView]);
 
   const handleActualSize = useCallback(() => {
     const viewport = getViewport();
-    if (viewport) {
-      // Reset zoom to 1:1
-      undefined;
-    }
-  }, [fitView, getViewport]);
+    void setViewport({ x: viewport.x, y: viewport.y, zoom: 1 }, { duration: 0 });
+  }, [getViewport, setViewport]);
 
   // Export handler
   const handleExportClick = useCallback(

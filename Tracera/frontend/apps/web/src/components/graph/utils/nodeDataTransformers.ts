@@ -10,21 +10,66 @@ import type { RichNodeData } from '../RichNodePill';
 
 type NormalizedTestStatus = TestNodeData['lastRunStatus'];
 
-function normalizeTestStatus(status: TestItem['lastExecutionResult']): NormalizedTestStatus {
-  switch (status) {
-    case 'passed':
-    case 'failed':
-    case 'skipped':
-    case 'error': {
-      return status;
-    }
-    case 'blocked': {
-      return 'failed';
-    }
-    default: {
-      return undefined;
+const TEST_SAFETY_LEVELS = ['safe', 'quarantined', 'disabled'] as const;
+const TEST_EARS_PATTERN_TYPES = [
+  'ubiquitous',
+  'event_driven',
+  'state_driven',
+  'optional',
+  'unwanted',
+] as const;
+const TEST_RISK_LEVELS = ['low', 'medium', 'high', 'critical'] as const;
+const TEST_VERIFICATION_STATUSES = ['not_verified', 'partially_verified', 'verified'] as const;
+const TEST_BUSINESS_VALUES = ['low', 'medium', 'high', 'critical'] as const;
+
+function getMetadataString(metadata: Record<string, unknown>, key: string): string | undefined {
+  const value = metadata[key];
+  return typeof value === 'string' ? value : undefined;
+}
+
+function getMetadataNumber(metadata: Record<string, unknown>, key: string): number | undefined {
+  const value = metadata[key];
+  return typeof value === 'number' ? value : undefined;
+}
+
+function getMetadataEnum<T extends string>(
+  metadata: Record<string, unknown>,
+  key: string,
+  allowed: readonly T[],
+): T | undefined {
+  const value = metadata[key];
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+
+  for (const candidate of allowed) {
+    if (candidate === value) {
+      return candidate;
     }
   }
+
+  return undefined;
+}
+
+function normalizeTestStatus(status: TestItem['lastExecutionResult']): NormalizedTestStatus {
+  if (status === undefined) {
+    return undefined;
+  }
+
+  if (status === 'blocked') {
+    return 'failed';
+  }
+
+  if (
+    status === 'passed' ||
+    status === 'failed' ||
+    status === 'skipped' ||
+    status === 'error'
+  ) {
+    return status;
+  }
+
+  return undefined;
 }
 
 /**
@@ -50,15 +95,15 @@ function transformTestItem(item: TestItem): Partial<TestNodeData> {
   const metadata = item['metadata'] ?? {};
   const result: Partial<TestNodeData> = {};
 
-  const coveragePercent = metadata['coveragePercent'] as number | undefined;
+  const coveragePercent = getMetadataNumber(metadata, 'coveragePercent');
   if (coveragePercent !== undefined) result.coveragePercent = coveragePercent;
-  const flakinessScore = metadata['flakinessScore'] as number | undefined;
+  const flakinessScore = getMetadataNumber(metadata, 'flakinessScore');
   if (flakinessScore !== undefined) result.flakinessScore = flakinessScore;
-  const framework = metadata['framework'] as string | undefined;
+  const framework = getMetadataString(metadata, 'framework');
   if (framework !== undefined) result.framework = framework;
   const lastRunStatus = normalizeTestStatus(item['lastExecutionResult']);
   if (lastRunStatus !== undefined) result.lastRunStatus = lastRunStatus;
-  const safetyLevel = metadata['safetyLevel'] as 'safe' | 'quarantined' | 'disabled' | undefined;
+  const safetyLevel = getMetadataEnum(metadata, 'safetyLevel', TEST_SAFETY_LEVELS);
   if (safetyLevel !== undefined) result.safetyLevel = safetyLevel;
   if (item['testType'] !== undefined) result.testType = item['testType'];
 
@@ -73,25 +118,15 @@ function transformRequirementItem(item: RequirementItem): Partial<RequirementNod
   const { qualityMetrics } = item;
   const result: Partial<RequirementNodeData> = {};
 
-  const earsPatternType = metadata['earsPatternType'] as
-    | 'ubiquitous'
-    | 'event_driven'
-    | 'state_driven'
-    | 'optional'
-    | 'unwanted'
-    | undefined;
+  const earsPatternType = getMetadataEnum(metadata, 'earsPatternType', TEST_EARS_PATTERN_TYPES);
   if (earsPatternType !== undefined) result.earsPatternType = earsPatternType;
-  const riskLevel = metadata['riskLevel'] as 'low' | 'medium' | 'high' | 'critical' | undefined;
+  const riskLevel = getMetadataEnum(metadata, 'riskLevel', TEST_RISK_LEVELS);
   if (riskLevel !== undefined) result.riskLevel = riskLevel;
   if (qualityMetrics?.completenessScore !== undefined)
     result.verifiabilityScore = qualityMetrics.completenessScore;
-  const verificationStatus = metadata['verificationStatus'] as
-    | 'not_verified'
-    | 'partially_verified'
-    | 'verified'
-    | undefined;
+  const verificationStatus = getMetadataEnum(metadata, 'verificationStatus', TEST_VERIFICATION_STATUSES);
   if (verificationStatus !== undefined) result.verificationStatus = verificationStatus;
-  const wsjfScore = metadata['wsjfScore'] as number | undefined;
+  const wsjfScore = getMetadataNumber(metadata, 'wsjfScore');
   if (wsjfScore !== undefined) result.wsjfScore = wsjfScore;
 
   return result;
@@ -105,14 +140,18 @@ function transformEpicItem(item: EpicItem): Partial<EpicNodeData> {
   const result: Partial<EpicNodeData> = {};
 
   const businessValue = item['businessValue']
-    ? (item['businessValue'].toLowerCase() as 'low' | 'medium' | 'high' | 'critical')
-    : (metadata['businessValue'] as 'low' | 'medium' | 'high' | 'critical' | undefined);
+    ? getMetadataEnum(
+        { businessValue: item['businessValue'].toLowerCase() },
+        'businessValue',
+        TEST_BUSINESS_VALUES,
+      )
+    : getMetadataEnum(metadata, 'businessValue', TEST_BUSINESS_VALUES);
   if (businessValue !== undefined) result.businessValue = businessValue;
-  const completedStoryCount = metadata['completedStoryCount'] as number | undefined;
+  const completedStoryCount = getMetadataNumber(metadata, 'completedStoryCount');
   if (completedStoryCount !== undefined) result.completedStoryCount = completedStoryCount;
-  const storyCount = metadata['storyCount'] as number | undefined;
+  const storyCount = getMetadataNumber(metadata, 'storyCount');
   if (storyCount !== undefined) result.storyCount = storyCount;
-  const timelineProgress = metadata['timelineProgress'] as number | undefined;
+  const timelineProgress = getMetadataNumber(metadata, 'timelineProgress');
   if (timelineProgress !== undefined) result.timelineProgress = timelineProgress;
 
   return result;
@@ -142,21 +181,21 @@ export function itemToNodeData(
     return {
       ...baseData,
       ...transformTestItem(item),
-    } as TestNodeData;
+    };
   }
 
   if (isRequirementItem(item)) {
     return {
       ...baseData,
       ...transformRequirementItem(item),
-    } as RequirementNodeData;
+    };
   }
 
   if (isEpicItem(item)) {
     return {
       ...baseData,
       ...transformEpicItem(item),
-    } as EpicNodeData;
+    };
   }
 
   // Default: return as RichNodeData

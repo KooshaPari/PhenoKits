@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ReportsView } from '../../views/ReportsView';
 
@@ -20,7 +20,7 @@ vi.mock('../../api/endpoints', () => ({
 describe(ReportsView, () => {
   let queryClient: QueryClient;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     queryClient = new QueryClient({
       defaultOptions: {
         mutations: { retry: false },
@@ -28,6 +28,17 @@ describe(ReportsView, () => {
       },
     });
     vi.clearAllMocks();
+
+    const { api } = await import('../../api/endpoints');
+    vi.mocked(api.projects.list).mockResolvedValue([]);
+    vi.mocked(api.exportImport.export).mockResolvedValue(new Blob(['test'], { type: 'text/csv' }));
+    vi.spyOn(globalThis.URL, 'createObjectURL').mockReturnValue('blob:report');
+    vi.spyOn(globalThis.URL, 'revokeObjectURL').mockImplementation(() => {});
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it('renders reports interface', () => {
@@ -37,12 +48,12 @@ describe(ReportsView, () => {
       </QueryClientProvider>,
     );
 
-    expect(screen.getByText('Reports')).toBeInTheDocument();
-    // Use getAllByText since items appear in both templates and recent reports
-    expect(screen.getAllByText('Coverage Report').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Status Report').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Items Export').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Links Export').length).toBeGreaterThan(0);
+    expect(screen.getByText('Intelligence Hub')).toBeInTheDocument();
+    expect(screen.getByText('Traceability Matrix')).toBeInTheDocument();
+    expect(screen.getByText('Executive Summary')).toBeInTheDocument();
+    expect(screen.getByText('Entity Registry')).toBeInTheDocument();
+    expect(screen.getByText('Compliance Audit')).toBeInTheDocument();
+    expect(screen.getByText('Archive History')).toBeInTheDocument();
   });
 
   it('displays report templates', () => {
@@ -52,11 +63,10 @@ describe(ReportsView, () => {
       </QueryClientProvider>,
     );
 
-    // Use getAllByText for items that appear multiple times
-    expect(screen.getAllByText('Coverage Report').length).toBeGreaterThan(0);
-    expect(screen.getByText('Requirements to features traceability')).toBeInTheDocument();
-    expect(screen.getAllByText('Status Report').length).toBeGreaterThan(0);
-    expect(screen.getByText('Current project status overview')).toBeInTheDocument();
+    expect(screen.getByText('Traceability Matrix')).toBeInTheDocument();
+    expect(screen.getByText('End-to-end mapping from reqs to implementation.')).toBeInTheDocument();
+    expect(screen.getByText('Executive Summary')).toBeInTheDocument();
+    expect(screen.getByText('High-level project health and risk assessment.')).toBeInTheDocument();
   });
 
   it('displays format badges for each template', () => {
@@ -66,10 +76,10 @@ describe(ReportsView, () => {
       </QueryClientProvider>,
     );
 
-    // Format badges may appear multiple times for different templates
-    expect(screen.getAllByText('PDF').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('XLSX').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('CSV').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('pdf').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('xlsx').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('csv').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('json').length).toBeGreaterThan(0);
   });
 
   it('handles format selection', async () => {
@@ -80,17 +90,11 @@ describe(ReportsView, () => {
       </QueryClientProvider>,
     );
 
-    // Click on CSV badge for coverage report
-    const csvBadges = screen.getAllByText('CSV');
-    expect(csvBadges.length).toBeGreaterThan(0);
-    const firstCsv = csvBadges[0];
-    if (firstCsv) {
-      await user.click(firstCsv);
-    }
+    const csvBadges = screen.getAllByText('csv');
+    await user.click(csvBadges[0]);
 
-    // Format badge should still be present after click
     await waitFor(() => {
-      expect(screen.getAllByText('CSV').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('csv').length).toBeGreaterThan(0);
     });
   });
 
@@ -101,13 +105,13 @@ describe(ReportsView, () => {
       </QueryClientProvider>,
     );
 
-    expect(screen.getByText('Project (for JSON/CSV exports)')).toBeInTheDocument();
+    expect(screen.getByText('System-Wide Registry')).toBeInTheDocument();
   });
 
   it('generates report when button is clicked', async () => {
     const user = userEvent.setup();
     const { api } = await import('../../api/endpoints');
-    const mockBlob = new Blob(['test'], { type: 'application/json' });
+    const mockBlob = new Blob(['test'], { type: 'text/csv' });
     (api.exportImport.export as any).mockResolvedValue(mockBlob);
     (api.projects.list as any).mockResolvedValue([{ id: 'proj-1', name: 'Test Project' }]);
 
@@ -117,29 +121,15 @@ describe(ReportsView, () => {
       </QueryClientProvider>,
     );
 
-    // Select project
-    const projectSelect = document.querySelector('#project-select');
-    if (projectSelect) {
-      await user.click(projectSelect);
-      await user.click(screen.getByText('Test Project'));
-    }
+    await user.click(screen.getByRole('combobox'));
+    await user.click(await screen.findByRole('option', { name: 'Test Project' }));
 
-    // Select format (CSV)
-    const csvBadges = screen.getAllByText('CSV');
-    const firstCsv = csvBadges[0];
-    if (firstCsv) {
-      await user.click(firstCsv);
-    }
+    await user.click(screen.getAllByText('csv')[0]);
 
-    // Click generate button
-    const generateButtons = screen.getAllByText('Generate Report');
-    const generateBtn = generateButtons[0];
-    if (generateBtn) {
-      await user.click(generateBtn);
-    }
+    await user.click(screen.getAllByRole('button', { name: /Compile Engine/i })[0]);
 
     await waitFor(() => {
-      expect(api.exportImport.export).toHaveBeenCalled();
+      expect(api.exportImport.export).toHaveBeenCalledWith('proj-1', 'csv');
     });
   });
 
@@ -150,10 +140,9 @@ describe(ReportsView, () => {
       </QueryClientProvider>,
     );
 
-    expect(screen.getByText('Recent Reports')).toBeInTheDocument();
-    // Coverage Report appears multiple times, use getAllByText
-    expect(screen.getAllByText('Coverage Report').length).toBeGreaterThan(0);
-    expect(screen.getByText('Generated 2 hours ago')).toBeInTheDocument();
+    expect(screen.getByText('Archive History')).toBeInTheDocument();
+    expect(screen.getByText('Full Integrity Matrix')).toBeInTheDocument();
+    expect(screen.getByText('2h ago • PDF')).toBeInTheDocument();
   });
 
   it('shows loading state during report generation', async () => {
@@ -175,40 +164,16 @@ describe(ReportsView, () => {
       </QueryClientProvider>,
     );
 
-    // Select project
-    const projectSelect = document.querySelector('#project-select');
-    if (projectSelect) {
-      await user.click(projectSelect);
-      // Wait for dropdown to open
-      await waitFor(
-        () => {
-          const testProject = screen.queryByRole('option', {
-            name: 'Test Project',
-          });
-          if (testProject) {
-            return true;
-          }
-          throw new Error('Test Project option not found');
-        },
-        { timeout: 2000 },
-      );
+    await user.click(screen.getByRole('combobox'));
+    await user.click(await screen.findByRole('option', { name: 'Test Project' }));
 
-      const testProjectOption = screen.getByRole('option', {
-        name: 'Test Project',
-      });
-      await user.click(testProjectOption);
-    }
+    await user.click(screen.getAllByText('pdf')[0]);
 
-    const csvBadges = screen.getAllByText('CSV');
-    await user.click(csvBadges[0]);
+    const generateButton = screen.getAllByRole('button', { name: /Compile Engine/i })[0];
+    await user.click(generateButton);
 
-    // Click generate - the button should still be functional
-    const generateButtons = screen.getAllByText('Generate Report');
-    await user.click(generateButtons[0]);
-
-    // Simply verify the button was clicked and component is still rendered
     await waitFor(() => {
-      expect(screen.getByText('Reports')).toBeInTheDocument();
+      expect(generateButton).toBeDisabled();
     });
   });
 });

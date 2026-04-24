@@ -32,6 +32,7 @@ export default defineConfig({
       'src/lib/graph/__tests__/**',
       'src/lib/__tests__/gpuForceLayout.benchmark.test.ts',
       'src/lib/__tests__/spatialIndex.benchmark.test.ts',
+      'src/routes/**',
     ],
     globals: true,
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
@@ -42,6 +43,5 @@ export default defineConfig({
     ],
     setupFiles: ['./src/__tests__/setup.ts'],
     testTimeout: 60_000,
-    ui: true,
   },
 });

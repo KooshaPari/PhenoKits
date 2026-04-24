@@ -8,6 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CacheStatistics } from '../../lib/cache';
 import type { LODDistribution, PerformanceMetrics } from '../useGraphPerformanceMonitor';
 
+import { logger } from '../../lib/logger';
 import {
   createProfilerCallback,
   perfMark,
@@ -131,7 +132,7 @@ describe(useGraphPerformanceMonitor, () => {
       }),
     );
 
-    expect(result.current.currentMetrics).toBeNull();
+    expect(result.current.currentMetrics).toBeUndefined();
     expect(result.current.history).toEqual([]);
   });
 
@@ -148,7 +149,7 @@ describe(useGraphPerformanceMonitor, () => {
       }),
     );
 
-    expect(result.current.currentMetrics).toBeNull();
+    expect(result.current.currentMetrics).toBeUndefined();
   });
 
   it('should collect performance metrics', async () => {
@@ -165,13 +166,9 @@ describe(useGraphPerformanceMonitor, () => {
       }),
     );
 
-    // Wait for first report
-    await waitFor(
-      () => {
-        expect(result.current.currentMetrics).not.toBeNull();
-      },
-      { timeout: 200 },
-    );
+    act(() => {
+      result.current.reportMetrics();
+    });
 
     const metrics = result.current.currentMetrics!;
 
@@ -209,12 +206,9 @@ describe(useGraphPerformanceMonitor, () => {
       }),
     );
 
-    await waitFor(
-      () => {
-        expect(result.current.currentMetrics).not.toBeNull();
-      },
-      { timeout: 200 },
-    );
+    act(() => {
+      result.current.reportMetrics();
+    });
 
     const metrics = result.current.currentMetrics!;
 
@@ -236,12 +230,9 @@ describe(useGraphPerformanceMonitor, () => {
       }),
     );
 
-    await waitFor(
-      () => {
-        expect(result.current.currentMetrics).not.toBeNull();
-      },
-      { timeout: 200 },
-    );
+    act(() => {
+      result.current.reportMetrics();
+    });
 
     const metrics = result.current.currentMetrics!;
 
@@ -292,12 +283,9 @@ describe(useGraphPerformanceMonitor, () => {
       }),
     );
 
-    await waitFor(
-      () => {
-        expect(result.current.currentMetrics).not.toBeNull();
-      },
-      { timeout: 200 },
-    );
+    act(() => {
+      result.current.reportMetrics();
+    });
 
     const summary = result.current.getSummary();
     expect(summary).toContain('FPS:');
@@ -318,18 +306,15 @@ describe(useGraphPerformanceMonitor, () => {
       }),
     );
 
-    await waitFor(
-      () => {
-        expect(result.current.currentMetrics).not.toBeNull();
-      },
-      { timeout: 200 },
-    );
+    act(() => {
+      result.current.reportMetrics();
+    });
 
     act(() => {
       result.current.reset();
     });
 
-    expect(result.current.currentMetrics).toBeNull();
+    expect(result.current.currentMetrics).toBeUndefined();
     expect(result.current.history).toEqual([]);
   });
 
@@ -387,14 +372,25 @@ describe(useGraphPerformanceMonitor, () => {
 });
 
 describe(createProfilerCallback, () => {
+  let originalEnv: string | undefined;
+
+  beforeEach(() => {
+    originalEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'development';
+  });
+
+  afterEach(() => {
+    process.env.NODE_ENV = originalEnv;
+  });
+
   it('should create profiler callback that logs to console', () => {
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const loggerSpy = vi.spyOn(logger, 'info').mockImplementation(() => {});
 
     const callback = createProfilerCallback('TestComponent', true);
 
     callback('TestComponent', 'mount', 10, 8, 1000, 1010);
 
-    expect(consoleSpy).toHaveBeenCalledWith(
+    expect(loggerSpy).toHaveBeenCalledWith(
       expect.stringContaining('TestComponent'),
       expect.any(String),
       expect.objectContaining({
@@ -403,7 +399,7 @@ describe(createProfilerCallback, () => {
       }),
     );
 
-    consoleSpy.mockRestore();
+    loggerSpy.mockRestore();
   });
 
   it('should store profiler data in sessionStorage', () => {
@@ -418,10 +414,18 @@ describe(createProfilerCallback, () => {
 });
 
 describe(perfMark, () => {
+  let originalEnv: string | undefined;
+
   beforeEach(() => {
+    originalEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'development';
     vi.spyOn(performance, 'mark').mockImplementation(() => ({}) as any);
     vi.spyOn(performance, 'measure').mockImplementation(() => ({}) as any);
     vi.spyOn(performance, 'getEntriesByName').mockReturnValue([{ duration: 42 } as any]);
+  });
+
+  afterEach(() => {
+    process.env.NODE_ENV = originalEnv;
   });
 
   it('should create performance marks', () => {
@@ -451,6 +455,7 @@ describe(perfMark, () => {
     process.env.NODE_ENV = 'production';
 
     const markSpy = vi.spyOn(performance, 'mark');
+    markSpy.mockClear();
 
     perfMark.start('test-operation');
     perfMark.end('test-operation');

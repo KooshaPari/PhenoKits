@@ -8,7 +8,6 @@ import { useAuthStore } from '@/stores/auth-store';
 
 const Login = () => {
   const redirectToAuthKit = useAuthStore((state) => state.redirectToAuthKit);
-  const isLoading = useAuthStore((state) => state.isLoading);
 
   useEffect(() => {
     const redirect = async () => {
@@ -20,7 +19,7 @@ const Login = () => {
       }
     };
 
-    redirect();
+    void redirect();
   }, [redirectToAuthKit]);
 
   return (

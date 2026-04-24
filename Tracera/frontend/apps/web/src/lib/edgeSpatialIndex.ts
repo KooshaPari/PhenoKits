@@ -14,7 +14,6 @@
 
 import {
   clipLineCohenSutherland,
-  lineIntersectsRectFast,
   type LineSegment,
   type Rectangle,
 } from './cohenSutherlandClipping';
@@ -226,9 +225,6 @@ export class EdgeSpatialIndex {
    * @returns Edges within distance
    */
   queryByDistance(viewport: ViewportBounds, maxDistance: number): EdgeVisibilityResult[] {
-    const centerX = (viewport.minX + viewport.maxX) / 2;
-    const centerY = (viewport.minY + viewport.maxY) / 2;
-
     // Query all potentially visible edges
     const allEdges = this.queryWithVisibility(viewport);
 

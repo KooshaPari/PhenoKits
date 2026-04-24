@@ -51,7 +51,7 @@ const safeErrorMessage = (error: unknown): string => {
 
 const safeJsonParse = <T = unknown>(value: string): T | undefined => {
   try {
-    return JSON.parse(value) as T;
+    return JSON.parse(value);
   } catch (error) {
     logger.warn(`[ExportImportWorker] Failed to parse JSON: ${value}`, error);
     return undefined;
@@ -131,7 +131,7 @@ const parseJSON = <T = unknown>(json: string, onProgress?: ProgressCallback): T 
   reportProgress(onProgress, PROGRESS_START);
 
   try {
-    const parsed = JSON.parse(json) as T;
+    const parsed = JSON.parse(json);
     reportProgress(onProgress, PROGRESS_COMPLETE);
     return parsed;
   } catch (error) {
@@ -271,11 +271,38 @@ const escapeCsvValue = (value: unknown, delimiter: string): string => {
   if (value === null || value === undefined) {
     return '';
   }
-  const str = String(value);
-  if (str.includes(delimiter) || str.includes('\n') || str.includes('"')) {
-    return `"${str.replaceAll('"', '""')}"`;
+
+  if (typeof value === 'object') {
+    const json = safeJsonStringify(value);
+    if (json !== undefined) {
+      return json;
+    }
+    return Object.prototype.toString.call(value);
   }
-  return str;
+
+  if (typeof value === 'string') {
+    const str = value;
+    if (str.includes(delimiter) || str.includes('\n') || str.includes('"')) {
+      return `"${str.replaceAll('"', '""')}"`;
+    }
+    return str;
+  }
+
+  if (
+    typeof value === 'number' ||
+    typeof value === 'boolean' ||
+    typeof value === 'bigint' ||
+    typeof value === 'symbol' ||
+    typeof value === 'function'
+  ) {
+    const str = String(value);
+    if (str.includes(delimiter) || str.includes('\n') || str.includes('"')) {
+      return `"${str.replaceAll('"', '""')}"`;
+    }
+    return str;
+  }
+
+  return '';
 };
 
 /**
@@ -400,7 +427,7 @@ const validateItem = (
  * Validate data against schema
  */
 const validateData = <T = unknown>(
-  data: unknown[],
+  data: readonly T[],
   schema: ValidationSchema,
   onProgress?: ProgressCallback,
 ): {
@@ -417,11 +444,15 @@ const validateData = <T = unknown>(
 
     for (let itemIndex = startIndex; itemIndex < endIndex; itemIndex += ONE) {
       const item = data[itemIndex];
+      if (item === undefined) {
+        invalid.push({ errors: ['Item must be an object'], item });
+        continue;
+      }
       const { errors, isValid } = validateItem(item, schema);
       if (!isValid) {
         invalid.push({ errors, item });
       } else {
-        valid.push(item as T);
+        valid.push(item);
       }
     }
 
@@ -435,14 +466,14 @@ const validateData = <T = unknown>(
 /**
  * Transform data using mapping rules
  */
-const transformData = <T = unknown, R = unknown>(
-  data: T[],
+const transformData = <T extends Record<string, unknown>>(
+  data: readonly T[],
   mapping: Record<string, string | ((value: T) => unknown)>,
   onProgress?: ProgressCallback,
-): R[] => {
+): Record<string, unknown>[] => {
   reportProgress(onProgress, PROGRESS_START);
 
-  const result: R[] = [];
+  const result: Record<string, unknown>[] = [];
 
   for (let startIndex = ZERO; startIndex < data.length; startIndex += CHUNK_SIZE) {
     const endIndex = Math.min(startIndex + CHUNK_SIZE, data.length);
@@ -458,11 +489,11 @@ const transformData = <T = unknown, R = unknown>(
         if (typeof sourceKeyOrFn === 'function') {
           transformed[targetKey] = sourceKeyOrFn(item);
         } else {
-          transformed[targetKey] = (item as Record<string, unknown>)[sourceKeyOrFn];
+          transformed[targetKey] = item[sourceKeyOrFn];
         }
       }
 
-      result.push(transformed as R);
+      result.push(transformed);
     }
 
     reportProgress(onProgress, calculateProgress(endIndex, data.length));

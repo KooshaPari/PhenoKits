@@ -307,8 +307,8 @@ describe('DashboardView', () => {
       const links = screen.getAllByRole('link');
       const projectLinks = links.filter(
         (link) =>
-          link.getAttribute('href')?.startsWith('/projects/p1') ??
-          link.getAttribute('href')?.startsWith('/projects/p2') ??
+          link.getAttribute('href')?.startsWith('/projects/p1') ||
+          link.getAttribute('href')?.startsWith('/projects/p2') ||
           link.getAttribute('href')?.startsWith('/projects/p3'),
       );
       expect(projectLinks.length).toBeGreaterThanOrEqual(3);

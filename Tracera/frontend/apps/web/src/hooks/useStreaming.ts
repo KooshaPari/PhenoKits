@@ -9,13 +9,22 @@ import type { Item } from '../api/types';
 import type { NDJSONMetadata, StreamingStats } from '../lib/ndjson-parser';
 
 import {
-  createCancellableExportStream,
-  createCancellableGraphStream,
-  createCancellableItemStream,
   streamExport,
   streamGraph,
   streamItems,
 } from '../api/streaming';
+
+const toError = (value: unknown): Error => {
+  if (value instanceof Error) {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    return new Error(value);
+  }
+
+  return new Error('Unknown streaming error');
+};
 
 export interface StreamingState {
   isStreaming: boolean;
@@ -105,7 +114,7 @@ export function useStreamItems(): UseStreamItemsResult {
       setState((prev) => ({
         ...prev,
         isStreaming: false,
-        error: error as Error,
+        error: toError(error),
       }));
     }
   }, []);
@@ -202,8 +211,8 @@ export function useStreamGraph(): UseStreamGraphResult {
         },
       };
 
-      const receivedNodes: Record<string, unknown>[] = [];
-      const receivedEdges: Record<string, unknown>[] = [];
+      const receivedNodes: unknown[] = [];
+      const receivedEdges: unknown[] = [];
 
       for await (const item of streamGraph(graphId, streamOptions)) {
         if (abortControllerRef.current?.signal.aborted) {
@@ -211,12 +220,12 @@ export function useStreamGraph(): UseStreamGraphResult {
         }
 
         if (item.type === 'node') {
-          receivedNodes.push(item.data as Record<string, unknown>);
+          receivedNodes.push(item.data);
           if (receivedNodes.length % 10 === 0) {
             setNodes([...receivedNodes]);
           }
         } else if (item.type === 'edge') {
-          receivedEdges.push(item.data as Record<string, unknown>);
+          receivedEdges.push(item.data);
           if (receivedEdges.length % 10 === 0) {
             setEdges([...receivedEdges]);
           }
@@ -235,7 +244,7 @@ export function useStreamGraph(): UseStreamGraphResult {
       setState((prev) => ({
         ...prev,
         isStreaming: false,
-        error: error as Error,
+        error: toError(error),
       }));
     }
   }, []);
@@ -330,14 +339,14 @@ export function useStreamExport(): UseStreamExportResult {
         },
       };
 
-      const receivedData: Record<string, unknown>[] = [];
+      const receivedData: unknown[] = [];
 
       for await (const item of streamExport(streamOptions)) {
         if (abortControllerRef.current?.signal.aborted) {
           break;
         }
 
-        receivedData.push(item as Record<string, unknown>);
+        receivedData.push(item);
 
         if (receivedData.length % 10 === 0) {
           setData([...receivedData]);
@@ -354,7 +363,7 @@ export function useStreamExport(): UseStreamExportResult {
       setState((prev) => ({
         ...prev,
         isStreaming: false,
-        error: error as Error,
+        error: toError(error),
       }));
     }
   }, []);

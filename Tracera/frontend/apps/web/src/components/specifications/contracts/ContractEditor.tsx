@@ -38,6 +38,44 @@ interface ContractEditorProps {
 }
 
 const contractTypes: ContractType[] = ['api', 'function', 'invariant', 'data', 'integration'];
+const conditionTypes = ['preconditions', 'postconditions', 'invariants'] as const;
+
+type ConditionType = (typeof conditionTypes)[number];
+
+const isContractType = (value: string): value is ContractType => {
+  switch (value) {
+    case 'api':
+    case 'function':
+    case 'invariant':
+    case 'data':
+    case 'integration':
+      return true;
+    default:
+      return false;
+  }
+};
+
+const isSpecLanguage = (value: string): value is NonNullable<Contract['specLanguage']> => {
+  switch (value) {
+    case 'typescript':
+    case 'python':
+    case 'gherkin':
+      return true;
+    default:
+      return false;
+  }
+};
+
+const getConditions = (contract: Partial<Contract>, type: ConditionType): ContractCondition[] => {
+  switch (type) {
+    case 'preconditions':
+      return contract.preconditions ?? [];
+    case 'postconditions':
+      return contract.postconditions ?? [];
+    case 'invariants':
+      return contract.invariants ?? [];
+  }
+};
 
 export function ContractEditor({ initialData, onSave, onCancel }: ContractEditorProps) {
   const [formData, setFormData] = useState<Partial<Contract>>({
@@ -71,17 +109,17 @@ export function ContractEditor({ initialData, onSave, onCancel }: ContractEditor
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const addCondition = (type: 'preconditions' | 'postconditions' | 'invariants') => {
+  const addCondition = (type: ConditionType) => {
     if (!newCondition.description?.trim()) {
       return;
     }
 
-    const condition = {
+    const condition: ContractCondition = {
       description: newCondition.description,
       expression: newCondition.expression,
       id: `cond_${Date.now()}`,
       isRequired: newCondition.isRequired ?? true,
-    } as ContractCondition;
+    };
 
     setFormData((prev) => ({
       ...prev,
@@ -91,7 +129,7 @@ export function ContractEditor({ initialData, onSave, onCancel }: ContractEditor
     setNewCondition({ description: '', expression: '', isRequired: true });
   };
 
-  const removeCondition = (type: 'preconditions' | 'postconditions' | 'invariants', id: string) => {
+  const removeCondition = (type: ConditionType, id: string) => {
     setFormData((prev) => ({
       ...prev,
       [type]: prev[type]?.filter((c) => c.id !== id) ?? [],
@@ -123,14 +161,14 @@ export function ContractEditor({ initialData, onSave, onCancel }: ContractEditor
       return;
     }
 
-    const transition = {
+    const transition: ContractTransition = {
       actions: newTransition.actions,
       fromState: newTransition.fromState,
       guards: newTransition.guards,
       id: `trans_${Date.now()}`,
       toState: newTransition.toState,
       trigger: newTransition.trigger,
-    } as ContractTransition;
+    };
 
     setFormData((prev) => ({
       ...prev,
@@ -194,7 +232,9 @@ export function ContractEditor({ initialData, onSave, onCancel }: ContractEditor
               <Select
                 value={formData.contractType ?? 'function'}
                 onValueChange={(value) => {
-                  handleChange('contractType', value as ContractType);
+                  if (isContractType(value)) {
+                    handleChange('contractType', value);
+                  }
                 }}
               >
                 <SelectTrigger id='contractType'>
@@ -238,14 +278,16 @@ export function ContractEditor({ initialData, onSave, onCancel }: ContractEditor
               </TabsTrigger>
             </TabsList>
 
-            {['preconditions', 'postconditions', 'invariants'].map((conditionType) => (
-              <TabsContent key={conditionType} value={conditionType} className='mt-4 space-y-4'>
-                {/* Existing Conditions */}
-                <div className='space-y-2'>
-                  <h4 className='text-sm font-semibold'>Existing Conditions</h4>
-                  <AnimatePresence mode='popLayout'>
-                    {(formData[conditionType as keyof Contract] as ContractCondition[])?.map(
-                      (condition) => (
+            {conditionTypes.map((conditionType) => {
+              const conditions = getConditions(formData, conditionType);
+
+              return (
+                <TabsContent key={conditionType} value={conditionType} className='mt-4 space-y-4'>
+                  {/* Existing Conditions */}
+                  <div className='space-y-2'>
+                    <h4 className='text-sm font-semibold'>Existing Conditions</h4>
+                    <AnimatePresence mode='popLayout'>
+                      {conditions.map((condition) => (
                         <motion.div
                           key={condition.id}
                           initial={{ opacity: 0, y: -10 }}
@@ -260,13 +302,7 @@ export function ContractEditor({ initialData, onSave, onCancel }: ContractEditor
                               variant='ghost'
                               size='sm'
                               onClick={() => {
-                                removeCondition(
-                                  conditionType as
-                                    | 'preconditions'
-                                    | 'postconditions'
-                                    | 'invariants',
-                                  condition.id,
-                                );
+                                removeCondition(conditionType, condition.id);
                               }}
                             >
                               <Trash2 className='text-destructive h-4 w-4' />
@@ -285,73 +321,71 @@ export function ContractEditor({ initialData, onSave, onCancel }: ContractEditor
                             )}
                           </div>
                         </motion.div>
-                      ),
-                    )}
-                  </AnimatePresence>
-                </div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
 
-                {/* Add New Condition */}
-                <div className='space-y-3 border-t pt-4'>
-                  <h4 className='text-sm font-semibold'>Add New Condition</h4>
-                  <div className='space-y-2'>
-                    <Label>Description</Label>
-                    <Input
-                      placeholder='Describe this condition...'
-                      value={newCondition.description}
-                      onChange={(e) => {
-                        setNewCondition((prev) => ({
-                          ...prev,
-                          description: e.target.value,
-                        }));
+                  {/* Add New Condition */}
+                  <div className='space-y-3 border-t pt-4'>
+                    <h4 className='text-sm font-semibold'>Add New Condition</h4>
+                    <div className='space-y-2'>
+                      <Label>Description</Label>
+                      <Input
+                        placeholder='Describe this condition...'
+                        value={newCondition.description}
+                        onChange={(e) => {
+                          setNewCondition((prev) => ({
+                            ...prev,
+                            description: e.target.value,
+                          }));
+                        }}
+                      />
+                    </div>
+                    <div className='space-y-2'>
+                      <Label>Expression (optional)</Label>
+                      <Textarea
+                        placeholder="e.g., array.length > 0 && typeof array[0] === 'number'"
+                        className='min-h-[60px] font-mono text-xs'
+                        value={newCondition.expression}
+                        onChange={(e) => {
+                          setNewCondition((prev) => ({
+                            ...prev,
+                            expression: e.target.value,
+                          }));
+                        }}
+                      />
+                    </div>
+                    <div className='flex items-center gap-2'>
+                      <input
+                        type='checkbox'
+                        id='isRequired'
+                        checked={newCondition.isRequired ?? true}
+                        onChange={(e) => {
+                          setNewCondition((prev) => ({
+                            ...prev,
+                            isRequired: e.target.checked,
+                          }));
+                        }}
+                      />
+                      <Label htmlFor='isRequired' className='font-normal'>
+                        Required
+                      </Label>
+                    </div>
+                    <Button
+                      type='button'
+                      size='sm'
+                      variant='outline'
+                      onClick={() => {
+                        addCondition(conditionType);
                       }}
-                    />
+                    >
+                      <Plus className='mr-2 h-4 w-4' />
+                      Add Condition
+                    </Button>
                   </div>
-                  <div className='space-y-2'>
-                    <Label>Expression (optional)</Label>
-                    <Textarea
-                      placeholder="e.g., array.length > 0 && typeof array[0] === 'number'"
-                      className='min-h-[60px] font-mono text-xs'
-                      value={newCondition.expression}
-                      onChange={(e) => {
-                        setNewCondition((prev) => ({
-                          ...prev,
-                          expression: e.target.value,
-                        }));
-                      }}
-                    />
-                  </div>
-                  <div className='flex items-center gap-2'>
-                    <input
-                      type='checkbox'
-                      id='isRequired'
-                      checked={newCondition.isRequired ?? true}
-                      onChange={(e) => {
-                        setNewCondition((prev) => ({
-                          ...prev,
-                          isRequired: e.target.checked,
-                        }));
-                      }}
-                    />
-                    <Label htmlFor='isRequired' className='font-normal'>
-                      Required
-                    </Label>
-                  </div>
-                  <Button
-                    type='button'
-                    size='sm'
-                    variant='outline'
-                    onClick={() => {
-                      addCondition(
-                        conditionType as 'preconditions' | 'postconditions' | 'invariants',
-                      );
-                    }}
-                  >
-                    <Plus className='mr-2 h-4 w-4' />
-                    Add Condition
-                  </Button>
-                </div>
-              </TabsContent>
-            ))}
+                </TabsContent>
+              );
+            })}
           </Tabs>
 
           {/* State Machine */}
@@ -554,7 +588,9 @@ export function ContractEditor({ initialData, onSave, onCancel }: ContractEditor
             <Select
               value={formData.specLanguage ?? 'typescript'}
               onValueChange={(value) => {
-                handleChange('specLanguage', value as 'typescript' | 'python' | 'gherkin');
+                if (isSpecLanguage(value)) {
+                  handleChange('specLanguage', value);
+                }
               }}
             >
               <SelectTrigger id='specLanguage'>

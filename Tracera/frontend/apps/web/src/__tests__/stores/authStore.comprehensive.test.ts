@@ -9,17 +9,29 @@ import type { User } from '../../stores/authStore';
 
 import { useAuthStore } from '../../stores/authStore';
 
+const mockFetch = vi.fn();
+globalThis.fetch = mockFetch as unknown as typeof fetch;
+const TEST_TOKEN = 'test-token';
+const TEST_REFRESH_TOKEN = 'refresh-token';
+
 describe('AuthStore', () => {
   beforeEach(() => {
+    useAuthStore.getState().stopAutoRefresh();
     // Reset store before each test
     useAuthStore.setState({
+      account: null,
+      authKitRefreshToken: null,
       isAuthenticated: false,
       isLoading: false,
+      refreshTimer: null,
       token: null,
       user: null,
     });
     // Clear localStorage
     localStorage.clear();
+    sessionStorage.clear();
+    mockFetch.mockReset();
+    globalThis.fetch = mockFetch as unknown as typeof fetch;
   });
 
   const mockUser: User = {
@@ -150,117 +162,120 @@ describe('AuthStore', () => {
     });
   });
 
-  describe('login', () => {
+  function mockAuthKitCallback(user: User = mockUser, token = TEST_TOKEN): void {
+    mockFetch.mockResolvedValueOnce({
+      json: async () => ({
+        refresh_token: TEST_REFRESH_TOKEN,
+        token,
+        user,
+      }),
+      ok: true,
+    } as Response);
+  }
+
+  describe('loginWithCode', () => {
     it('should set loading state during login', async () => {
-      const { login } = useAuthStore.getState();
+      mockAuthKitCallback();
+      const { loginWithCode } = useAuthStore.getState();
 
-      // Note: In the mock implementation, login completes synchronously
-      // So we can only verify the final state after completion
-      await login('test@example.com', 'password');
+      await loginWithCode('auth-code', 'auth-state');
 
-      // Loading should be false after completion
       expect(useAuthStore.getState().isLoading).toBeFalsy();
-      // User should be set after successful login
       expect(useAuthStore.getState().user).not.toBeNull();
     });
 
     it('should set user and token on successful login', async () => {
-      const { login } = useAuthStore.getState();
-      await login('test@example.com', 'password');
+      mockAuthKitCallback();
+      const { loginWithCode } = useAuthStore.getState();
+      await loginWithCode('auth-code', 'auth-state');
 
       const { user, token, isAuthenticated } = useAuthStore.getState();
       expect(user).not.toBeNull();
       expect(user?.email).toBe('test@example.com');
-      expect(token).not.toBeNull();
+      expect(token).toBe(TEST_TOKEN);
       expect(isAuthenticated).toBeTruthy();
     });
 
-    it('should derive username from email', async () => {
-      const { login } = useAuthStore.getState();
-      await login('john.doe@example.com', 'password');
+    it('should persist callback user fields unchanged', async () => {
+      const authUser = { email: 'john.doe@example.com', id: 'user-2', name: 'John Doe' };
+      mockAuthKitCallback(authUser);
+      const { loginWithCode } = useAuthStore.getState();
+      await loginWithCode('auth-code', 'auth-state');
 
       const { user } = useAuthStore.getState();
-      expect(user?.name).toBe('john.doe');
+      expect(user).toEqual(authUser);
     });
 
     it('should handle login errors', async () => {
-      // This is a mock implementation, so it doesn't actually fail
-      // But in a real implementation, we'd test error handling
-      const { login } = useAuthStore.getState();
+      mockFetch.mockResolvedValueOnce({
+        json: async () => ({ error: 'Invalid code' }),
+        ok: false,
+        status: 401,
+      } as Response);
+      const { loginWithCode } = useAuthStore.getState();
 
-      await expect(login('test@example.com', 'password')).resolves.toBeUndefined();
+      await expect(loginWithCode('bad-code', 'auth-state')).rejects.toThrow('Invalid code: 401');
+      expect(useAuthStore.getState().isAuthenticated).toBeFalsy();
     });
 
     it('should clear loading state on error', async () => {
-      // Mock a failing login by temporarily replacing the login function
-      const originalLogin = useAuthStore.getState().login;
+      const { loginWithCode } = useAuthStore.getState();
 
-      useAuthStore.setState({
-        login: async () => {
-          useAuthStore.setState({ isLoading: true });
-          try {
-            throw new Error('Login failed');
-          } finally {
-            useAuthStore.setState({ isLoading: false });
-          }
-        },
-      });
-
-      await expect(useAuthStore.getState().login('test@example.com', 'wrong')).rejects.toThrow();
+      await expect(loginWithCode('', 'auth-state')).rejects.toThrow(
+        'Authorization code and state are required',
+      );
       expect(useAuthStore.getState().isLoading).toBeFalsy();
-
-      // Restore original
-      useAuthStore.setState({ login: originalLogin });
     });
 
     it('should persist token to localStorage', async () => {
-      const { login } = useAuthStore.getState();
-      await login('test@example.com', 'password');
+      mockAuthKitCallback();
+      const { loginWithCode } = useAuthStore.getState();
+      await loginWithCode('auth-code', 'auth-state');
 
-      expect(localStorage.getItem('auth_token')).not.toBeNull();
+      expect(localStorage.getItem('auth_token')).toBe(TEST_TOKEN);
     });
   });
 
   describe('logout', () => {
-    it('should clear user', () => {
+    it('should clear user', async () => {
       const { setUser, logout } = useAuthStore.getState();
       setUser(mockUser);
-      void logout();
+      await logout();
 
       const { user } = useAuthStore.getState();
       expect(user).toBeNull();
     });
 
-    it('should clear token', () => {
+    it('should clear token', async () => {
       const { setToken, logout } = useAuthStore.getState();
       setToken('test-token');
-      void logout();
+      await logout();
 
       const { token } = useAuthStore.getState();
       expect(token).toBeNull();
     });
 
-    it('should set isAuthenticated to false', () => {
+    it('should set isAuthenticated to false', async () => {
       const { setUser, logout } = useAuthStore.getState();
       setUser(mockUser);
-      void logout();
+      await logout();
 
       const { isAuthenticated } = useAuthStore.getState();
       expect(isAuthenticated).toBeFalsy();
     });
 
-    it('should remove token from localStorage', () => {
+    it('should remove token from localStorage', async () => {
       const { setToken, logout } = useAuthStore.getState();
       setToken('test-token');
-      void logout();
+      await logout();
 
       expect(localStorage.getItem('auth_token')).toBeNull();
     });
 
-    it('should handle logout when already logged out', () => {
+    it('should handle logout when already logged out', async () => {
       const { logout } = useAuthStore.getState();
 
-      expect(async () => logout()).not.toThrow();
+      await expect(logout()).resolves.toBeUndefined();
 
       const { user, token, isAuthenticated } = useAuthStore.getState();
       expect(user).toBeNull();
@@ -276,14 +291,18 @@ describe('AuthStore', () => {
       await expect(refreshToken()).resolves.not.toThrow();
     });
 
-    it('should log message about not being implemented', async () => {
-      const consoleSpy = vi.spyOn(console, 'log');
+    it('should refresh token when a refresh token is available', async () => {
+      useAuthStore.setState({ authKitRefreshToken: TEST_REFRESH_TOKEN });
+      mockFetch.mockResolvedValueOnce({
+        json: async () => ({ refresh_token: 'next-refresh-token', token: 'next-token' }),
+        ok: true,
+      } as Response);
       const { refreshToken } = useAuthStore.getState();
 
       await refreshToken();
 
-      expect(consoleSpy).toHaveBeenCalledWith('Token refresh not implemented yet');
-      consoleSpy.mockRestore();
+      expect(useAuthStore.getState().token).toBe('next-token');
+      expect(useAuthStore.getState().authKitRefreshToken).toBe('next-refresh-token');
     });
   });
 
@@ -405,11 +424,12 @@ describe('AuthStore', () => {
     });
 
     it('should handle concurrent login/logout', async () => {
-      const { login, logout } = useAuthStore.getState();
+      mockAuthKitCallback();
+      const { loginWithCode, logout } = useAuthStore.getState();
 
-      const loginPromise = login('test@example.com', 'password');
+      const loginPromise = loginWithCode('auth-code', 'auth-state');
       await loginPromise;
-      void logout();
+      await logout();
 
       // State should reflect the last operation
       const { user, isAuthenticated } = useAuthStore.getState();
@@ -456,18 +476,20 @@ describe('AuthStore', () => {
     });
 
     it('should handle special characters in email', async () => {
-      const { login } = useAuthStore.getState();
-      await login('test+tag@example.com', 'password');
+      const authUser = { email: 'test+tag@example.com', id: 'user-special' };
+      mockAuthKitCallback(authUser);
+      const { loginWithCode } = useAuthStore.getState();
+      await loginWithCode('auth-code', 'auth-state');
 
       const { user } = useAuthStore.getState();
       expect(user?.email).toBe('test+tag@example.com');
-      expect(user?.name).toBe('test+tag');
     });
 
     it('should handle very long email', async () => {
-      const { login } = useAuthStore.getState();
       const longEmail = `${'a'.repeat(50)}@example.com`;
-      await login(longEmail, 'password');
+      mockAuthKitCallback({ email: longEmail, id: 'user-long-email' });
+      const { loginWithCode } = useAuthStore.getState();
+      await loginWithCode('auth-code', 'auth-state');
 
       const { user } = useAuthStore.getState();
       expect(user?.email).toBe(longEmail);

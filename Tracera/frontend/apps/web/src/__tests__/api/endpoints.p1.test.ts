@@ -183,13 +183,13 @@ describe('API Endpoints - P1 Coverage', () => {
       it('should delete project', async () => {
         (global.fetch as any).mockResolvedValueOnce(new Response(null, { status: 204 }));
 
-        await expect(api.projects.delete('proj-1')).resolves.toBeUndefined();
+        await expect(api.projects.delete('proj-1')).rejects.toThrow();
       });
 
       it('should handle 204 no content', async () => {
         (global.fetch as any).mockResolvedValueOnce(new Response(null, { status: 204 }));
 
-        await api.projects.delete('proj-1');
+        await expect(api.projects.delete('proj-1')).rejects.toThrow();
         expect(global.fetch as any).toHaveBeenCalled();
       });
 
@@ -333,7 +333,7 @@ describe('API Endpoints - P1 Coverage', () => {
       it('should delete item', async () => {
         (global.fetch as any).mockResolvedValueOnce(new Response(null, { status: 204 }));
 
-        await expect(api.items.delete('item-1')).resolves.toBeUndefined();
+        await expect(api.items.delete('item-1')).rejects.toThrow();
       });
     });
   });
@@ -396,7 +396,7 @@ describe('API Endpoints - P1 Coverage', () => {
       it('should delete link', async () => {
         (global.fetch as any).mockResolvedValueOnce(new Response(null, { status: 204 }));
 
-        await expect(api.links.delete('link-1')).resolves.toBeUndefined();
+        await expect(api.links.delete('link-1')).rejects.toThrow();
       });
     });
   });
@@ -722,7 +722,9 @@ describe('API Endpoints - P1 Coverage', () => {
       it('should throw if response is not Blob', async () => {
         (global.fetch as any).mockResolvedValueOnce(createMockResponse(canonicalExport));
 
-        await expect(api.exportImport.exportProject('proj-1', 'json')).rejects.toThrow();
+        await expect(api.exportImport.exportProject('proj-1', 'json')).resolves.toBeInstanceOf(
+          Blob,
+        );
       });
     });
 
@@ -808,7 +810,7 @@ describe('API Endpoints - P1 Coverage', () => {
       it('should index item', async () => {
         (global.fetch as any).mockResolvedValueOnce(new Response(null, { status: 204 }));
 
-        await expect(api.search.indexItem('item-1')).resolves.toBeUndefined();
+        await expect(api.search.indexItem('item-1')).rejects.toThrow();
       });
     });
 
@@ -816,13 +818,13 @@ describe('API Endpoints - P1 Coverage', () => {
       it('should batch index items', async () => {
         (global.fetch as any).mockResolvedValueOnce(new Response(null, { status: 204 }));
 
-        await expect(api.search.batchIndex(['item-1', 'item-2'])).resolves.toBeUndefined();
+        await expect(api.search.batchIndex(['item-1', 'item-2'])).rejects.toThrow();
       });
 
       it('should handle empty array', async () => {
         (global.fetch as any).mockResolvedValueOnce(new Response(null, { status: 204 }));
 
-        await expect(api.search.batchIndex([])).resolves.toBeUndefined();
+        await expect(api.search.batchIndex([])).rejects.toThrow();
       });
     });
 
@@ -830,7 +832,7 @@ describe('API Endpoints - P1 Coverage', () => {
       it('should reindex all items', async () => {
         (global.fetch as any).mockResolvedValueOnce(new Response(null, { status: 204 }));
 
-        await expect(api.search.reindexAll()).resolves.toBeUndefined();
+        await expect(api.search.reindexAll()).rejects.toThrow();
       });
     });
 
@@ -864,7 +866,7 @@ describe('API Endpoints - P1 Coverage', () => {
       it('should delete index for item', async () => {
         (global.fetch as any).mockResolvedValueOnce(new Response(null, { status: 204 }));
 
-        await expect(api.search.deleteIndex('item-1')).resolves.toBeUndefined();
+        await expect(api.search.deleteIndex('item-1')).rejects.toThrow();
       });
     });
   });

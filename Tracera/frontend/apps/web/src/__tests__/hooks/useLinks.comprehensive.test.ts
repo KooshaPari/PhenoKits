@@ -4,15 +4,17 @@
  */
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useCreateLink, useDeleteLink, useLinks, useTraceabilityGraph } from '../../hooks/useLinks';
+import { useAuthStore } from '../../stores/authStore';
 
 // Mock fetch
 const mockFetch = vi.fn();
 globalThis.fetch = mockFetch as unknown as typeof fetch;
+const TEST_TOKEN = 'test-token';
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -28,7 +30,17 @@ const createWrapper = () => {
 
 describe('useLinks - Comprehensive Coverage', () => {
   beforeEach(() => {
+    globalThis.fetch = mockFetch as unknown as typeof fetch;
     vi.clearAllMocks();
+    act(() => {
+      useAuthStore.setState({ token: TEST_TOKEN } as any);
+    });
+  });
+
+  afterEach(() => {
+    act(() => {
+      useAuthStore.setState({ token: null } as any);
+    });
   });
 
   describe(useLinks, () => {
@@ -69,33 +81,37 @@ describe('useLinks - Comprehensive Coverage', () => {
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('project_id=proj-1'),
         expect.objectContaining({
-          headers: {
+          headers: expect.objectContaining({
+            Authorization: `Bearer ${TEST_TOKEN}`,
             'X-Bulk-Operation': 'true',
-          },
+          }),
         }),
       );
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('source_id=item-1'),
         expect.objectContaining({
-          headers: {
+          headers: expect.objectContaining({
+            Authorization: `Bearer ${TEST_TOKEN}`,
             'X-Bulk-Operation': 'true',
-          },
+          }),
         }),
       );
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('target_id=item-2'),
         expect.objectContaining({
-          headers: {
+          headers: expect.objectContaining({
+            Authorization: `Bearer ${TEST_TOKEN}`,
             'X-Bulk-Operation': 'true',
-          },
+          }),
         }),
       );
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('type=depends_on'),
         expect.objectContaining({
-          headers: {
+          headers: expect.objectContaining({
+            Authorization: `Bearer ${TEST_TOKEN}`,
             'X-Bulk-Operation': 'true',
-          },
+          }),
         }),
       );
     });
@@ -119,9 +135,10 @@ describe('useLinks - Comprehensive Coverage', () => {
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('project_id=proj-1'),
         expect.objectContaining({
-          headers: {
+          headers: expect.objectContaining({
+            Authorization: `Bearer ${TEST_TOKEN}`,
             'X-Bulk-Operation': 'true',
-          },
+          }),
         }),
       );
     });
@@ -145,9 +162,10 @@ describe('useLinks - Comprehensive Coverage', () => {
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('type=implements'),
         expect.objectContaining({
-          headers: {
+          headers: expect.objectContaining({
+            Authorization: `Bearer ${TEST_TOKEN}`,
             'X-Bulk-Operation': 'true',
-          },
+          }),
         }),
       );
     });

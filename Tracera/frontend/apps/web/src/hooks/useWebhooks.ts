@@ -1,7 +1,5 @@
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
-
 import { useMutation, useQuery } from '@tanstack/react-query';
-
 import type {
   WebhookIntegration,
   WebhookLog,
@@ -9,55 +7,107 @@ import type {
   WebhookStats,
   WebhookStatus,
 } from '@tracertm/types';
-
 import { client } from '@/api/client';
-
 const { getAuthHeaders } = client;
-
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:4000';
-
-const toNumber = (value: unknown, fallback: number): number =>
-  value === undefined ? fallback : Number(value);
-
-const toString = (value: unknown, fallback: string): string =>
-  value === undefined ? fallback : String(value);
-
-const toStringOrUndefined = (value: unknown): string | undefined =>
-  value === undefined ? undefined : String(value);
-
-const toRecordOrUndefined = <T extends Record<string, unknown>>(value: unknown): T | undefined =>
-  value === undefined ? undefined : (value as T);
-
-const toStringArrayOrUndefined = (value: unknown): string[] | undefined =>
-  value === undefined ? undefined : (value as string[]);
-
+const toNumber = (value: unknown, fallback: number): number => (value === undefined ? fallback : Number(value));
+const toPrimitiveString = (value: unknown): string | undefined => {
+  if (
+    typeof value === 'string' ||
+    typeof value === 'number' ||
+    typeof value === 'boolean' ||
+    typeof value === 'bigint'
+  ) {
+    return String(value);
+  }
+  return value === null ? 'null' : undefined;
+};
+const toString = (value: unknown, fallback: string): string => toPrimitiveString(value) ?? fallback;
+const toStringOrUndefined = (value: unknown): string | undefined => toPrimitiveString(value);
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+const toStringRecordOrUndefined = (value: unknown): Record<string, string> | undefined => {
+  if (!isRecord(value)) return undefined;
+  const record: Record<string, string> = {};
+  for (const [key, recordValue] of Object.entries(value)) {
+    const stringValue = toPrimitiveString(recordValue);
+    if (stringValue === undefined) return undefined;
+    record[key] = stringValue;
+  }
+  return record;
+};
+const toUnknownRecordOrUndefined = (value: unknown): Record<string, unknown> | undefined => (isRecord(value) ? value : undefined);
+const toStringArrayOrUndefined = (value: unknown): string[] | undefined => {
+  if (!Array.isArray(value)) return undefined;
+  const strings: string[] = [];
+  for (const item of value) {
+    const stringValue = toPrimitiveString(item);
+    if (stringValue === undefined) return undefined;
+    strings.push(stringValue);
+  }
+  return strings;
+};
+const isWebhookProvider = (value: unknown): value is WebhookProvider =>
+  value === 'github_actions' ||
+  value === 'gitlab_ci' ||
+  value === 'jenkins' ||
+  value === 'azure_devops' ||
+  value === 'circleci' ||
+  value === 'travis_ci' ||
+  value === 'custom';
+const isWebhookStatus = (value: unknown): value is WebhookStatus =>
+  value === 'active' || value === 'paused' || value === 'disabled';
+const toRecordArrayOrUndefined = (value: unknown): Record<string, unknown>[] | undefined => {
+  if (!Array.isArray(value)) return undefined;
+  const records: Record<string, unknown>[] = [];
+  for (const item of value) {
+    if (isRecord(item)) {
+      records.push(item);
+    }
+  }
+  return records;
+};
+const toNumberRecordOrUndefined = (value: unknown): Record<string, number> | undefined => {
+  if (!isRecord(value)) return undefined;
+  const record: Record<string, number> = {};
+  for (const [key, recordValue] of Object.entries(value)) {
+    record[key] = Number(recordValue);
+  }
+  return record;
+};
+const toNumberOrUndefined = (value: unknown): number | undefined => (value === undefined ? undefined : Number(value));
 const toBoolean = (value: unknown): boolean => value === true;
-
-// Transform API response (snake_case) to frontend format (camelCase)
+const parseJsonRecord = async (response: Response): Promise<Record<string, unknown>> => {
+  const data: unknown = await response.json();
+  if (!isRecord(data)) {
+    throw new Error('Expected a JSON object response');
+  }
+  return data;
+};
 function transformWebhook(data: Record<string, unknown>): WebhookIntegration {
   return {
     apiKey: toString(data['api_key'], ''),
     autoCompleteRun: toBoolean(data['auto_complete_run']),
     autoCreateRun: toBoolean(data['auto_create_run']),
-    callbackHeaders: toRecordOrUndefined<Record<string, string>>(data['callback_headers']),
+    callbackHeaders: toStringRecordOrUndefined(data['callback_headers']),
     callbackUrl: toString(data['callback_url'], ''),
     createdAt: toString(data['created_at'], ''),
     defaultSuiteId: toString(data['default_suite_id'], ''),
     description: toStringOrUndefined(data['description']),
     enabledEvents: toStringArrayOrUndefined(data['enabled_events']),
-    eventFilters: toRecordOrUndefined<Record<string, unknown>>(data['event_filters']),
+    eventFilters: toUnknownRecordOrUndefined(data['event_filters']),
     failedRequests: toNumber(data['failed_requests'], 0),
     id: String(data['id']),
     lastErrorMessage: toStringOrUndefined(data['last_error_message']),
     lastFailureAt: toStringOrUndefined(data['last_failure_at']),
     lastRequestAt: toString(data['last_request_at'], ''),
     lastSuccessAt: toStringOrUndefined(data['last_success_at']),
-    metadata: toRecordOrUndefined<Record<string, unknown>>(data['webhook_metadata']),
+    metadata: toUnknownRecordOrUndefined(data['webhook_metadata']),
     name: String(data['name']),
     projectId: String(data['project_id']),
-    provider: data['provider'] as WebhookProvider,
+    provider: isWebhookProvider(data['provider']) ? data['provider'] : 'custom',
     rateLimitPerMinute: toNumber(data['rate_limit_per_minute'], 0),
-    status: data['status'] as WebhookStatus,
+    status: isWebhookStatus(data['status']) ? data['status'] : 'disabled',
     successfulRequests: toNumber(data['successful_requests'], 0),
     totalRequests: toNumber(data['total_requests'], 0),
     updatedAt: toString(data['updated_at'], ''),
@@ -74,10 +124,10 @@ function transformWebhookLog(data: Record<string, unknown>): WebhookLog {
     eventType: String(data['event_type']),
     httpMethod: String(data['http_method']),
     id: String(data['id']),
-    payloadSizeBytes: data['payload_size_bytes'] as number | undefined,
+    payloadSizeBytes: toNumberOrUndefined(data['payload_size_bytes']),
     processingTimeMs: toNumber(data['processing_time_ms'], 0),
     requestBodyPreview: toStringOrUndefined(data['request_body_preview']),
-    requestHeaders: toRecordOrUndefined<Record<string, unknown>>(data['request_headers']),
+    requestHeaders: toUnknownRecordOrUndefined(data['request_headers']),
     requestId: toString(data['request_id'], ''),
     resultsSubmitted: Number(data['results_submitted'] ?? 0),
     sourceIp: toStringOrUndefined(data['source_ip']),
@@ -125,8 +175,8 @@ async function fetchWebhooks(
     const errorText = await res.text();
     throw new Error(`Failed to fetch webhooks: ${res.status} ${errorText}`);
   }
-  const data = await res.json();
-  const webhooks = (data['webhooks'] as Record<string, unknown>[] | undefined) ?? [];
+  const data = await parseJsonRecord(res);
+  const webhooks = toRecordArrayOrUndefined(data['webhooks']) ?? [];
   return {
     total: Number(data['total'] ?? 0),
     webhooks: webhooks.map((item) => transformWebhook(item)),
@@ -140,7 +190,7 @@ async function fetchWebhook(id: string): Promise<WebhookIntegration> {
   if (!res.ok) {
     throw new Error('Failed to fetch webhook');
   }
-  const data = await res.json();
+  const data = await parseJsonRecord(res);
   return transformWebhook(data);
 }
 
@@ -186,7 +236,7 @@ async function createWebhook(data: CreateWebhookData): Promise<WebhookIntegratio
     const errorText = await res.text();
     throw new Error(`Failed to create webhook: ${res.status} ${errorText}`);
   }
-  const result = await res.json();
+  const result = await parseJsonRecord(res);
   return transformWebhook(result);
 }
 
@@ -239,7 +289,7 @@ async function updateWebhook(id: string, data: UpdateWebhookData): Promise<Webho
     const errorText = await res.text();
     throw new Error(`Failed to update webhook: ${res.status} ${errorText}`);
   }
-  const result = await res.json();
+  const result = await parseJsonRecord(res);
   return transformWebhook(result);
 }
 
@@ -256,7 +306,12 @@ async function setWebhookStatus(
     const errorText = await res.text();
     throw new Error(`Failed to update status: ${res.status} ${errorText}`);
   }
-  return res.json();
+  const data = await parseJsonRecord(res);
+  return {
+    id: String(data['id']),
+    status: String(data['status']),
+    version: Number(data['version'] ?? 0),
+  };
 }
 
 async function regenerateSecret(
@@ -320,8 +375,8 @@ async function fetchWebhookLogs(
   if (!res.ok) {
     throw new Error('Failed to fetch webhook logs');
   }
-  const data = await res.json();
-  const logs = (data['logs'] as Record<string, unknown>[] | undefined) ?? [];
+  const data = await parseJsonRecord(res);
+  const logs = toRecordArrayOrUndefined(data['logs']) ?? [];
   return {
     logs: logs.map((item) => transformWebhookLog(item)),
     total: Number(data['total'] ?? 0),
@@ -335,15 +390,17 @@ async function fetchWebhookStats(projectId: string): Promise<WebhookStats> {
   if (!res.ok) {
     throw new Error('Failed to fetch webhook stats');
   }
-  const data = await res.json();
+  const data = await parseJsonRecord(res);
+  const byProvider = toNumberRecordOrUndefined(data['by_provider']) ?? {};
+  const byStatus = toNumberRecordOrUndefined(data['by_status']) ?? {};
   return {
-    byProvider: data['by_provider'],
-    byStatus: data['by_status'],
-    failedRequests: data['failed_requests'],
-    projectId: data['project_id'],
-    successfulRequests: data['successful_requests'],
-    total: data['total'],
-    totalRequests: data['total_requests'],
+    byProvider,
+    byStatus,
+    failedRequests: toNumber(data['failed_requests'], 0),
+    projectId: toString(data['project_id'], ''),
+    successfulRequests: toNumber(data['successful_requests'], 0),
+    total: toNumber(data['total'], 0),
+    totalRequests: toNumber(data['total_requests'], 0),
   };
 }
 

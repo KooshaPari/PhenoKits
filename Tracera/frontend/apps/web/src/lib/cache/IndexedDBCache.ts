@@ -35,6 +35,47 @@ import {
   CacheEventType as EventType,
 } from './CacheInterface';
 
+const formatRequestError = (error: DOMException | null): string => error?.message ?? 'unknown error';
+
+const isCacheMetadata = (value: unknown): value is CacheMetadata => {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const createdAt: unknown = Reflect.get(value, 'createdAt');
+  const expiresAt: unknown = Reflect.get(value, 'expiresAt');
+  const hitCount: unknown = Reflect.get(value, 'hitCount');
+  const lastAccessAt: unknown = Reflect.get(value, 'lastAccessAt');
+  const size: unknown = Reflect.get(value, 'size');
+  const tags: unknown = Reflect.get(value, 'tags');
+  const version: unknown = Reflect.get(value, 'version');
+
+  return (
+    typeof createdAt === 'number' &&
+    typeof lastAccessAt === 'number' &&
+    (typeof expiresAt === 'number' || expiresAt === null) &&
+    typeof hitCount === 'number' &&
+    typeof size === 'number' &&
+    Array.isArray(tags) &&
+    tags.every((tag) => typeof tag === 'string') &&
+    typeof version === 'number'
+  );
+};
+
+const isCacheEntry = <T = unknown>(value: unknown): value is CacheEntry<T> => {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const key: unknown = Reflect.get(value, 'key');
+  const metadata: unknown = Reflect.get(value, 'metadata');
+
+  return typeof key === 'string' && isCacheMetadata(metadata);
+};
+
+const keyFromIDBKey = (key: IDBValidKey): string | undefined =>
+  typeof key === 'string' ? key : undefined;
+
 /**
  * IndexedDB cache configuration
  */
@@ -85,31 +126,30 @@ export class IndexedDBCache implements IObservableCache {
    * Initialize IndexedDB
    */
   private async initialize(): Promise<void> {
-    if (typeof window === 'undefined' || !window.indexedDB) {
+    if (typeof globalThis.indexedDB === 'undefined') {
       throw new Error('IndexedDB not available');
     }
 
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open(this.dbName, this.version);
+      const request = globalThis.indexedDB.open(this.dbName, this.version);
 
-      request.onerror = () => {
-        reject(new Error(`Failed to open IndexedDB: ${request.error}`));
-      };
+      request.addEventListener('error', () => {
+        reject(new Error(`Failed to open IndexedDB: ${formatRequestError(request.error)}`));
+      });
 
-      request.onsuccess = () => {
+      request.addEventListener('success', () => {
         this.db = request.result;
         if (this.enableLogging) {
           logger.debug(`[IndexedDBCache] Initialized database: ${this.dbName}`);
         }
-        // Clean up expired entries on startup
-        this.cleanupExpired().catch((error) => {
+        void this.cleanupExpired().catch((error: unknown) => {
           logger.error('[IndexedDBCache] Cleanup failed:', error);
         });
         resolve();
-      };
+      });
 
-      request.onupgradeneeded = (event) => {
-        const db = (event.target as IDBOpenDBRequest).result;
+      request.addEventListener('upgradeneeded', () => {
+        const db = request.result;
 
         // Create object store if it doesn't exist
         if (!db.objectStoreNames.contains(this.storeName)) {
@@ -133,7 +173,7 @@ export class IndexedDBCache implements IObservableCache {
             logger.debug(`[IndexedDBCache] Created object store: ${this.storeName}`);
           }
         }
-      };
+      });
     });
   }
 
@@ -149,22 +189,30 @@ export class IndexedDBCache implements IObservableCache {
     }
   }
 
+  private requireDatabase(): IDBDatabase {
+    if (this.db === null) {
+      throw new Error('IndexedDB not initialized');
+    }
+
+    return this.db;
+  }
+
   /**
    * Get a value from cache
    */
   async get<T = unknown>(key: string): Promise<T | null> {
     await this.ensureInitialized();
 
-    const transaction = this.db!.transaction([this.storeName], 'readonly');
+    const transaction = this.requireDatabase().transaction([this.storeName], 'readonly');
     const store = transaction.objectStore(this.storeName);
 
     return new Promise((resolve) => {
       const request = store.get(key);
 
-      request.onsuccess = () => {
-        const entry = request.result as CacheEntry<T> | undefined;
+      request.addEventListener('success', () => {
+        const entry = request.result;
 
-        if (!entry) {
+        if (!isCacheEntry<T>(entry)) {
           this.totalMisses++;
           this.emit({
             type: EventType.MISS,
@@ -178,7 +226,9 @@ export class IndexedDBCache implements IObservableCache {
 
         // Check expiration
         if (isExpired(entry.metadata.expiresAt)) {
-          this.delete(key); // Clean up
+          void this.delete(key).catch((error: unknown) => {
+            logger.error(`[IndexedDBCache] Expired cleanup failed for key=${key}:`, error);
+          });
           this.totalMisses++;
           this.emit({
             type: EventType.MISS,
@@ -197,7 +247,7 @@ export class IndexedDBCache implements IObservableCache {
         this.totalHits++;
 
         // Update entry in DB
-        this.updateMetadata(key, entry.metadata).catch((error) => {
+        this.updateMetadata(key, entry.metadata).catch((error: unknown) => {
           logger.error('[IndexedDBCache] Failed to update metadata:', error);
         });
 
@@ -209,12 +259,12 @@ export class IndexedDBCache implements IObservableCache {
         });
 
         resolve(entry.value);
-      };
+      });
 
-      request.onerror = () => {
+      request.addEventListener('error', () => {
         logger.error(`[IndexedDBCache] Get failed for key=${key}:`, request.error);
         resolve(null);
-      };
+      });
     });
   }
 
@@ -245,13 +295,13 @@ export class IndexedDBCache implements IObservableCache {
 
     const entry: CacheEntry<T> = { key, value, metadata };
 
-    const transaction = this.db!.transaction([this.storeName], 'readwrite');
+    const transaction = this.requireDatabase().transaction([this.storeName], 'readwrite');
     const store = transaction.objectStore(this.storeName);
 
     return new Promise((resolve, reject) => {
       const request = store.put(entry);
 
-      request.onsuccess = () => {
+      request.addEventListener('success', () => {
         this.emit({
           type: EventType.SET,
           backend: 'IndexedDBCache',
@@ -264,11 +314,11 @@ export class IndexedDBCache implements IObservableCache {
           logger.debug(`[IndexedDBCache] Set key=${key}, size=${size}`);
         }
         resolve();
-      };
+      });
 
-      request.onerror = () => {
-        reject(new Error(`Failed to set key=${key}: ${request.error}`));
-      };
+      request.addEventListener('error', () => {
+        reject(new Error(`Failed to set key=${key}: ${formatRequestError(request.error)}`));
+      });
     });
   }
 
@@ -286,13 +336,13 @@ export class IndexedDBCache implements IObservableCache {
   async delete(key: string): Promise<boolean> {
     await this.ensureInitialized();
 
-    const transaction = this.db!.transaction([this.storeName], 'readwrite');
+    const transaction = this.requireDatabase().transaction([this.storeName], 'readwrite');
     const store = transaction.objectStore(this.storeName);
 
     return new Promise((resolve) => {
       const request = store.delete(key);
 
-      request.onsuccess = () => {
+      request.addEventListener('success', () => {
         this.emit({
           type: EventType.DELETE,
           backend: 'IndexedDBCache',
@@ -300,12 +350,12 @@ export class IndexedDBCache implements IObservableCache {
           timestamp: Date.now(),
         });
         resolve(true);
-      };
+      });
 
-      request.onerror = () => {
+      request.addEventListener('error', () => {
         logger.error(`[IndexedDBCache] Delete failed for key=${key}:`, request.error);
         resolve(false);
-      };
+      });
     });
   }
 
@@ -324,7 +374,7 @@ export class IndexedDBCache implements IObservableCache {
     const keysToDelete: string[] = [];
 
     // Find keys by pattern or tags
-    const transaction = this.db!.transaction([this.storeName], 'readonly');
+    const transaction = this.requireDatabase().transaction([this.storeName], 'readonly');
     const store = transaction.objectStore(this.storeName);
 
     if (options.tags && options.tags.length > 0) {
@@ -333,29 +383,32 @@ export class IndexedDBCache implements IObservableCache {
       for (const tag of options.tags) {
         const request = index.getAll(tag);
         await new Promise<void>((resolve) => {
-          request.onsuccess = () => {
-            const entries = request.result as CacheEntry[];
-            entries.forEach((entry) => {
+          request.addEventListener('success', () => {
+            const entries = request.result.filter(isCacheEntry);
+            for (const entry of entries) {
               if (!keysToDelete.includes(entry.key)) {
                 keysToDelete.push(entry.key);
               }
-            });
+            }
             resolve();
-          };
-          request.onerror = () => resolve();
+          });
+          request.addEventListener('error', () => {
+            resolve();
+          });
         });
       }
     }
 
-    if (options.pattern) {
+    if (options.pattern !== undefined) {
       // Get all keys and filter by pattern
+      const { pattern } = options;
       const allKeys = await this.keys();
-      const matchedKeys = allKeys.filter((key) => matchesPattern(key, options.pattern!));
-      matchedKeys.forEach((key) => {
+      const matchedKeys = allKeys.filter((key) => matchesPattern(key, pattern));
+      for (const key of matchedKeys) {
         if (!keysToDelete.includes(key)) {
           keysToDelete.push(key);
         }
-      });
+      }
     }
 
     // Delete matched keys
@@ -381,24 +434,24 @@ export class IndexedDBCache implements IObservableCache {
   async clear(): Promise<void> {
     await this.ensureInitialized();
 
-    const transaction = this.db!.transaction([this.storeName], 'readwrite');
+    const transaction = this.requireDatabase().transaction([this.storeName], 'readwrite');
     const store = transaction.objectStore(this.storeName);
 
     return new Promise((resolve, reject) => {
       const request = store.clear();
 
-      request.onsuccess = () => {
+      request.addEventListener('success', () => {
         this.emit({
           type: EventType.CLEAR,
           backend: 'IndexedDBCache',
           timestamp: Date.now(),
         });
         resolve();
-      };
+      });
 
-      request.onerror = () => {
-        reject(new Error(`Failed to clear cache: ${request.error}`));
-      };
+      request.addEventListener('error', () => {
+        reject(new Error(`Failed to clear cache: ${formatRequestError(request.error)}`));
+      });
     });
   }
 
@@ -433,25 +486,28 @@ export class IndexedDBCache implements IObservableCache {
   async keys(pattern?: string): Promise<string[]> {
     await this.ensureInitialized();
 
-    const transaction = this.db!.transaction([this.storeName], 'readonly');
+    const transaction = this.requireDatabase().transaction([this.storeName], 'readonly');
     const store = transaction.objectStore(this.storeName);
 
     return new Promise((resolve) => {
       const request = store.getAllKeys();
 
-      request.onsuccess = () => {
-        const allKeys = request.result as string[];
-        if (!pattern) {
+      request.addEventListener('success', () => {
+        const allKeys = request.result.flatMap((key) => {
+          const stringKey = keyFromIDBKey(key);
+          return stringKey === undefined ? [] : [stringKey];
+        });
+        if (pattern === undefined) {
           resolve(allKeys);
         } else {
           resolve(allKeys.filter((key) => matchesPattern(key, pattern)));
         }
-      };
+      });
 
-      request.onerror = () => {
+      request.addEventListener('error', () => {
         logger.error('[IndexedDBCache] Failed to get keys:', request.error);
         resolve([]);
-      };
+      });
     });
   }
 
@@ -507,7 +563,11 @@ export class IndexedDBCache implements IObservableCache {
     if (!this.listeners.has(eventType)) {
       this.listeners.set(eventType, new Set());
     }
-    this.listeners.get(eventType)!.add(listener);
+    const eventListeners = this.listeners.get(eventType);
+    if (eventListeners === undefined) {
+      throw new Error(`Failed to initialize listener set for ${eventType}`);
+    }
+    eventListeners.add(listener);
 
     return () => {
       const listeners = this.listeners.get(eventType);
@@ -537,20 +597,22 @@ export class IndexedDBCache implements IObservableCache {
    * Private: Update metadata
    */
   private async updateMetadata(key: string, metadata: CacheMetadata): Promise<void> {
-    const transaction = this.db!.transaction([this.storeName], 'readwrite');
+    const transaction = this.requireDatabase().transaction([this.storeName], 'readwrite');
     const store = transaction.objectStore(this.storeName);
 
     return new Promise((resolve) => {
       const getRequest = store.get(key);
-      getRequest.onsuccess = () => {
-        const entry = getRequest.result as CacheEntry | undefined;
-        if (entry) {
+      getRequest.addEventListener('success', () => {
+        const entry = getRequest.result;
+        if (isCacheEntry(entry)) {
           entry.metadata = metadata;
           store.put(entry);
         }
         resolve();
-      };
-      getRequest.onerror = () => resolve();
+      });
+      getRequest.addEventListener('error', () => {
+        resolve();
+      });
     });
   }
 
@@ -558,13 +620,17 @@ export class IndexedDBCache implements IObservableCache {
    * Private: Count entries
    */
   private async count(): Promise<number> {
-    const transaction = this.db!.transaction([this.storeName], 'readonly');
+    const transaction = this.requireDatabase().transaction([this.storeName], 'readonly');
     const store = transaction.objectStore(this.storeName);
 
     return new Promise((resolve) => {
       const request = store.count();
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => resolve(0);
+      request.addEventListener('success', () => {
+        resolve(request.result);
+      });
+      request.addEventListener('error', () => {
+        resolve(0);
+      });
     });
   }
 
@@ -572,17 +638,19 @@ export class IndexedDBCache implements IObservableCache {
    * Private: Calculate total size
    */
   private async calculateTotalSize(): Promise<number> {
-    const transaction = this.db!.transaction([this.storeName], 'readonly');
+    const transaction = this.requireDatabase().transaction([this.storeName], 'readonly');
     const store = transaction.objectStore(this.storeName);
 
     return new Promise((resolve) => {
       const request = store.getAll();
-      request.onsuccess = () => {
-        const entries = request.result as CacheEntry[];
+      request.addEventListener('success', () => {
+        const entries = request.result.filter(isCacheEntry);
         const total = entries.reduce((sum, entry) => sum + entry.metadata.size, 0);
         resolve(total);
-      };
-      request.onerror = () => resolve(0);
+      });
+      request.addEventListener('error', () => {
+        resolve(0);
+      });
     });
   }
 
@@ -590,26 +658,29 @@ export class IndexedDBCache implements IObservableCache {
    * Private: Evict oldest entry
    */
   private async evictOldest(): Promise<void> {
-    const transaction = this.db!.transaction([this.storeName], 'readwrite');
+    const transaction = this.requireDatabase().transaction([this.storeName], 'readwrite');
     const store = transaction.objectStore(this.storeName);
     const index = store.index('createdAt');
 
     return new Promise((resolve) => {
       const request = index.openCursor();
-      request.onsuccess = () => {
+      request.addEventListener('success', () => {
         const cursor = request.result;
         if (cursor) {
+          const key = keyFromIDBKey(cursor.primaryKey);
           store.delete(cursor.primaryKey);
           this.emit({
             type: EventType.EVICTION,
             backend: 'IndexedDBCache',
-            key: cursor.primaryKey as string,
+            key,
             timestamp: Date.now(),
           });
         }
         resolve();
-      };
-      request.onerror = () => resolve();
+      });
+      request.addEventListener('error', () => {
+        resolve();
+      });
     });
   }
 
@@ -619,7 +690,7 @@ export class IndexedDBCache implements IObservableCache {
   private async cleanupExpired(): Promise<number> {
     await this.ensureInitialized();
 
-    const transaction = this.db!.transaction([this.storeName], 'readwrite');
+    const transaction = this.requireDatabase().transaction([this.storeName], 'readwrite');
     const store = transaction.objectStore(this.storeName);
     const index = store.index('expiresAt');
 
@@ -628,11 +699,15 @@ export class IndexedDBCache implements IObservableCache {
 
     return new Promise((resolve) => {
       const request = index.openCursor();
-      request.onsuccess = () => {
+      request.addEventListener('success', () => {
         const cursor = request.result;
         if (cursor) {
-          const entry = cursor.value as CacheEntry;
-          if (entry.metadata.expiresAt && entry.metadata.expiresAt <= now) {
+          const entry = cursor.value;
+          if (
+            isCacheEntry(entry) &&
+            entry.metadata.expiresAt !== null &&
+            entry.metadata.expiresAt <= now
+          ) {
             store.delete(cursor.primaryKey);
             count++;
           }
@@ -643,8 +718,10 @@ export class IndexedDBCache implements IObservableCache {
           }
           resolve(count);
         }
-      };
-      request.onerror = () => resolve(count);
+      });
+      request.addEventListener('error', () => {
+        resolve(count);
+      });
     });
   }
 }

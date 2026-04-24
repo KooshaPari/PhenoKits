@@ -17,7 +17,6 @@ import {
   CODE_SYMBOL_TYPES,
   COMPLEXITY_LEVELS,
   DEFECT_SEVERITY_VALUES,
-  DEFECT_TYPES,
   DEFAULT_PRIORITY,
   DEFAULT_STATUS,
   DEFAULT_VERSION,
@@ -31,9 +30,7 @@ import {
   PRIORITY_VALUES,
   RISK_LEVELS,
   TEST_CASE_TYPES,
-  TEST_ITEM_TYPES,
   TEST_RESULT_STATUS_VALUES,
-  USER_STORY_TYPES,
   VIEW_TYPE_VALUES,
 } from '@/hooks/useItems/constants';
 import {
@@ -55,6 +52,10 @@ import {
 type MutableItem = Item & { view: Item['view'] };
 
 type Normalizer = (base: MutableItem, item: ApiItem) => TypedItem;
+
+const TEST_ITEM_TYPE_VALUES: readonly string[] = ['test', 'test_case', 'test_suite'];
+const USER_STORY_TYPE_VALUES: readonly string[] = ['user_story', 'story'];
+const DEFECT_TYPE_VALUES: readonly string[] = ['bug', 'defect'];
 
 function normalizeStatus(value: unknown) {
   const normalized = readEnumValue(value, ITEM_STATUS_VALUES);
@@ -115,12 +116,14 @@ function readItemDimensions(value: unknown): ItemDimensions | undefined {
     const custom = readRecord(record['custom']);
     let customValues: Record<string, string | number | boolean> | undefined;
     if (custom) {
-      const entries = Object.entries(custom).filter(
-        ([, entry]) =>
-          typeof entry === 'string' || typeof entry === 'number' || typeof entry === 'boolean',
-      );
-      if (entries.length > 0) {
-        customValues = Object.fromEntries(entries) as Record<string, string | number | boolean>;
+      const values: Record<string, string | number | boolean> = {};
+      for (const [key, entry] of Object.entries(custom)) {
+        if (typeof entry === 'string' || typeof entry === 'number' || typeof entry === 'boolean') {
+          values[key] = entry;
+        }
+      }
+      if (Object.keys(values).length > 0) {
+        customValues = values;
       }
     }
 
@@ -357,6 +360,18 @@ function normalizeDefect(base: MutableItem, item: ApiItem, type: DefectItem['typ
   };
 }
 
+function isTestItemType(type: string): type is TestItem['type'] {
+  return TEST_ITEM_TYPE_VALUES.includes(type);
+}
+
+function isUserStoryType(type: string): type is UserStoryItem['type'] {
+  return USER_STORY_TYPE_VALUES.includes(type);
+}
+
+function isDefectType(type: string): type is DefectItem['type'] {
+  return DEFECT_TYPE_VALUES.includes(type);
+}
+
 function normalizeItem(item: ApiItem): TypedItem {
   const baseItem = normalizeBaseItem(item);
   const { type } = baseItem;
@@ -366,16 +381,16 @@ function normalizeItem(item: ApiItem): TypedItem {
     return simpleNormalizer(baseItem, item);
   }
 
-  if (TEST_ITEM_TYPES.has(type as TestItem['type'])) {
-    return normalizeTest(baseItem, item, type as TestItem['type']);
+  if (isTestItemType(type)) {
+    return normalizeTest(baseItem, item, type);
   }
 
-  if (USER_STORY_TYPES.has(type as UserStoryItem['type'])) {
-    return normalizeUserStory(baseItem, item, type as UserStoryItem['type']);
+  if (isUserStoryType(type)) {
+    return normalizeUserStory(baseItem, item, type);
   }
 
-  if (DEFECT_TYPES.has(type as DefectItem['type'])) {
-    return normalizeDefect(baseItem, item, type as DefectItem['type']);
+  if (isDefectType(type)) {
+    return normalizeDefect(baseItem, item, type);
   }
 
   return baseItem;

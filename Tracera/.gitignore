@@ -124,6 +124,15 @@ artifacts/
 temp/
 vault.test
 violation-summary.txt
+.alloy/
+.grafana/
+.tempo/
+.minio/
+.prometheus/
+.vault-root-token
+.process-compose/
+backend/tmp/
+frontend/apps/web/test-results/
 # Compiled Go backend binaries (produced by `make build`)
 backend/tracertm-backend
 backend/tracertm-setup

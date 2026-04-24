@@ -17,17 +17,19 @@ import {
 } from '@tracertm/ui/components/Select';
 import { Skeleton } from '@tracertm/ui/components/Skeleton';
 
+import type { SearchQuery } from '../api/types';
+
 import { useSearch } from '../hooks/useSearch';
 
 export function SearchView() {
   const [query, setQuery] = useState('');
-  const [filters, setFilters] = useState({
-    project: '',
-    status: '',
-    type: '',
+  const [filters, setFilters] = useState<Partial<SearchQuery>>({
+    projectId: undefined,
+    statuses: undefined,
+    types: undefined,
   });
 
-  const { results, isLoading } = useSearch({ q: query, ...filters });
+  const { results, isLoading, setSearchText, updateQuery } = useSearch({ q: query, ...filters });
 
   return (
     <div className='animate-in-fade-up mx-auto max-w-5xl space-y-8 p-6'>
@@ -55,7 +57,9 @@ export function SearchView() {
               placeholder='Type anything to search...'
               value={query}
               onChange={(e) => {
-                setQuery(e.target.value);
+                const nextQuery = e.target.value;
+                setQuery(nextQuery);
+                setSearchText(nextQuery);
               }}
               className='h-14 border-none bg-transparent pl-14 text-lg font-medium focus-visible:ring-0'
             />
@@ -63,9 +67,12 @@ export function SearchView() {
           <div className='flex w-full items-center gap-2 px-2 md:w-auto'>
             <Separator orientation='vertical' className='hidden h-8 md:block' />
             <Select
-              value={filters.type || 'all'}
+              value={filters.types?.[0] || 'all'}
               onValueChange={(v) => {
-                setFilters({ ...filters, type: v === 'all' ? '' : v });
+                const nextType = v === 'all' ? '' : v;
+                const nextTypes = nextType ? [nextType] : undefined;
+                setFilters({ ...filters, types: nextTypes });
+                updateQuery({ page: 1, types: nextTypes });
               }}
             >
               <SelectTrigger className='bg-muted/50 h-10 rounded-2xl border-none md:w-32'>

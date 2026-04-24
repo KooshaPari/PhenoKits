@@ -9,7 +9,7 @@ import { useEffect } from 'react';
 import { Toaster } from 'sonner';
 
 import { CommandPalette } from '@/components/CommandPalette';
-import Layout from '@/components/layout/Layout';
+import { Layout } from '@/components/layout/Layout';
 import { LostConnectionBanner } from '@/components/LostConnectionBanner';
 import { useConnectionHealth } from '@/hooks/useConnectionHealth';
 import { Button } from '@tracertm/ui';
@@ -21,7 +21,7 @@ function NotFoundComponent() {
 
   useEffect(() => {
     if (location.pathname === '/') {
-      router.navigate({ replace: true, to: '/landing' });
+      void router.navigate({ replace: true, to: '/landing' });
     }
   }, [location.pathname, router]);
 
@@ -85,7 +85,12 @@ function RootErrorComponent({ error }: { error: Error }) {
         </div>
 
         <div className='flex flex-col gap-3 sm:flex-row'>
-          <Button onClick={async () => router.invalidate()} className='flex-1 gap-2'>
+          <Button
+            onClick={() => {
+              void router.invalidate();
+            }}
+            className='flex-1 gap-2'
+          >
             <RefreshCcw className='h-4 w-4' />
             Sync & Retry
           </Button>
@@ -141,7 +146,9 @@ const RootComponent = () => {
     };
 
     // Delay prefetch to not block initial render
-    const timeoutId = setTimeout(prefetchRoutes, 1000);
+    const timeoutId = setTimeout(() => {
+      void prefetchRoutes();
+    }, 1000);
     return () => {
       clearTimeout(timeoutId);
     };

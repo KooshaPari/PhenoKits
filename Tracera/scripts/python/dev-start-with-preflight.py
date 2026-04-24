@@ -4,11 +4,11 @@
 - Runs dev-start preflight (database, redis, nats, neo4j).
 - If any check fails, tries to start that service via scripts/shell/start-services.sh, then re-runs preflight.
 - If still failing, prints detailed failures (no need for 'rtm dev check') and exits 1.
-- If all pass, execs process-compose with remaining args (e.g. up --logs-truncate or up -d --logs-truncate).
+- If all pass, execs process-compose with remaining args (e.g. up --logs-truncate or up -D --logs-truncate).
 
 Usage:
   python scripts/python/dev-start-with-preflight.py up --logs-truncate
-  python scripts/python/dev-start-with-preflight.py up -d --logs-truncate
+  python scripts/python/dev-start-with-preflight.py up -D --logs-truncate
 """
 
 from __future__ import annotations
@@ -44,7 +44,7 @@ def start_failed_services(failed_names: set[str], repo_root: Path, env: dict[str
     """Start services that failed preflight checks."""
     service_map = {
         "database": "postgres",
-        "redis": "redis",
+        "cache": "dragonfly",
         "nats": "nats",
         "neo4j": "neo4j",
     }
@@ -118,6 +118,25 @@ def main() -> int:
     # Load environment
     env = load_env_file(repo_root)
     env.setdefault("PC_PORT_NUM", "18080")
+    env.setdefault("DATABASE_URL", "postgresql://tracertm:tracertm@127.0.0.1:5432/tracertm")
+    env.setdefault("REDIS_URL", "redis://127.0.0.1:6379")
+    env.setdefault("NATS_URL", "nats://127.0.0.1:4222")
+    env.setdefault("NEO4J_URI", "bolt://127.0.0.1:7687")
+    env.setdefault("NEO4J_USER", "neo4j")
+    env.setdefault("NEO4J_PASSWORD", "neo4j_password")
+    env.setdefault("TEMPORAL_NAMESPACE", "default")
+    env.setdefault("S3_ENDPOINT", "http://127.0.0.1:9000")
+    env.setdefault("S3_ACCESS_KEY_ID", "minioadmin")
+    env.setdefault("S3_SECRET_ACCESS_KEY", "minioadmin")
+    env.setdefault("S3_BUCKET", "tracertm")
+    env.setdefault("S3_REGION", "us-east-1")
+    env.setdefault("WORKOS_CLIENT_ID", "client_dev_placeholder")
+    env.setdefault("WORKOS_API_KEY", "sk_dev_placeholder")
+    env.setdefault("WORKOS_AUTHKIT_DOMAIN", "auth.dev.localhost")
+    env.setdefault("JWT_SECRET", "dev-jwt-secret-change-me-0000000000")
+    env.setdefault("CSRF_SECRET", "dev-csrf-secret-change-me-000000000")
+    env.setdefault("AUTHKIT_JWT_SECRET", "dev-authkit-secret-change-me-000000")
+    env.setdefault("PHENO_OBSERVABILITY_OTLP_GRPC_ENDPOINT", "127.0.0.1:4319")
     os.environ.update(env)
 
     # Run preflight checks

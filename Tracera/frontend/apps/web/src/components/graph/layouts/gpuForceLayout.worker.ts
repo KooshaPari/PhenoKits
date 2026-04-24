@@ -46,6 +46,12 @@ export interface ForceLayoutError {
 
 const layoutEngine = new GPUForceLayout();
 
+declare const postMessage: (message: ForceLayoutResponse | ForceLayoutError) => void;
+
+const postWorkerMessage = (message: ForceLayoutResponse | ForceLayoutError): void => {
+  postMessage(message);
+};
+
 self.addEventListener('message', async (ev: MessageEvent<ForceLayoutRequest>) => {
   const msg = ev.data;
 
@@ -89,14 +95,14 @@ self.addEventListener('message', async (ev: MessageEvent<ForceLayoutRequest>) =>
       type: 'result',
     };
 
-    (globalThis as unknown as Worker).postMessage(response);
+    postWorkerMessage(response);
   } catch (error) {
     const errorResponse: ForceLayoutError = {
       error: error instanceof Error ? error.message : String(error),
       type: 'error',
     };
 
-    (globalThis as unknown as Worker).postMessage(errorResponse);
+    postWorkerMessage(errorResponse);
   }
 });
 
@@ -107,5 +113,5 @@ self.addEventListener('error', (err) => {
     type: 'error',
   };
 
-  (globalThis as unknown as Worker).postMessage(errorResponse);
+  postWorkerMessage(errorResponse);
 });

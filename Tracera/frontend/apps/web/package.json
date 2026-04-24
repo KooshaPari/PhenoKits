@@ -30,7 +30,7 @@
     "typecheck": "tsc --build --noEmit",
     "lint:type-aware": "bun x oxlint-tsgolint --tsconfig tsconfig.oxlint.json",
     "lint:oxlint": "bun x oxlint -f stylish src --promise-plugin --react-plugin --vitest-plugin --jsx-a11y-plugin --react-perf-plugin --node-plugin --jsdoc-plugin --import-plugin",
-    "test": "vitest",
+    "test": "vitest --run",
     "test:browser": "VITEST_BROWSER=1 vitest --run",
     "test:browser:ui": "VITEST_BROWSER=1 vitest --ui",
     "test:a11y": "vitest run src/__tests__/a11y",

@@ -42,6 +42,8 @@ import {
   SelectValue,
 } from '@tracertm/ui/components/Select';
 
+// Style import required by React Flow
+// eslint-disable-next-line import/no-unassigned-import
 import '@xyflow/react/dist/style.css';
 import { Separator } from '@tracertm/ui/components/Separator';
 import { Skeleton } from '@tracertm/ui/components/Skeleton';
@@ -61,11 +63,57 @@ import {
 } from './types';
 import { UIComponentTree } from './UIComponentTree';
 
-// Custom node types - using as assertion for React Flow compatibility
-const nodeTypes: NodeTypes = {
-  qaEnhanced: QAEnhancedNode as any,
-  richPill: RichNodePill, // Type compatibility workaround for React Flow
-};
+const LAYOUT_OPTIONS = ['force', 'hierarchical', 'radial', 'grid'] as const;
+type LayoutType = (typeof LAYOUT_OPTIONS)[number];
+
+function isLayoutType(value: string): value is LayoutType {
+  return (
+    value === 'force' || value === 'hierarchical' || value === 'radial' || value === 'grid'
+  );
+}
+
+function getStringValue(record: Record<string, unknown> | undefined, key: string): string | undefined {
+  const value = record?.[key];
+  return typeof value === 'string' ? value : undefined;
+}
+
+function getEnhancedTypeColor(value: unknown): string {
+  if (typeof value !== 'string') {
+    return '#64748b';
+  }
+
+  return ENHANCED_TYPE_COLORS[value] ?? '#64748b';
+}
+
+function createEmptyLinkTypeCounts(): Record<LinkType, number> {
+  return {
+    blocks: 0,
+    depends_on: 0,
+    derives_from: 0,
+    documents: 0,
+    implements: 0,
+    alternative_to: 0,
+    calls: 0,
+    imports: 0,
+    conflicts_with: 0,
+    manifests_as: 0,
+    mentions: 0,
+    parent_of: 0,
+    related_to: 0,
+    same_as: 0,
+    represents: 0,
+    supersedes: 0,
+    tests: 0,
+    traces_to: 0,
+    validates: 0,
+  };
+}
+
+// Custom node types for React Flow
+const nodeTypes = {
+  qaEnhanced: QAEnhancedNode,
+  richPill: RichNodePill,
+} satisfies NodeTypes;
 
 interface FlowGraphViewProps {
   items: Item[];
@@ -74,9 +122,6 @@ interface FlowGraphViewProps {
   projectId?: string | undefined;
   onNavigateToItem?: ((itemId: string) => void) | undefined;
 }
-
-// Layout algorithms
-type LayoutType = 'force' | 'hierarchical' | 'radial' | 'grid';
 
 function FlowGraphViewInner({
   items,
@@ -91,7 +136,7 @@ function FlowGraphViewInner({
   const [showUITree, setShowUITree] = useState(false);
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
 
-  const { zoomIn, zoomOut } = useReactFlow();
+  const { fitView, zoomIn, zoomOut } = useReactFlow();
 
   // Build enhanced node data
   const enhancedNodes = useMemo((): EnhancedNodeData[] => {
@@ -106,16 +151,16 @@ function FlowGraphViewInner({
       outgoingCount.set(link.sourceId, (outgoingCount.get(link.sourceId) ?? 0) + 1);
 
       if (!connectionsByType.has(link.targetId)) {
-        connectionsByType.set(link.targetId, {} as Record<LinkType, number>);
+        connectionsByType.set(link.targetId, createEmptyLinkTypeCounts());
       }
       const targetTypes = connectionsByType.get(link.targetId)!;
-      targetTypes[link.type] = (targetTypes[link.type] || 0) + 1;
+      targetTypes[link.type] = (targetTypes[link.type] ?? 0) + 1;
 
       if (!connectionsByType.has(link.sourceId)) {
-        connectionsByType.set(link.sourceId, {} as Record<LinkType, number>);
+        connectionsByType.set(link.sourceId, createEmptyLinkTypeCounts());
       }
       const sourceTypes = connectionsByType.get(link.sourceId)!;
-      sourceTypes[link.type] = (sourceTypes[link.type] || 0) + 1;
+      sourceTypes[link.type] = (sourceTypes[link.type] ?? 0) + 1;
     }
 
     return items.map((item) => {
@@ -134,9 +179,20 @@ function FlowGraphViewInner({
         currentId = parent?.parentId;
       }
 
+      const metadata = item.metadata ?? {};
+      const screenshotUrl = getStringValue(metadata, 'screenshotUrl');
+      const uiPreview = screenshotUrl
+        ? {
+            componentCode: getStringValue(metadata, 'code'),
+            interactiveWidgetUrl: getStringValue(metadata, 'interactiveUrl'),
+            screenshotUrl,
+            thumbnailUrl: getStringValue(metadata, 'thumbnailUrl'),
+          }
+        : undefined;
+
       return {
         connections: {
-          byType: connectionsByType.get(item.id) ?? ({} as Record<LinkType, number>),
+          byType: connectionsByType.get(item.id) ?? createEmptyLinkTypeCounts(),
           incoming,
           outgoing,
           total: incoming + outgoing,
@@ -150,15 +206,8 @@ function FlowGraphViewInner({
         perspective: perspectives,
         status: item.status,
         type: itemType,
-        uiPreview: item.metadata?.['screenshotUrl']
-          ? {
-              componentCode: item.metadata['code'] as string | undefined,
-              interactiveWidgetUrl: item.metadata['interactiveUrl'] as string | undefined,
-              screenshotUrl: item.metadata['screenshotUrl'] as string,
-              thumbnailUrl: item.metadata['thumbnailUrl'] as string | undefined,
-            }
-          : undefined,
-      } as EnhancedNodeData;
+        uiPreview,
+      };
     });
   }, [items, links]);
 
@@ -368,15 +417,16 @@ function FlowGraphViewInner({
     [filteredNodes, layout, calculateLayout],
   );
 
-  const initialEdges = useMemo((): Edge[] => {
+const initialEdges = useMemo((): Edge[] => {
     const defaultStyle = { arrow: false, color: '#64748b', dashed: true };
+    const labelBgPadding: [number, number] = [4, 2];
     return filteredLinks.map((link) => {
       const linkStyle = LINK_STYLES[link.type] ?? defaultStyle;
       const edge: Edge = {
         animated: link.type === 'depends_on' || link.type === 'blocks',
         id: link.id,
         label: link.type.replaceAll('_', ' '),
-        labelBgPadding: [4, 2] as [number, number],
+        labelBgPadding,
         labelBgStyle: { fill: 'rgba(26, 26, 46, 0.9)' },
         labelStyle: { fill: linkStyle.color, fontSize: 10 },
         source: link.sourceId,
@@ -398,7 +448,7 @@ function FlowGraphViewInner({
     });
   }, [filteredLinks]);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes as Node[]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node<RichNodeData>>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   const layoutInputSignature = useMemo(() => {
@@ -420,7 +470,7 @@ function FlowGraphViewInner({
   useEffect(() => {
     if (layoutInputSignature && layoutInputSignature !== prevNodesSignature.current) {
       prevNodesSignature.current = layoutInputSignature;
-      setNodes(calculateLayout(filteredNodes, layout) as Node[]);
+        setNodes(calculateLayout(filteredNodes, layout));
     }
   }, [filteredNodes, layout, calculateLayout, setNodes, layoutInputSignature]);
 
@@ -478,7 +528,9 @@ function FlowGraphViewInner({
     }
   };
 
-  const handleFit = () => {};
+  const handleFit = useCallback(() => {
+    void fitView();
+  }, [fitView]);
   const handleReset = () => {
     setPerspective('all');
     setLayout('force');
@@ -492,7 +544,7 @@ function FlowGraphViewInner({
     // Find the node and center on it
     const node = nodes.find((n) => n.id === nodeId);
     if (node) {
-      undefined;
+      void fitView({ nodes: [node], duration: 800 });
     }
   };
 
@@ -573,7 +625,9 @@ function FlowGraphViewInner({
             <Select
               value={layout}
               onValueChange={(v) => {
-                setLayout(v as LayoutType);
+                if (isLayoutType(v)) {
+                  setLayout(v);
+                }
               }}
             >
               <SelectTrigger className='h-9 w-[160px]' aria-label='Graph layout selection'>
@@ -698,10 +752,7 @@ function FlowGraphViewInner({
             <Background variant={BackgroundVariant.Dots} gap={20} size={1} color='#374151' />
             <Controls showInteractive={false} />
             <MiniMap
-              nodeColor={(node) => {
-                const nodeType = (node.data as RichNodeData | undefined)?.type;
-                return nodeType ? (ENHANCED_TYPE_COLORS[nodeType] ?? '#64748b') : '#64748b';
-              }}
+              nodeColor={(node) => getEnhancedTypeColor(node.data['type'])}
               maskColor='rgba(0, 0, 0, 0.7)'
               className='!bg-card !border-border'
             />

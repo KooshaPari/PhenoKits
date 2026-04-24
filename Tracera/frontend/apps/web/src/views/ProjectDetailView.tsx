@@ -180,17 +180,21 @@ const formatProjectDate = (value: string | null | undefined): string => {
   return Number.isNaN(date.getTime()) ? '—' : date.toLocaleDateString();
 };
 
-const buildTypeStats = (items: Item[]): Record<string, number> =>
-  items.reduce<Record<string, number>>((acc, item) => {
-    acc[item.type] = (acc[item.type] ?? 0) + 1;
-    return acc;
-  }, {});
+const buildTypeStats = (items: Item[]): Record<string, number> => {
+  const stats: Record<string, number> = {};
+  for (const item of items) {
+    stats[item.type] = (stats[item.type] ?? 0) + 1;
+  }
+  return stats;
+};
 
-const buildStatusStats = (items: Item[]): Record<string, number> =>
-  items.reduce<Record<string, number>>((acc, item) => {
-    acc[item.status] = (acc[item.status] ?? 0) + 1;
-    return acc;
-  }, {});
+const buildStatusStats = (items: Item[]): Record<string, number> => {
+  const stats: Record<string, number> = {};
+  for (const item of items) {
+    stats[item.status] = (stats[item.status] ?? 0) + 1;
+  }
+  return stats;
+};
 
 const buildRadarData = (byType: Record<string, number>) =>
   RADAR_TYPES.map((entry) => ({
@@ -202,9 +206,15 @@ const buildRadarData = (byType: Record<string, number>) =>
 const buildTypeData = (byType: Record<string, number>) =>
   Object.entries(byType).map(([name, value]) => ({ name, value }));
 
-const useProjectIdParam = () => {
-  const params = useParams({ strict: false });
-  return params.projectId as string | undefined;
+const hasProjectIdParam = (params: unknown): params is { projectId?: unknown } =>
+  typeof params === 'object' && params !== null && 'projectId' in params;
+
+const useProjectIdParam = (): string | undefined => {
+  const params: unknown = useParams({ strict: false });
+  if (!hasProjectIdParam(params) || typeof params.projectId !== 'string') {
+    return undefined;
+  }
+  return params.projectId;
 };
 
 const useSyncCurrentProject = (project: Project | null) => {
@@ -227,17 +237,19 @@ const useSyncCurrentProject = (project: Project | null) => {
   }, [project, setCurrentProject]);
 };
 
-const useProjectDetailData = (projectId: string | undefined) => {
-  const safeProjectId = projectId ?? '';
+const useProjectDetailData = (projectId = '') => {
+  const safeProjectId = projectId;
   const projectQuery = useProject(safeProjectId);
   const itemsQuery = useItems({ projectId: safeProjectId });
   const linksQuery = useLinks({ projectId: safeProjectId });
   useSyncCurrentProject(projectQuery.data ?? null);
+  const itemsData = itemsQuery.data;
+  const linksData = linksQuery.data;
 
   return {
-    items: itemsQuery.data?.items ?? EMPTY_ITEMS,
-    itemsTotal: itemsQuery.data?.total ?? 0,
-    linksTotal: linksQuery.data?.total ?? 0,
+    items: itemsData === undefined ? EMPTY_ITEMS : itemsData.items,
+    itemsTotal: itemsData === undefined ? 0 : itemsData.total,
+    linksTotal: linksData === undefined ? 0 : linksData.total,
     loading: projectQuery.isLoading || itemsQuery.isLoading || linksQuery.isLoading,
     project: projectQuery.data ?? null,
     projectError: projectQuery.error,
@@ -308,7 +320,7 @@ const useProjectDetailActions = (
     if (!project) {
       return;
     }
-    navigate({
+    void navigate({
       params: { projectId: project.id, viewType: 'feature' },
       search: { action: 'create' } as Record<string, string>,
       to: '/projects/$projectId/views/$viewType',
@@ -319,14 +331,14 @@ const useProjectDetailActions = (
     if (!project) {
       return;
     }
-    navigate({ to: `/projects/${project.id}/settings` });
+    void navigate({ to: `/projects/${project.id}/settings` });
   }, [navigate, project]);
 
   const handleViewAll = useCallback(() => {
     if (!project) {
       return;
     }
-    navigate({
+    void navigate({
       params: { projectId: project.id, viewType: 'feature' },
       to: '/projects/$projectId/views/$viewType',
     });
@@ -373,7 +385,7 @@ const ProjectHeaderDetails = ({
         </h1>
         <div className='mt-1 flex items-center gap-2'>
           <Badge variant='outline' className='text-[10px] font-bold tracking-tighter uppercase'>
-            {projectId?.slice(0, PROJECT_ID_SHORT_LENGTH) ?? '—'}
+            {projectId === undefined ? '—' : projectId.slice(0, PROJECT_ID_SHORT_LENGTH)}
           </Badge>
           <span className='text-muted-foreground flex items-center gap-1 text-xs'>
             <Calendar className='h-3 w-3' />
@@ -822,7 +834,7 @@ export const ProjectDetailView = () => {
     setShowAgentWorkflows((previous) => !previous);
   }, []);
   const handleBackToProjects = useCallback(() => {
-    navigate({ to: '/projects' });
+    void navigate({ to: '/projects' });
   }, [navigate]);
 
   if (loading) {

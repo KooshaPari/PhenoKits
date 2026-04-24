@@ -1,4 +1,4 @@
-import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useNavigate, useRouter, useSearch } from '@tanstack/react-router';
 import React from 'react';
 import { toast } from 'sonner';
 
@@ -24,19 +24,29 @@ interface ItemsTableViewProps {
 
 const EMPTY_ITEMS: TypedItem[] = [];
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
+function pushSearchPatch(
+  router: ReturnType<typeof useRouter>,
+  patch: Record<string, string | undefined>,
+): void {
+  const currentUrl = new URL(router.history.location.href, globalThis.location.origin);
+  const nextParams = new URLSearchParams(currentUrl.search);
 
-const mergeSearch = (prev: unknown, patch: Record<string, unknown>): Record<string, unknown> => {
-  if (isRecord(prev)) {
-    return { ...prev, ...patch };
+  for (const [key, value] of Object.entries(patch)) {
+    if (value === undefined) {
+      nextParams.delete(key);
+    } else {
+      nextParams.set(key, value);
+    }
   }
-  return { ...patch };
-};
+
+  const nextSearch = nextParams.toString();
+  currentUrl.search = nextSearch === '' ? '' : `?${nextSearch}`;
+  router.history.push(`${currentUrl.pathname}${currentUrl.search}${currentUrl.hash}`);
+}
 
 function ItemsTableView({ projectId, view, type }: ItemsTableViewProps = {}): JSX.Element {
   const navigate = useNavigate();
+  const router = useRouter();
   const search = useSearch({ strict: false });
 
   const projectFilter = itemsTableFormatters.getSearchValue(
@@ -104,11 +114,8 @@ function ItemsTableView({ projectId, view, type }: ItemsTableViewProps = {}): JS
     if (actionParam !== itemsTableConstants.ACTION_CREATE) {
       return;
     }
-    navigate({
-      search: ((prev: unknown) =>
-        mergeSearch(prev, { [itemsTableConstants.SEARCH_PARAM_ACTION]: undefined })) as never,
-    });
-  }, [actionParam, navigate]);
+    pushSearchPatch(router, { [itemsTableConstants.SEARCH_PARAM_ACTION]: undefined });
+  }, [actionParam, router]);
 
   const handleItemNavigate = React.useCallback(
     (item: TypedItem): void => {
@@ -117,7 +124,7 @@ function ItemsTableView({ projectId, view, type }: ItemsTableViewProps = {}): JS
         return;
       }
       const viewSegment = itemsTableFormatters.getViewSegment(view, item.view);
-      navigate({
+      void navigate({
         to: `/projects/${projectIdValue}/views/${viewSegment}/${item.id}`,
       });
     },
@@ -150,23 +157,17 @@ function ItemsTableView({ projectId, view, type }: ItemsTableViewProps = {}): JS
   const handleProjectFilterChange = React.useCallback(
     (value: string): void => {
       const nextValue = itemsTableFormatters.getFilterValue(value);
-      navigate({
-        search: ((prev: unknown) =>
-          mergeSearch(prev, { [itemsTableConstants.SEARCH_PARAM_PROJECT]: nextValue })) as never,
-      });
+      pushSearchPatch(router, { [itemsTableConstants.SEARCH_PARAM_PROJECT]: nextValue });
     },
-    [navigate],
+    [router],
   );
 
   const handleTypeFilterChange = React.useCallback(
     (value: string): void => {
       const nextValue = itemsTableFormatters.getFilterValue(value);
-      navigate({
-        search: ((prev: unknown) =>
-          mergeSearch(prev, { [itemsTableConstants.SEARCH_PARAM_TYPE]: nextValue })) as never,
-      });
+      pushSearchPatch(router, { [itemsTableConstants.SEARCH_PARAM_TYPE]: nextValue });
     },
-    [navigate],
+    [router],
   );
 
   const handleCreateModalOpen = React.useCallback((): void => {

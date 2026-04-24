@@ -3,7 +3,8 @@
  * Tests combobox ARIA pattern, keyboard navigation, focus management
  */
 
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 import { axe } from './setup';
@@ -44,6 +45,11 @@ function MockCommandPalette({ open, onClose }: { open: boolean; onClose: () => v
               aria-activedescendant='cmd-item-nav-home'
               role='combobox'
               autoComplete='off'
+              onKeyDown={(event) => {
+                if (event.key === 'Escape' || event.key === 'Tab') {
+                  onClose();
+                }
+              }}
             />
             <span id='command-hint' className='sr-only'>
               5 results found. Use arrow keys to navigate, Enter to select, Home/End to jump, Escape
@@ -66,10 +72,9 @@ function MockCommandPalette({ open, onClose }: { open: boolean; onClose: () => v
               <div>Main dashboard</div>
             </button>
           </div>
-
-          <div role='status' aria-live='polite' aria-atomic='true'>
-            <p>5 results found for "test"</p>
-          </div>
+        </div>
+        <div role='status' aria-live='polite' aria-atomic='true'>
+          <p>5 results found for "test"</p>
         </div>
       </div>
     </div>
@@ -150,9 +155,10 @@ describe('CommandPalette - Keyboard Navigation', () => {
 
   it('should support Escape to close', async () => {
     const handleClose = vi.fn();
+    const user = userEvent.setup();
 
     render(<MockCommandPalette open onClose={handleClose} />);
-    const input = getByRole('combobox');
+    const input = screen.getByRole('combobox');
     input.focus();
 
     await user.keyboard('{Escape}');
@@ -162,6 +168,7 @@ describe('CommandPalette - Keyboard Navigation', () => {
   it('should support Enter to select', async () => {
     const { getByRole } = render(<MockCommandPalette open onClose={() => {}} />);
     const input = getByRole('combobox');
+    const user = userEvent.setup();
 
     input.focus();
     // Enter key should work
@@ -173,6 +180,7 @@ describe('CommandPalette - Keyboard Navigation', () => {
     const handleClose = vi.fn();
     const { getByRole } = render(<MockCommandPalette open onClose={handleClose} />);
     const input = getByRole('combobox');
+    const user = userEvent.setup();
 
     input.focus();
     await user.keyboard('{Tab}');
@@ -253,13 +261,13 @@ describe('CommandPalette - Screen Reader Accessibility', () => {
 
 describe('CommandPalette - WCAG 2.1 AA Compliance', () => {
   it('should pass axe accessibility audit', async () => {
-    render(<MockCommandPalette open onClose={() => {}} />);
+    const { container } = render(<MockCommandPalette open onClose={() => {}} />);
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
 
   it('should have sufficient color contrast', () => {
-    render(<MockCommandPalette open onClose={() => {}} />);
+    const { container } = render(<MockCommandPalette open onClose={() => {}} />);
 
     // All text should have sufficient contrast
     const textElements = container.querySelectorAll('p, span, button, input');

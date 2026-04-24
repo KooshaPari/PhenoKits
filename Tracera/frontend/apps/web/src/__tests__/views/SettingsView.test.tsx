@@ -1,9 +1,20 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { SettingsView } from '../../views/SettingsView';
+import { saveSettings } from "../../api/settings";
+import { useProjects } from "../../hooks/useProjects";
+import { SettingsView } from "../../views/SettingsView";
+
+// Traces to: FR-TRACERA-VIEWS-007
+vi.mock("../../api/settings", () => ({
+  saveSettings: vi.fn().mockResolvedValue({}),
+}));
+
+vi.mock("../../hooks/useProjects", () => ({
+  useProjects: vi.fn(),
+}));
 
 describe(SettingsView, () => {
   let queryClient: QueryClient;
@@ -16,35 +27,42 @@ describe(SettingsView, () => {
       },
     });
     vi.clearAllMocks();
+    vi.mocked(useProjects).mockReturnValue({
+      data: [],
+      error: null,
+      isError: false,
+      isLoading: false,
+    } as any);
   });
 
-  it('renders settings interface', () => {
+  it("renders settings interface", () => {
     render(
       <QueryClientProvider client={queryClient}>
         <SettingsView />
       </QueryClientProvider>,
     );
 
-    expect(screen.getByText('Settings')).toBeInTheDocument();
-    expect(screen.getByText('General')).toBeInTheDocument();
-    expect(screen.getByText('Appearance')).toBeInTheDocument();
-    expect(screen.getByText('API Keys')).toBeInTheDocument();
-    expect(screen.getByText('Notifications')).toBeInTheDocument();
+    expect(screen.getByText("System Preferences")).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: /Identity/i })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: /Visuals/i })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: /Engine Access/i })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: /Comms/i })).toBeInTheDocument();
   });
 
-  it('displays general settings', () => {
+  it("displays general settings", () => {
     render(
       <QueryClientProvider client={queryClient}>
         <SettingsView />
       </QueryClientProvider>,
     );
 
-    expect(screen.getByText('Display Name')).toBeInTheDocument();
-    expect(screen.getByText('Email')).toBeInTheDocument();
-    expect(screen.getByText('Timezone')).toBeInTheDocument();
+    expect(screen.getByText("Public Identity")).toBeInTheDocument();
+    expect(screen.getByText("Registry Name")).toBeInTheDocument();
+    expect(screen.getByText("Direct Comms (Email)")).toBeInTheDocument();
+    expect(screen.getByText("Timezone / Location Context")).toBeInTheDocument();
   });
 
-  it('displays appearance settings', async () => {
+  it("displays appearance settings", async () => {
     const user = userEvent.setup();
     render(
       <QueryClientProvider client={queryClient}>
@@ -53,14 +71,14 @@ describe(SettingsView, () => {
     );
 
     // Click on Appearance tab
-    await user.click(screen.getByText('Appearance'));
+    await user.click(screen.getByRole("tab", { name: /Visuals/i }));
 
-    expect(screen.getByText('Theme')).toBeInTheDocument();
-    expect(screen.getByText('Font Size')).toBeInTheDocument();
-    expect(screen.getByText('Use compact layout')).toBeInTheDocument();
+    expect(screen.getByText("Interface Directives")).toBeInTheDocument();
+    expect(screen.getByText("Color Schema")).toBeInTheDocument();
+    expect(screen.getByText("Information Density")).toBeInTheDocument();
   });
 
-  it('displays API keys settings', async () => {
+  it("displays API keys settings", async () => {
     const user = userEvent.setup();
     render(
       <QueryClientProvider client={queryClient}>
@@ -69,14 +87,14 @@ describe(SettingsView, () => {
     );
 
     // Click on API Keys tab
-    await user.click(screen.getByText('API Keys'));
+    await user.click(screen.getByRole("tab", { name: /Engine Access/i }));
 
-    expect(screen.getByText('API Key')).toBeInTheDocument();
-    expect(screen.getByText('Generate New Key')).toBeInTheDocument();
-    expect(screen.getByText('Revoke Key')).toBeInTheDocument();
+    expect(screen.getByText("Engine Interface Access")).toBeInTheDocument();
+    expect(screen.getByText("Master API Link")).toBeInTheDocument();
+    expect(screen.getByText("REGEN")).toBeInTheDocument();
   });
 
-  it('displays notification settings', async () => {
+  it("displays notification settings", async () => {
     const user = userEvent.setup();
     render(
       <QueryClientProvider client={queryClient}>
@@ -85,15 +103,15 @@ describe(SettingsView, () => {
     );
 
     // Click on Notifications tab
-    await user.click(screen.getByText('Notifications'));
+    await user.click(screen.getByRole("tab", { name: /Comms/i }));
 
-    expect(screen.getByText('Email Notifications')).toBeInTheDocument();
-    expect(screen.getByText('Desktop Notifications')).toBeInTheDocument();
-    expect(screen.getByText('Weekly Summary')).toBeInTheDocument();
-    expect(screen.getByText('Item Updates')).toBeInTheDocument();
+    expect(screen.getByText("Telemetry & Comms")).toBeInTheDocument();
+    expect(screen.getByText("Email Dispatches")).toBeInTheDocument();
+    expect(screen.getByText("Desktop Stream")).toBeInTheDocument();
+    expect(screen.getByText("Executive Weekly")).toBeInTheDocument();
   });
 
-  it('handles theme selection', async () => {
+  it("handles theme selection", async () => {
     const user = userEvent.setup();
     render(
       <QueryClientProvider client={queryClient}>
@@ -102,30 +120,17 @@ describe(SettingsView, () => {
     );
 
     // Click on Appearance tab
-    await user.click(screen.getByText('Appearance'));
+    await user.click(screen.getByRole("tab", { name: /Visuals/i }));
 
-    // Radix UI Select uses button triggers, not native selects
-    const themeSelect = document.querySelector('#theme-select');
-    expect(themeSelect).toBeInTheDocument();
+    const darkThemeButton = screen.getByRole("button", { name: "dark" });
+    await user.click(darkThemeButton);
 
-    // Click to open the dropdown
-    await user.click(themeSelect!);
-
-    // Wait for dropdown to open and click option
     await waitFor(() => {
-      const darkOption = screen.getByRole('option', { name: 'Dark' });
-      expect(darkOption).toBeInTheDocument();
-    });
-
-    await user.click(screen.getByRole('option', { name: 'Dark' }));
-
-    // Verify the trigger now shows the selected value
-    await waitFor(() => {
-      expect(themeSelect).toHaveTextContent('Dark');
+      expect(darkThemeButton).toHaveClass("bg-primary");
     });
   });
 
-  it('handles notification toggles', async () => {
+  it("handles notification toggles", async () => {
     const user = userEvent.setup();
     render(
       <QueryClientProvider client={queryClient}>
@@ -134,9 +139,9 @@ describe(SettingsView, () => {
     );
 
     // Click on Notifications tab
-    await user.click(screen.getByText('Notifications'));
+    await user.click(screen.getByRole("tab", { name: /Comms/i }));
 
-    const emailNotifications = document.querySelector('#email-notifications')!;
+    const emailNotifications = screen.getAllByRole("checkbox")[0];
     expect(emailNotifications).toBeChecked();
 
     await user.click(emailNotifications);
@@ -145,7 +150,7 @@ describe(SettingsView, () => {
     });
   });
 
-  it('saves settings when save button is clicked', async () => {
+  it("saves settings when save button is clicked", async () => {
     const user = userEvent.setup();
     render(
       <QueryClientProvider client={queryClient}>
@@ -153,24 +158,25 @@ describe(SettingsView, () => {
       </QueryClientProvider>,
     );
 
-    const displayNameInput = document.querySelector('#display-name')!;
-    await user.type(displayNameInput, 'Test User');
+    const displayNameInput = screen.getByDisplayValue("System Administrator");
+    await user.clear(displayNameInput);
+    await user.type(displayNameInput, "Test User");
 
-    const saveButton = screen.getByText('Save Changes');
+    const saveButton = screen.getByRole("button", { name: /Synchronize Parameters/i });
     expect(saveButton).toBeInTheDocument();
 
-    // Click save and verify the button exists (mutation is mocked and resolves immediately)
     await user.click(saveButton);
 
-    // Since the mutation resolves immediately in tests, verify that the alert was called
-    // Or that the button returns to its normal state
     await waitFor(() => {
-      // The mutation resolves quickly, so the button should be back to "Save Changes"
-      expect(screen.getByText('Save Changes')).toBeInTheDocument();
+      expect(saveSettings).toHaveBeenCalledWith(
+        expect.objectContaining({
+          displayName: "Test User",
+        }),
+      );
     });
   });
 
-  it('handles form input changes', async () => {
+  it("handles form input changes", async () => {
     const user = userEvent.setup();
     render(
       <QueryClientProvider client={queryClient}>
@@ -178,13 +184,15 @@ describe(SettingsView, () => {
       </QueryClientProvider>,
     );
 
-    const displayNameInput = document.querySelector('#display-name')!;
-    await user.type(displayNameInput, 'John Doe');
+    const displayNameInput = screen.getByDisplayValue("System Administrator");
+    await user.clear(displayNameInput);
+    await user.type(displayNameInput, "John Doe");
 
-    const emailInput = document.querySelector('#email')!;
-    await user.type(emailInput, 'john@example.com');
+    const emailInput = screen.getByDisplayValue("admin@tracertm.io");
+    await user.clear(emailInput);
+    await user.type(emailInput, "john@example.com");
 
-    expect(displayNameInput).toHaveValue('John Doe');
-    expect(emailInput).toHaveValue('john@example.com');
+    expect(displayNameInput).toHaveValue("John Doe");
+    expect(emailInput).toHaveValue("john@example.com");
   });
 });

@@ -105,7 +105,42 @@ function toNonEmptyString(value: unknown): string | undefined {
 }
 
 function getLinkTypeCountMap(): Record<LinkType, number> {
-  return {} as Record<LinkType, number>;
+  return {
+    alternative_to: 0,
+    blocks: 0,
+    calls: 0,
+    conflicts_with: 0,
+    depends_on: 0,
+    derives_from: 0,
+    documents: 0,
+    imports: 0,
+    implements: 0,
+    manifests_as: 0,
+    mentions: 0,
+    parent_of: 0,
+    related_to: 0,
+    represents: 0,
+    same_as: 0,
+    supersedes: 0,
+    tests: 0,
+    traces_to: 0,
+    validates: 0,
+  };
+}
+
+const LAYOUT_TYPES: readonly LayoutType[] = [
+  'cose',
+  'breadthfirst',
+  'circle',
+  'grid',
+  'elk',
+  'dagre',
+  'cola',
+  'concentric',
+];
+
+function isLayoutType(value: string): value is LayoutType {
+  return LAYOUT_TYPES.some((layoutType) => layoutType === value);
 }
 
 function getNodeColor(type: string): string {
@@ -126,19 +161,24 @@ function getNodeDepth(item: Item, itemMap: Map<string, Item>): number {
   while (typeof currentId === 'string' && currentId.length > 0 && depth < MAX_PARENT_DEPTH) {
     depth += 1;
     const parent = itemMap.get(currentId);
-    currentId = parent?.parentId;
+    currentId = parent === undefined ? undefined : parent.parentId;
   }
   return depth;
 }
 
 function buildNodeUIPreview(item: Item): EnhancedNodeData['uiPreview'] {
-  const screenshotUrl = toNonEmptyString(item.metadata?.['screenshotUrl']);
+  const metadata = item.metadata;
+  const screenshotUrl = toNonEmptyString(
+    metadata === undefined ? undefined : metadata['screenshotUrl'],
+  );
   if (screenshotUrl === undefined) {
     return;
   }
 
-  const componentCode = toNonEmptyString(item.metadata?.['code']);
-  const interactiveWidgetUrl = toNonEmptyString(item.metadata?.['interactiveUrl']);
+  const componentCode = toNonEmptyString(metadata === undefined ? undefined : metadata['code']);
+  const interactiveWidgetUrl = toNonEmptyString(
+    metadata === undefined ? undefined : metadata['interactiveUrl'],
+  );
   const uiPreview: NonNullable<EnhancedNodeData['uiPreview']> = { screenshotUrl };
 
   if (componentCode !== undefined) {
@@ -174,14 +214,19 @@ function createCytoscapeNode(node: EnhancedNodeData): { data: CytoscapeNodeData 
 }
 
 function createCytoscapeEdge(link: Link): { data: CytoscapeEdgeData } {
+  const linkStyle = LINK_STYLES[link.type];
+  const edgeColor = linkStyle === undefined ? DEFAULT_EDGE_COLOR : linkStyle.color;
+  const edgeArrowShape = linkStyle?.arrow === true ? 'triangle' : 'none';
+  const edgeLineStyle = linkStyle?.dashed === true ? 'dashed' : 'solid';
+
   return {
     data: {
-      arrowColor: LINK_STYLES[link.type]?.color ?? DEFAULT_EDGE_COLOR,
-      arrowShape: LINK_STYLES[link.type]?.arrow === true ? 'triangle' : 'none',
+      arrowColor: edgeColor,
+      arrowShape: edgeArrowShape,
       id: link.id,
       label: link.type.replaceAll('_', ' '),
-      lineColor: LINK_STYLES[link.type]?.color ?? DEFAULT_EDGE_COLOR,
-      lineStyle: LINK_STYLES[link.type]?.dashed === true ? 'dashed' : 'solid',
+      lineColor: edgeColor,
+      lineStyle: edgeLineStyle,
       source: link.sourceId,
       target: link.targetId,
       type: link.type,
@@ -190,39 +235,54 @@ function createCytoscapeEdge(link: Link): { data: CytoscapeEdgeData } {
 }
 
 function getGraphLayoutOptions(layout: LayoutType): LayoutOptions {
-  return {
+  const layoutOptions = {
     name: layout === 'elk' ? 'breadthfirst' : layout,
     animate: true,
     animationDuration: 500,
-    ...(layout === 'breadthfirst' || layout === 'elk'
-      ? {
-          directed: true,
-          padding: BREADTHFIRST_PADDING,
-          spacingFactor: BREADTHFIRST_SPACING_FACTOR,
-        }
-      : {}),
-    ...(layout === 'cose'
-      ? {
-          edgeElasticity: COSE_EDGE_ELASTICITY,
-          gravity: COSE_GRAVITY,
-          idealEdgeLength: COSE_IDEAL_EDGE_LENGTH,
-          nodeRepulsion: COSE_NODE_REPULSION,
-        }
-      : {}),
+  } as LayoutOptions & {
+    directed?: boolean;
+    edgeElasticity?: number;
+    gravity?: number;
+    idealEdgeLength?: number;
+    nodeRepulsion?: number;
+    padding?: number;
+    spacingFactor?: number;
   };
+
+  if (layout === 'breadthfirst' || layout === 'elk') {
+    layoutOptions.directed = true;
+    layoutOptions.padding = BREADTHFIRST_PADDING;
+    layoutOptions.spacingFactor = BREADTHFIRST_SPACING_FACTOR;
+  }
+
+  if (layout === 'cose') {
+    layoutOptions.edgeElasticity = COSE_EDGE_ELASTICITY;
+    layoutOptions.gravity = COSE_GRAVITY;
+    layoutOptions.idealEdgeLength = COSE_IDEAL_EDGE_LENGTH;
+    layoutOptions.nodeRepulsion = COSE_NODE_REPULSION;
+  }
+
+  return layoutOptions;
 }
 
-function getGraphStyles(perspectiveColor: string | undefined): CytoscapeOptions['style'] {
+function getGraphStyles(
+  perspectiveColor: string | undefined,
+): NonNullable<CytoscapeOptions['style']> {
   return [
     {
       selector: 'node',
       style: {
         shape: 'round-rectangle',
-        width: (node: NodeSingular): number => node.data('nodeWidth') as number,
+        width: (node: NodeSingular): number => {
+          const nodeWidth = node.data('nodeWidth');
+          return typeof nodeWidth === 'number' ? nodeWidth : NODE_MIN_WIDTH;
+        },
         height: 50,
         'background-color': 'data(backgroundColor)',
-        'background-opacity': (node: NodeSingular): number =>
-          node.data('backgroundOpacity') as number,
+        'background-opacity': (node: NodeSingular): number => {
+          const backgroundOpacity = node.data('backgroundOpacity');
+          return typeof backgroundOpacity === 'number' ? backgroundOpacity : 1;
+        },
         label: 'data(label)',
         color: '#fff',
         'text-outline-color': 'data(borderColor)',
@@ -232,7 +292,7 @@ function getGraphStyles(perspectiveColor: string | undefined): CytoscapeOptions[
         'text-valign': 'center',
         'text-halign': 'center',
         'text-wrap': 'ellipsis',
-        'text-max-width': 140 as unknown as string,
+        'text-max-width': '140px',
         'border-width': 2,
         'border-color': 'data(borderColor)',
         'border-opacity': 0.3,
@@ -245,9 +305,9 @@ function getGraphStyles(perspectiveColor: string | undefined): CytoscapeOptions[
         'line-color': 'data(lineColor)',
         'target-arrow-color': 'data(arrowColor)',
         'target-arrow-shape': (edge: EdgeSingular): CytoscapeEdgeData['arrowShape'] =>
-          edge.data('arrowShape') as CytoscapeEdgeData['arrowShape'],
+          edge.data('arrowShape') === 'triangle' ? 'triangle' : 'none',
         'line-style': (edge: EdgeSingular): CytoscapeEdgeData['lineStyle'] =>
-          edge.data('lineStyle') as CytoscapeEdgeData['lineStyle'],
+          edge.data('lineStyle') === 'dashed' ? 'dashed' : 'solid',
         'curve-style': 'bezier',
         opacity: 0.6,
         label: 'data(label)',
@@ -375,7 +435,7 @@ function EnhancedGraphViewComponent({
       const outgoing = outgoingCount.get(item.id) ?? 0;
       const uiPreview = buildNodeUIPreview(item);
 
-      return {
+      const node: EnhancedNodeData = {
         connections: {
           byType: connectionsByType.get(item.id) ?? getLinkTypeCountMap(),
           incoming,
@@ -387,12 +447,18 @@ function EnhancedGraphViewComponent({
         id: item.id,
         item,
         label: toNonEmptyString(item.title) ?? 'Untitled',
-        ...(item.parentId === undefined ? {} : { parentId: item.parentId }),
         perspective: TYPE_TO_PERSPECTIVE[itemType] ?? ['all'],
         status: item.status,
         type: itemType,
-        ...(uiPreview === undefined ? {} : { uiPreview }),
       };
+      if (item.parentId !== undefined) {
+        node.parentId = item.parentId;
+      }
+      if (uiPreview !== undefined) {
+        node.uiPreview = uiPreview;
+      }
+
+      return node;
     });
   }, [items, links]);
 
@@ -494,9 +560,11 @@ function EnhancedGraphViewComponent({
 
     const cytoscapeNodes = filteredNodes.map((node) => createCytoscapeNode(node));
     const cytoscapeEdges = filteredLinks.map((link) => createCytoscapeEdge(link));
-    const perspectiveColor = getPerspectiveConfig(perspective)?.color;
+    const perspectiveConfig = getPerspectiveConfig(perspective);
+    const perspectiveColor =
+      perspectiveConfig === undefined ? undefined : perspectiveConfig.color;
 
-    const cyInstance = cytoscape({
+    const cyInstanceOptions: CytoscapeOptions = {
       container: containerRef.current,
       elements: [...cytoscapeNodes, ...cytoscapeEdges],
       layout: getGraphLayoutOptions(layout),
@@ -504,12 +572,13 @@ function EnhancedGraphViewComponent({
       minZoom: 0.1,
       style: getGraphStyles(perspectiveColor),
       wheelSensitivity: 0.3,
-    } as cytoscape.CytoscapeOptions);
+    };
+    const cyInstance = cytoscape(cyInstanceOptions);
     cyRef.current = cyInstance;
 
     // Event handlers
     cyInstance.on('tap', 'node', (event: EventObject): void => {
-      const tappedNode = event.target as NodeSingular;
+      const tappedNode = event.target;
       const nodeId = tappedNode.id();
       setSelectedNodeId(nodeId);
       setShowDetailPanel(true);
@@ -536,7 +605,10 @@ function EnhancedGraphViewComponent({
   useEffect((): (() => void) => {
     initCytoscape();
     return (): void => {
-      cyRef.current?.destroy();
+      const cyInstance = cyRef.current;
+      if (cyInstance !== null) {
+        cyInstance.destroy();
+      }
     };
   }, [initCytoscape]);
 
@@ -595,7 +667,9 @@ function EnhancedGraphViewComponent({
 
   const handleLayoutSelect = useCallback(
     (selectedLayoutValue: string): void => {
-      handleLayoutChange(selectedLayoutValue as LayoutType);
+      if (isLayoutType(selectedLayoutValue)) {
+        handleLayoutChange(selectedLayoutValue);
+      }
     },
     [handleLayoutChange],
   );
@@ -610,7 +684,7 @@ function EnhancedGraphViewComponent({
 
     // Update layout preference
     const config = getPerspectiveConfig(newPerspective);
-    if (config?.layoutPreference !== undefined) {
+    if (config !== undefined && config.layoutPreference !== undefined) {
       setLayout(config.layoutPreference);
     }
   }, []);
@@ -633,12 +707,19 @@ function EnhancedGraphViewComponent({
   }, []);
 
   const clearHighlightState = useCallback((): void => {
-    cyRef.current?.elements().removeClass('faded highlighted');
+    const cyInstance = cyRef.current;
+    if (cyInstance !== null) {
+      cyInstance.elements().removeClass('faded highlighted');
+    }
   }, []);
 
   const handleFit = useCallback((): void => {
-    cyRef.current?.fit(undefined, FIT_PADDING);
-    cyRef.current?.elements().removeClass('faded highlighted');
+    const cyInstance = cyRef.current;
+    if (cyInstance === null) {
+      return;
+    }
+    cyInstance.fit(undefined, FIT_PADDING);
+    cyInstance.elements().removeClass('faded highlighted');
   }, []);
 
   const handleReset = useCallback((): void => {
@@ -663,19 +744,24 @@ function EnhancedGraphViewComponent({
 
   // Focus on specific node
   const handleFocusNode = useCallback((nodeId: string): void => {
-    const node = cyRef.current?.getElementById(nodeId);
-    if (node !== undefined && node.length > 0) {
+    const cyInstance = cyRef.current;
+    if (cyInstance === null) {
+      return;
+    }
+
+    const node = cyInstance.getElementById(nodeId);
+    if (node.length > 0) {
       setSelectedNodeId(nodeId);
 
       // Center on node
-      cyRef.current?.animate({
+      cyInstance.animate({
         center: { eles: node },
         duration: 300,
         zoom: FOCUS_ZOOM,
       });
 
       // Highlight
-      cyRef.current?.elements().addClass('faded');
+      cyInstance.elements().addClass('faded');
       const neighborhood = node.closedNeighborhood();
       neighborhood.removeClass('faded');
       neighborhood.addClass('highlighted');
@@ -747,7 +833,7 @@ function EnhancedGraphViewComponent({
         <div className='flex items-center gap-3'>
           {perspective !== 'all' && (
             <Badge variant='outline' className='px-3 py-1' style={activePerspectiveBadgeStyle}>
-              {activePerspectiveConfig?.label}
+              {activePerspectiveConfig === undefined ? undefined : activePerspectiveConfig.label}
             </Badge>
           )}
         </div>

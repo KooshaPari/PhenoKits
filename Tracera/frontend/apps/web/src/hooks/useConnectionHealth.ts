@@ -11,6 +11,14 @@ const POLL_INTERVAL_MS = 25_000;
 const RETRY_ATTEMPTS = 3;
 const RETRY_DELAY_MS = 2000;
 
+function isUnhealthyHealthPayload(data: unknown): boolean {
+  if (typeof data !== 'object' || data === null) {
+    return false;
+  }
+
+  return Reflect.get(data, 'status') === 'unhealthy';
+}
+
 /**
  * Background health polling for the important backend (Python API).
  * On failure: sets reconnecting, retries; after retries exhausted sets lost.
@@ -40,7 +48,7 @@ export function useConnectionHealth(): void {
         const unhealthy =
           error !== undefined ||
           !response?.ok ||
-          (data as { status?: string })?.status === 'unhealthy';
+          isUnhealthyHealthPayload(data);
         if (unhealthy) {
           if (!hasEverConnected) {
             setConnecting('Still waiting for backend…');
@@ -56,7 +64,7 @@ export function useConnectionHealth(): void {
             const retryOk =
               !retry.error &&
               retry.response?.ok &&
-              !((retry.data as { status?: string }).status === 'unhealthy');
+              !isUnhealthyHealthPayload(retry.data);
             if (retryOk) {
               setOnline();
               hasEverConnected = true;
@@ -87,7 +95,7 @@ export function useConnectionHealth(): void {
             const retryOk =
               !retry.error &&
               retry.response?.ok &&
-              !((retry.data as { status?: string }).status === 'unhealthy');
+              !isUnhealthyHealthPayload(retry.data);
             if (retryOk) {
               setOnline();
               hasEverConnected = true;
@@ -102,9 +110,11 @@ export function useConnectionHealth(): void {
     }
 
     // Initial poll immediately to check backend health on app startup
-    poll();
+    void poll();
 
-    intervalRef.current = setInterval(poll, POLL_INTERVAL_MS);
+    intervalRef.current = setInterval(() => {
+      void poll();
+    }, POLL_INTERVAL_MS);
 
     return () => {
       cancelled = true;
@@ -113,5 +123,5 @@ export function useConnectionHealth(): void {
         intervalRef.current = null;
       }
     };
-  }, [setOnline, setLost, setReconnecting]);
+  }, [setConnecting, setLost, setOnline, setReconnecting]);
 }

@@ -9,8 +9,11 @@ import type {
   GraphData,
   ImpactAnalysis,
   Item,
+  ItemStatus,
   Link,
   Project,
+  LinkType,
+  Priority,
   UpdateItemInput,
   UpdateLinkInput,
   UpdateProjectInput,
@@ -38,6 +41,226 @@ const mockItems = USE_ENHANCED_DATA ? enhancedItems : mockItemsBaseline;
 const mockLinks = USE_ENHANCED_DATA ? enhancedLinks : mockLinksBaseline;
 
 const API_BASE = 'http://localhost:4000';
+
+type JsonRecord = Record<string, unknown>;
+const EMPTY = '';
+
+function hasPayload(value: unknown): boolean {
+  return value !== null && value !== undefined;
+}
+
+function isRecord(value: unknown): value is JsonRecord {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function toRecord(value: unknown): JsonRecord {
+  return isRecord(value) ? value : {};
+}
+
+function toRouteId(value: string | readonly string[] | undefined): string {
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (Array.isArray(value)) {
+    return value[0] ?? EMPTY;
+  }
+  return EMPTY;
+}
+
+function toString(value: unknown): string {
+  return typeof value === 'string' ? value : EMPTY;
+}
+
+function toOptionalString(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined;
+}
+
+function toItemStatus(value: unknown): ItemStatus | undefined {
+  if (value === 'todo') {
+    return value;
+  }
+  if (value === 'in_progress') {
+    return value;
+  }
+  if (value === 'done') {
+    return value;
+  }
+  if (value === 'blocked') {
+    return value;
+  }
+  if (value === 'cancelled') {
+    return value;
+  }
+  return undefined;
+}
+
+function toPriority(value: unknown): Priority | undefined {
+  if (value === 'low') {
+    return value;
+  }
+  if (value === 'medium') {
+    return value;
+  }
+  if (value === 'high') {
+    return value;
+  }
+  if (value === 'critical') {
+    return value;
+  }
+  return undefined;
+}
+
+function toLinkType(value: unknown): LinkType | undefined {
+  if (value === 'implements') {
+    return value;
+  }
+  if (value === 'tests') {
+    return value;
+  }
+  if (value === 'depends_on') {
+    return value;
+  }
+  if (value === 'related_to') {
+    return value;
+  }
+  if (value === 'blocks') {
+    return value;
+  }
+  if (value === 'parent_of') {
+    return value;
+  }
+  if (value === 'same_as') {
+    return value;
+  }
+  if (value === 'represents') {
+    return value;
+  }
+  if (value === 'manifests_as') {
+    return value;
+  }
+  if (value === 'documents') {
+    return value;
+  }
+  if (value === 'mentions') {
+    return value;
+  }
+  if (value === 'calls') {
+    return value;
+  }
+  if (value === 'imports') {
+    return value;
+  }
+  if (value === 'derives_from') {
+    return value;
+  }
+  if (value === 'alternative_to') {
+    return value;
+  }
+  if (value === 'conflicts_with') {
+    return value;
+  }
+  if (value === 'supersedes') {
+    return value;
+  }
+  if (value === 'validates') {
+    return value;
+  }
+  if (value === 'traces_to') {
+    return value;
+  }
+  return undefined;
+}
+
+function isItem(value: unknown): value is Item {
+  return (
+    isRecord(value) &&
+    typeof value['id'] === 'string' &&
+    typeof value['title'] === 'string'
+  );
+}
+
+function parseCreateProjectBody(request: Request): Promise<CreateProjectInput> {
+  return request.json().then((body: unknown) => {
+    const payload = toRecord(body);
+    return {
+      name: toString(payload['name']),
+      ...(hasPayload(payload['description']) && {
+        description: toOptionalString(payload['description']),
+      }),
+    };
+  });
+}
+
+function parseUpdateProjectBody(request: Request): Promise<UpdateProjectInput> {
+  return request.json().then((body: unknown) => {
+    const payload = toRecord(body);
+    return {
+      ...(hasPayload(payload['name']) && { name: toString(payload['name']) }),
+      ...(hasPayload(payload['description']) && {
+        description: toOptionalString(payload['description']),
+      }),
+    };
+  });
+}
+
+function parseCreateItemBody(request: Request): Promise<CreateItemInput> {
+  return request.json().then((body: unknown) => {
+    const payload = toRecord(body);
+    return {
+      projectId: toString(payload['projectId']),
+      type: toString(payload['type']),
+      title: toString(payload['title']),
+      ...(hasPayload(payload['description']) && {
+        description: toOptionalString(payload['description']),
+      }),
+      ...(hasPayload(payload['parentId']) && { parentId: toString(payload['parentId']) }),
+      ...(hasPayload(payload['status']) && { status: toItemStatus(payload['status']) }),
+      ...(hasPayload(payload['priority']) && { priority: toPriority(payload['priority']) }),
+    };
+  });
+}
+
+function parseUpdateItemBody(request: Request): Promise<UpdateItemInput> {
+  return request.json().then((body: unknown) => {
+    const payload = toRecord(body);
+    return {
+      ...(hasPayload(payload['description']) && {
+        description: toOptionalString(payload['description']),
+      }),
+      ...(hasPayload(payload['parentId']) && { parentId: toString(payload['parentId']) }),
+      ...(hasPayload(payload['status']) && { status: toItemStatus(payload['status']) }),
+      ...(hasPayload(payload['title']) && { title: toString(payload['title']) }),
+      ...(hasPayload(payload['type']) && { type: toString(payload['type']) }),
+      ...(hasPayload(payload['priority']) && { priority: toPriority(payload['priority']) }),
+    };
+  });
+}
+
+function parseCreateLinkBody(request: Request): Promise<CreateLinkInput> {
+  return request.json().then((body: unknown) => {
+    const payload = toRecord(body);
+    return {
+      sourceId: toString(payload['sourceId']),
+      targetId: toString(payload['targetId']),
+      type: toLinkType(payload['type']) ?? 'depends_on',
+      ...(hasPayload(payload['description']) && {
+        description: toOptionalString(payload['description']),
+      }),
+    };
+  });
+}
+
+function parseUpdateLinkBody(request: Request): Promise<UpdateLinkInput> {
+  return request.json().then((body: unknown) => {
+    const payload = toRecord(body);
+    return {
+      ...(hasPayload(payload['type']) && { type: toLinkType(payload['type']) }),
+      ...(hasPayload(payload['description']) && {
+        description: toOptionalString(payload['description']),
+      }),
+    };
+  });
+}
 
 // Helper to simulate delays
 const delay = async (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -81,8 +304,8 @@ export const handlers = [
 
   http.get(`${API_BASE}/api/v1/projects/:id`, async ({ params }) => {
     await delay();
-    const { id } = params;
-    const project = findProjectById(id as string);
+    const id = toRouteId(params['id']);
+    const project = findProjectById(id);
 
     if (!project) {
       return HttpResponse.json({ error: 'Project not found' }, { status: 404 });
@@ -93,7 +316,7 @@ export const handlers = [
 
   http.post(`${API_BASE}/api/v1/projects`, async ({ request }) => {
     await delay();
-    const body = (await request.json()) as CreateProjectInput;
+    const body = await parseCreateProjectBody(request);
 
     const newProject: Project = {
       id: generateProjectId(),
@@ -109,8 +332,8 @@ export const handlers = [
 
   http.put(`${API_BASE}/api/v1/projects/:id`, async ({ params, request }) => {
     await delay();
-    const { id } = params;
-    const body = (await request.json()) as UpdateProjectInput;
+    const id = toRouteId(params['id']);
+    const body = await parseUpdateProjectBody(request);
     const projectIndex = mockProjects.findIndex((p) => p.id === id);
 
     if (projectIndex === -1) {
@@ -136,7 +359,7 @@ export const handlers = [
 
   http.delete(`${API_BASE}/api/v1/projects/:id`, async ({ params }) => {
     await delay();
-    const { id } = params;
+    const id = toRouteId(params['id']);
     const projectIndex = mockProjects.findIndex((p) => p.id === id);
 
     if (projectIndex === -1) {
@@ -167,8 +390,8 @@ export const handlers = [
 
   http.get(`${API_BASE}/api/v1/items/:id`, async ({ params }) => {
     await delay();
-    const { id } = params;
-    const item = findItemById(id as string);
+    const id = toRouteId(params['id']);
+    const item = findItemById(id);
 
     if (!item) {
       return HttpResponse.json({ error: 'Item not found' }, { status: 404 });
@@ -179,7 +402,7 @@ export const handlers = [
 
   http.post(`${API_BASE}/api/v1/items`, async ({ request }) => {
     await delay();
-    const body = (await request.json()) as CreateItemInput;
+    const body = await parseCreateItemBody(request);
 
     const newItem: Item = {
       id: generateItemId(),
@@ -202,8 +425,8 @@ export const handlers = [
 
   http.put(`${API_BASE}/api/v1/items/:id`, async ({ params, request }) => {
     await delay();
-    const { id } = params;
-    const body = (await request.json()) as UpdateItemInput;
+    const id = toRouteId(params['id']);
+    const body = await parseUpdateItemBody(request);
     const itemIndex = mockItems.findIndex((i) => i.id === id);
 
     if (itemIndex === -1) {
@@ -236,7 +459,7 @@ export const handlers = [
 
   http.delete(`${API_BASE}/api/v1/items/:id`, async ({ params }) => {
     await delay();
-    const { id } = params;
+    const id = toRouteId(params['id']);
     const itemIndex = mockItems.findIndex((i) => i.id === id);
 
     if (itemIndex === -1) {
@@ -274,8 +497,8 @@ export const handlers = [
 
   http.get(`${API_BASE}/api/v1/links/:id`, async ({ params }) => {
     await delay();
-    const { id } = params;
-    const link = findLinkById(id as string);
+    const id = toRouteId(params['id']);
+    const link = findLinkById(id);
 
     if (!link) {
       return HttpResponse.json({ error: 'Link not found' }, { status: 404 });
@@ -286,7 +509,7 @@ export const handlers = [
 
   http.post(`${API_BASE}/api/v1/links`, async ({ request }) => {
     await delay();
-    const body = (await request.json()) as CreateLinkInput;
+    const body = await parseCreateLinkBody(request);
 
     // Get source item to determine projectId
     const sourceItem = findItemById(body.sourceId);
@@ -311,8 +534,8 @@ export const handlers = [
 
   http.put(`${API_BASE}/api/v1/links/:id`, async ({ params, request }) => {
     await delay();
-    const { id } = params;
-    const body = (await request.json()) as UpdateLinkInput;
+    const id = toRouteId(params['id']);
+    const body = await parseUpdateLinkBody(request);
     const linkIndex = mockLinks.findIndex((l) => l.id === id);
 
     if (linkIndex === -1) {
@@ -338,7 +561,7 @@ export const handlers = [
 
   http.delete(`${API_BASE}/api/v1/links/:id`, async ({ params }) => {
     await delay();
-    const { id } = params;
+    const id = toRouteId(params['id']);
     const linkIndex = mockLinks.findIndex((l) => l.id === id);
 
     if (linkIndex === -1) {
@@ -379,23 +602,23 @@ export const handlers = [
 
   http.get(`${API_BASE}/api/v1/graph/impact/:id`, async ({ params }) => {
     await delay();
-    const { id } = params;
-    const item = findItemById(id as string);
+    const id = toRouteId(params['id']);
+    const item = findItemById(id);
 
     if (!item) {
       return HttpResponse.json({ error: 'Item not found' }, { status: 404 });
     }
 
-    const affectedLinks = filterLinksByTarget(id as string);
+    const affectedLinks = filterLinksByTarget(id);
     const affectedItems = affectedLinks
       .map((link) => findItemById(link.sourceId))
-      .filter(Boolean) as Item[];
+      .filter(isItem);
 
     const impactAnalysis: ImpactAnalysis = {
       affectedCount: affectedItems.length,
       affectedItems: affectedItems,
       depth: 1,
-      itemId: id as string,
+      itemId: id,
     };
 
     return HttpResponse.json(impactAnalysis);
@@ -403,23 +626,23 @@ export const handlers = [
 
   http.get(`${API_BASE}/api/v1/graph/dependencies/:id`, async ({ params }) => {
     await delay();
-    const { id } = params;
-    const item = findItemById(id as string);
+    const id = toRouteId(params['id']);
+    const item = findItemById(id);
 
     if (!item) {
       return HttpResponse.json({ error: 'Item not found' }, { status: 404 });
     }
 
-    const dependencyLinks = filterLinksBySource(id as string);
+    const dependencyLinks = filterLinksBySource(id);
     const dependencies = dependencyLinks
       .map((link) => findItemById(link.targetId))
-      .filter(Boolean) as Item[];
+      .filter(isItem);
 
     const dependencyAnalysis: DependencyAnalysis = {
       dependencies,
       dependencyCount: dependencies.length,
       depth: 1,
-      itemId: id as string,
+      itemId: id,
     };
 
     return HttpResponse.json(dependencyAnalysis);

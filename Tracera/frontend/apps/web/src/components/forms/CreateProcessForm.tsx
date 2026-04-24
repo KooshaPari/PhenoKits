@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { logger } from '@/lib/logger';
 
 import { useCreateProcess } from '../../hooks/useProcesses';
+import type { CreateProcessData } from '../../hooks/processes/process-types';
 
 // Constants
 const MAX_DESCRIPTION_LENGTH = 5000;
@@ -57,7 +58,8 @@ const processSchema = z.object({
   swimlanes: z.array(swimlaneSchema).optional(),
 });
 
-type ProcessFormData = z.infer<typeof processSchema>;
+type ProcessFormInput = z.input<typeof processSchema>;
+type ProcessFormData = z.output<typeof processSchema>;
 
 interface CreateProcessFormProps {
   onCancel: () => void;
@@ -69,60 +71,8 @@ interface CreateProcessFormProps {
 const buildProcessPayload = (
   data: ProcessFormData,
   projectId: string,
-): {
-  name: string;
-  projectId: string;
-  category?: string | undefined;
-  description?: string | undefined;
-  expectedDurationHours?: number | undefined;
-  exitCriteria?: string[] | undefined;
-  owner?: string | undefined;
-  purpose?: string | undefined;
-  responsibleTeam?: string | undefined;
-  slaHours?: number | undefined;
-  stages?: {
-    id: string;
-    name: string;
-    order: number;
-    required: boolean;
-    description?: string | undefined;
-    estimatedDurationMinutes?: number | undefined;
-    assignedRole?: string | undefined;
-  }[];
-  swimlanes?: {
-    id: string;
-    name: string;
-    role?: string | undefined;
-    description?: string | undefined;
-  }[];
-} => {
-  const payload: {
-    name: string;
-    projectId: string;
-    category?: string | undefined;
-    description?: string | undefined;
-    expectedDurationHours?: number | undefined;
-    exitCriteria?: string[] | undefined;
-    owner?: string | undefined;
-    purpose?: string | undefined;
-    responsibleTeam?: string | undefined;
-    slaHours?: number | undefined;
-    stages?: {
-      id: string;
-      name: string;
-      order: number;
-      required: boolean;
-      description?: string | undefined;
-      estimatedDurationMinutes?: number | undefined;
-      assignedRole?: string | undefined;
-    }[];
-    swimlanes?: {
-      id: string;
-      name: string;
-      role?: string | undefined;
-      description?: string | undefined;
-    }[];
-  } = {
+): CreateProcessData => {
+  const payload: CreateProcessData = {
     name: data.name,
     projectId,
   };
@@ -178,18 +128,20 @@ const buildProcessPayload = (
 
 export function CreateProcessForm({ projectId, onCancel, onSuccess }: CreateProcessFormProps) {
   const createProcess = useCreateProcess();
+  const resolver: Resolver<ProcessFormInput, unknown, ProcessFormData> =
+    zodResolver(processSchema);
 
   const {
     register,
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm<ProcessFormData>({
+  } = useForm<ProcessFormInput, unknown, ProcessFormData>({
     defaultValues: {
       stages: [],
       swimlanes: [],
     },
-    resolver: zodResolver(processSchema) as Resolver<ProcessFormData>,
+    resolver,
   });
 
   const {
@@ -213,7 +165,7 @@ export function CreateProcessForm({ projectId, onCancel, onSuccess }: CreateProc
   const onSubmit: SubmitHandler<ProcessFormData> = async (data) => {
     try {
       const payload = buildProcessPayload(data, projectId);
-      await createProcess.mutateAsync(payload as Parameters<typeof createProcess.mutateAsync>[0]);
+      await createProcess.mutateAsync(payload);
       onSuccess();
     } catch (error) {
       logger.error('Failed to create process:', error);
@@ -282,8 +234,11 @@ export function CreateProcessForm({ projectId, onCancel, onSuccess }: CreateProc
             </div>
 
             <div>
-              <label className='block text-sm font-medium'>Description</label>
+              <label htmlFor='process-description' className='block text-sm font-medium'>
+                Description
+              </label>
               <textarea
+                id='process-description'
                 {...register('description')}
                 rows={3}
                 placeholder='Describe this process...'
@@ -292,8 +247,11 @@ export function CreateProcessForm({ projectId, onCancel, onSuccess }: CreateProc
             </div>
 
             <div>
-              <label className='block text-sm font-medium'>Purpose</label>
+              <label htmlFor='process-purpose' className='block text-sm font-medium'>
+                Purpose
+              </label>
               <textarea
+                id='process-purpose'
                 {...register('purpose')}
                 rows={2}
                 placeholder='What is the purpose of this process?'
@@ -303,8 +261,11 @@ export function CreateProcessForm({ projectId, onCancel, onSuccess }: CreateProc
 
             <div className='grid gap-4 sm:grid-cols-2'>
               <div>
-                <label className='block text-sm font-medium'>Category</label>
+                <label htmlFor='process-category' className='block text-sm font-medium'>
+                  Category
+                </label>
                 <select
+                  id='process-category'
                   {...register('category')}
                   className='bg-background mt-1 w-full rounded-lg border px-3 py-2'
                 >
@@ -317,8 +278,11 @@ export function CreateProcessForm({ projectId, onCancel, onSuccess }: CreateProc
                 </select>
               </div>
               <div>
-                <label className='block text-sm font-medium'>Owner</label>
+                <label htmlFor='process-owner' className='block text-sm font-medium'>
+                  Owner
+                </label>
                 <input
+                  id='process-owner'
                   {...register('owner')}
                   placeholder='Process owner...'
                   className='bg-background mt-1 w-full rounded-lg border px-3 py-2'
@@ -328,16 +292,22 @@ export function CreateProcessForm({ projectId, onCancel, onSuccess }: CreateProc
 
             <div className='grid gap-4 sm:grid-cols-3'>
               <div>
-                <label className='block text-sm font-medium'>Responsible Team</label>
+                <label htmlFor='process-responsible-team' className='block text-sm font-medium'>
+                  Responsible Team
+                </label>
                 <input
+                  id='process-responsible-team'
                   {...register('responsibleTeam')}
                   placeholder='Team...'
                   className='bg-background mt-1 w-full rounded-lg border px-3 py-2'
                 />
               </div>
               <div>
-                <label className='block text-sm font-medium'>Expected Duration (hours)</label>
+                <label htmlFor='process-expected-duration' className='block text-sm font-medium'>
+                  Expected Duration (hours)
+                </label>
                 <input
+                  id='process-expected-duration'
                   {...register('expectedDurationHours')}
                   type='number'
                   min={0}
@@ -346,8 +316,11 @@ export function CreateProcessForm({ projectId, onCancel, onSuccess }: CreateProc
                 />
               </div>
               <div>
-                <label className='block text-sm font-medium'>SLA (hours)</label>
+                <label htmlFor='process-sla-hours' className='block text-sm font-medium'>
+                  SLA (hours)
+                </label>
                 <input
+                  id='process-sla-hours'
                   {...register('slaHours')}
                   type='number'
                   min={0}
@@ -464,8 +437,11 @@ export function CreateProcessForm({ projectId, onCancel, onSuccess }: CreateProc
 
           {/* Exit Criteria */}
           <div>
-            <label className='block text-sm font-medium'>Exit Criteria (one per line)</label>
+            <label htmlFor='process-exit-criteria' className='block text-sm font-medium'>
+              Exit Criteria (one per line)
+            </label>
             <textarea
+              id='process-exit-criteria'
               {...register('exitCriteria')}
               rows={3}
               placeholder='Conditions that must be met to complete the process...'

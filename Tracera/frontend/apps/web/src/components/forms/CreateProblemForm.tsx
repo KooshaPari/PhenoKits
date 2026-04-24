@@ -1,3 +1,5 @@
+import type { Resolver, SubmitHandler } from 'react-hook-form';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { X } from 'lucide-react';
 import { useForm } from 'react-hook-form';
@@ -25,7 +27,8 @@ const problemSchema = z.object({
   urgency: z.enum(impactLevels),
 });
 
-type ProblemFormData = z.infer<typeof problemSchema>;
+type ProblemFormInput = z.input<typeof problemSchema>;
+type ProblemFormData = z.output<typeof problemSchema>;
 
 interface CreateProblemFormProps {
   projectId: string;
@@ -47,21 +50,22 @@ const categoryOptions = [
 
 export function CreateProblemForm({ projectId, onCancel, onSuccess }: CreateProblemFormProps) {
   const createProblem = useCreateProblem();
+  const resolver: Resolver<ProblemFormInput, unknown, ProblemFormData> = zodResolver(problemSchema);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<ProblemFormData>({
+  } = useForm<ProblemFormInput, unknown, ProblemFormData>({
     defaultValues: {
       impactLevel: 'medium',
       priority: 'medium',
       urgency: 'medium',
     },
-    resolver: zodResolver(problemSchema) as any,
+    resolver,
   });
 
-  const onSubmit = async (data: ProblemFormData) => {
+  const onSubmit: SubmitHandler<ProblemFormData> = async (data) => {
     try {
       const payload: Parameters<typeof createProblem.mutateAsync>[0] = {
         impactLevel: data.impactLevel,
@@ -107,7 +111,12 @@ export function CreateProblemForm({ projectId, onCancel, onSuccess }: CreateProb
 
   return (
     <div className='fixed inset-0 z-50 flex items-center justify-center'>
-      <div className='fixed inset-0 bg-black/50 backdrop-blur-sm' onClick={onCancel} />
+      <button
+        className='fixed inset-0 bg-black/50 backdrop-blur-sm'
+        type='button'
+        onClick={onCancel}
+        aria-label='Close dialog'
+      />
       <div
         className='bg-background relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border p-6 shadow-2xl'
         role='dialog'
@@ -131,10 +140,11 @@ export function CreateProblemForm({ projectId, onCancel, onSuccess }: CreateProb
         <form onSubmit={handleSubmit(onSubmit)} className='mt-6 space-y-4'>
           {/* Title */}
           <div>
-            <label className='block text-sm font-medium'>
+            <label htmlFor='problem-title' className='block text-sm font-medium'>
               Title <span className='text-red-500'>*</span>
             </label>
             <input
+              id='problem-title'
               {...register('title')}
               placeholder='Brief description of the problem'
               className='bg-background mt-1 w-full rounded-lg border px-3 py-2'
@@ -144,8 +154,11 @@ export function CreateProblemForm({ projectId, onCancel, onSuccess }: CreateProb
 
           {/* Description */}
           <div>
-            <label className='block text-sm font-medium'>Description</label>
+            <label htmlFor='problem-description' className='block text-sm font-medium'>
+              Description
+            </label>
             <textarea
+              id='problem-description'
               {...register('description')}
               rows={4}
               placeholder='Detailed description of the problem, symptoms, and when it occurs...'
@@ -156,8 +169,11 @@ export function CreateProblemForm({ projectId, onCancel, onSuccess }: CreateProb
           {/* Category */}
           <div className='grid gap-4 sm:grid-cols-2'>
             <div>
-              <label className='block text-sm font-medium'>Category</label>
+              <label htmlFor='problem-category' className='block text-sm font-medium'>
+                Category
+              </label>
               <select
+                id='problem-category'
                 {...register('category')}
                 className='bg-background mt-1 w-full rounded-lg border px-3 py-2'
               >
@@ -170,8 +186,11 @@ export function CreateProblemForm({ projectId, onCancel, onSuccess }: CreateProb
               </select>
             </div>
             <div>
-              <label className='block text-sm font-medium'>Sub-Category</label>
+              <label htmlFor='problem-sub-category' className='block text-sm font-medium'>
+                Sub-Category
+              </label>
               <input
+                id='problem-sub-category'
                 {...register('subCategory')}
                 placeholder='Sub-category...'
                 className='bg-background mt-1 w-full rounded-lg border px-3 py-2'
@@ -182,10 +201,11 @@ export function CreateProblemForm({ projectId, onCancel, onSuccess }: CreateProb
           {/* Impact, Urgency, Priority */}
           <div className='grid gap-4 sm:grid-cols-3'>
             <div>
-              <label className='block text-sm font-medium'>
+              <label htmlFor='problem-impact-level' className='block text-sm font-medium'>
                 Impact Level <span className='text-red-500'>*</span>
               </label>
               <select
+                id='problem-impact-level'
                 {...register('impactLevel')}
                 className='bg-background mt-1 w-full rounded-lg border px-3 py-2'
               >
@@ -197,10 +217,11 @@ export function CreateProblemForm({ projectId, onCancel, onSuccess }: CreateProb
               </select>
             </div>
             <div>
-              <label className='block text-sm font-medium'>
+              <label htmlFor='problem-urgency' className='block text-sm font-medium'>
                 Urgency <span className='text-red-500'>*</span>
               </label>
               <select
+                id='problem-urgency'
                 {...register('urgency')}
                 className='bg-background mt-1 w-full rounded-lg border px-3 py-2'
               >
@@ -212,10 +233,11 @@ export function CreateProblemForm({ projectId, onCancel, onSuccess }: CreateProb
               </select>
             </div>
             <div>
-              <label className='block text-sm font-medium'>
+              <label htmlFor='problem-priority' className='block text-sm font-medium'>
                 Priority <span className='text-red-500'>*</span>
               </label>
               <select
+                id='problem-priority'
                 {...register('priority')}
                 className='bg-background mt-1 w-full rounded-lg border px-3 py-2'
               >
@@ -231,8 +253,11 @@ export function CreateProblemForm({ projectId, onCancel, onSuccess }: CreateProb
           {/* Affected Systems & Users */}
           <div className='grid gap-4 sm:grid-cols-2'>
             <div>
-              <label className='block text-sm font-medium'>Affected Systems</label>
+              <label htmlFor='problem-affected-systems' className='block text-sm font-medium'>
+                Affected Systems
+              </label>
               <input
+                id='problem-affected-systems'
                 {...register('affectedSystems')}
                 placeholder='Comma-separated list...'
                 className='bg-background mt-1 w-full rounded-lg border px-3 py-2'
@@ -240,8 +265,11 @@ export function CreateProblemForm({ projectId, onCancel, onSuccess }: CreateProb
               <p className='text-muted-foreground mt-1 text-xs'>e.g., API, Database, Frontend</p>
             </div>
             <div>
-              <label className='block text-sm font-medium'>Affected Users (estimated)</label>
+              <label htmlFor='problem-affected-users' className='block text-sm font-medium'>
+                Affected Users (estimated)
+              </label>
               <input
+                id='problem-affected-users'
                 {...register('affectedUsersEstimated')}
                 type='number'
                 min={0}
@@ -253,8 +281,11 @@ export function CreateProblemForm({ projectId, onCancel, onSuccess }: CreateProb
 
           {/* Business Impact */}
           <div>
-            <label className='block text-sm font-medium'>Business Impact Description</label>
+            <label htmlFor='problem-business-impact' className='block text-sm font-medium'>
+              Business Impact Description
+            </label>
             <textarea
+              id='problem-business-impact'
               {...register('businessImpactDescription')}
               rows={2}
               placeholder='Describe the business impact...'
@@ -265,24 +296,33 @@ export function CreateProblemForm({ projectId, onCancel, onSuccess }: CreateProb
           {/* Assignment */}
           <div className='grid gap-4 sm:grid-cols-3'>
             <div>
-              <label className='block text-sm font-medium'>Assigned To</label>
+              <label htmlFor='problem-assigned-to' className='block text-sm font-medium'>
+                Assigned To
+              </label>
               <input
+                id='problem-assigned-to'
                 {...register('assignedTo')}
                 placeholder='Person...'
                 className='bg-background mt-1 w-full rounded-lg border px-3 py-2'
               />
             </div>
             <div>
-              <label className='block text-sm font-medium'>Assigned Team</label>
+              <label htmlFor='problem-assigned-team' className='block text-sm font-medium'>
+                Assigned Team
+              </label>
               <input
+                id='problem-assigned-team'
                 {...register('assignedTeam')}
                 placeholder='Team...'
                 className='bg-background mt-1 w-full rounded-lg border px-3 py-2'
               />
             </div>
             <div>
-              <label className='block text-sm font-medium'>Owner</label>
+              <label htmlFor='problem-owner' className='block text-sm font-medium'>
+                Owner
+              </label>
               <input
+                id='problem-owner'
                 {...register('owner')}
                 placeholder='Problem owner...'
                 className='bg-background mt-1 w-full rounded-lg border px-3 py-2'

@@ -335,10 +335,9 @@ describe(deepClone, () => {
     expect(deepClone(true)).toBeTruthy();
   });
 
-  it('should not preserve functions', () => {
+  it('should reject functions because structuredClone cannot clone them', () => {
     const obj = { fn: () => {} };
-    const clone = deepClone(obj);
-    expect(clone.fn).toBeUndefined();
+    expect(() => deepClone(obj)).toThrow(/could not be cloned/i);
   });
 });
 
@@ -892,9 +891,9 @@ describe('localStorage utilities', () => {
 describe(copyToClipboard, () => {
   it('should use clipboard API when available', async () => {
     const mockWriteText = vi.fn().mockResolvedValue();
-    Object.assign(navigator, {
-      clipboard: { writeText: mockWriteText },
-    });
+    vi.spyOn(navigator, 'clipboard', 'get').mockReturnValue({
+      writeText: mockWriteText,
+    } as unknown as Clipboard);
 
     const result = await copyToClipboard('test text');
     expect(result).toBeTruthy();
@@ -903,49 +902,46 @@ describe(copyToClipboard, () => {
 
   it('should handle clipboard API errors', async () => {
     const mockWriteText = vi.fn().mockRejectedValue(new Error('Denied'));
-    Object.assign(navigator, {
-      clipboard: { writeText: mockWriteText },
-    });
+    vi.spyOn(navigator, 'clipboard', 'get').mockReturnValue({
+      writeText: mockWriteText,
+    } as unknown as Clipboard);
 
-    // Should fall back to execCommand
     const result = await copyToClipboard('test text');
     expect(typeof result).toBe('boolean');
   });
 });
 
 describe(downloadFile, () => {
+  beforeEach(() => {
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test-url');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it('should create download link', () => {
     const createElementSpy = vi.spyOn(document, 'createElement');
-    const appendChildSpy = vi
-      .spyOn(document.body, 'appendChild')
-      .mockImplementation((): Node => null as unknown as Node);
-    const removeChildSpy = vi
-      .spyOn(document.body, 'removeChild')
-      .mockImplementation((): Node => null as unknown as Node);
+    const appendSpy = vi.spyOn(document.body, 'append');
+    const removeChildSpy = vi.spyOn(document.body, 'removeChild');
+    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
 
     downloadFile('test content', 'test.txt', 'text/plain');
 
     expect(createElementSpy).toHaveBeenCalledWith('a');
-    expect(appendChildSpy).toHaveBeenCalled();
+    expect(appendSpy).toHaveBeenCalled();
+    expect(clickSpy).toHaveBeenCalled();
     expect(removeChildSpy).toHaveBeenCalled();
-
-    createElementSpy.mockRestore();
-    appendChildSpy.mockRestore();
-    removeChildSpy.mockRestore();
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:test-url');
   });
 
   it('should handle different file types', () => {
-    const appendChildSpy = vi
-      .spyOn(document.body, 'appendChild')
-      .mockImplementation((): Node => null as unknown as Node);
-    const removeChildSpy = vi
-      .spyOn(document.body, 'removeChild')
-      .mockImplementation((): Node => null as unknown as Node);
+    const appendSpy = vi.spyOn(document.body, 'append');
+    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
 
     downloadFile('{"test": true}', 'data.json', 'application/json');
-    expect(appendChildSpy).toHaveBeenCalled();
-
-    appendChildSpy.mockRestore();
-    removeChildSpy.mockRestore();
+    expect(appendSpy).toHaveBeenCalled();
+    expect(clickSpy).toHaveBeenCalled();
   });
 });

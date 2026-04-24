@@ -3,15 +3,17 @@
  */
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useCreateProject, useProject, useProjects } from '../../hooks/useProjects';
+import { useAuthStore } from '@/stores/authStore';
 
 // Mock fetch (vi.fn() compatible with fetch at runtime)
 const mockFetch = vi.fn();
 globalThis.fetch = mockFetch as unknown as typeof fetch;
+const TEST_TOKEN = 'test-token';
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -27,7 +29,17 @@ const createWrapper = () => {
 
 describe(useProjects, () => {
   beforeEach(() => {
+    globalThis.fetch = mockFetch as unknown as typeof fetch;
     vi.clearAllMocks();
+    act(() => {
+      useAuthStore.setState({ token: TEST_TOKEN } as any);
+    });
+  });
+
+  afterEach(() => {
+    act(() => {
+      useAuthStore.setState({ token: null } as any);
+    });
   });
 
   it('should fetch projects', async () => {
@@ -51,6 +63,15 @@ describe(useProjects, () => {
 
     expect(result.current.data).toEqual(mockProjects);
     expect(mockFetch).toHaveBeenCalledOnce();
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining('/api/v1/projects'),
+      expect.objectContaining({
+        credentials: 'include',
+        headers: expect.objectContaining({
+          Authorization: `Bearer ${TEST_TOKEN}`,
+        }),
+      }),
+    );
   });
 
   it('should handle fetch error', async () => {
@@ -73,7 +94,17 @@ describe(useProjects, () => {
 
 describe(useProject, () => {
   beforeEach(() => {
+    globalThis.fetch = mockFetch as unknown as typeof fetch;
     vi.clearAllMocks();
+    act(() => {
+      useAuthStore.setState({ token: TEST_TOKEN } as any);
+    });
+  });
+
+  afterEach(() => {
+    act(() => {
+      useAuthStore.setState({ token: null } as any);
+    });
   });
 
   it('should fetch a single project', async () => {
@@ -100,9 +131,10 @@ describe(useProject, () => {
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining('/api/v1/projects/1'),
       expect.objectContaining({
-        headers: {
+        headers: expect.objectContaining({
+          Authorization: `Bearer ${TEST_TOKEN}`,
           'X-Bulk-Operation': 'true',
-        },
+        }),
       }),
     );
   });
@@ -119,7 +151,17 @@ describe(useProject, () => {
 
 describe(useCreateProject, () => {
   beforeEach(() => {
+    globalThis.fetch = mockFetch as unknown as typeof fetch;
     vi.clearAllMocks();
+    act(() => {
+      useAuthStore.setState({ token: TEST_TOKEN } as any);
+    });
+  });
+
+  afterEach(() => {
+    act(() => {
+      useAuthStore.setState({ token: null } as any);
+    });
   });
 
   it('should create a project', async () => {

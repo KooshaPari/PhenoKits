@@ -4,6 +4,10 @@
  */
 
 import { configureAxe } from 'jest-axe';
+import { toHaveNoViolations } from 'jest-axe';
+import { expect } from 'vitest';
+
+expect.extend(toHaveNoViolations as unknown as Parameters<typeof expect.extend>[0]);
 
 // Configure axe-core with WCAG 2.1 Level AA standards
 export const axe = configureAxe({

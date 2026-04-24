@@ -3,15 +3,17 @@
  */
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useCreateLink, useLinks } from '../../hooks/useLinks';
+import { useAuthStore } from '../../stores/authStore';
 
 // Mock fetch at module level
 const mockFetch = vi.fn();
 globalThis.fetch = mockFetch as unknown as typeof fetch;
+const TEST_TOKEN = 'test-token';
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -27,13 +29,23 @@ const createWrapper = () => {
 
 describe(useLinks, () => {
   beforeEach(() => {
-    mockFetch.mockClear();
+    globalThis.fetch = mockFetch as unknown as typeof fetch;
+    mockFetch.mockReset();
+    act(() => {
+      useAuthStore.setState({ token: TEST_TOKEN } as any);
+    });
+  });
+
+  afterEach(() => {
+    act(() => {
+      useAuthStore.setState({ token: null } as any);
+    });
   });
 
   it('should fetch links', async () => {
     const mockLinksArray = [
-      { id: '1', sourceId: 'item-1', targetId: 'item-2', type: 'depends_on' },
-      { id: '2', sourceId: 'item-2', targetId: 'item-3', type: 'implements' },
+      { id: '1', source_id: 'item-1', target_id: 'item-2', type: 'depends_on' },
+      { id: '2', source_id: 'item-2', target_id: 'item-3', type: 'implements' },
     ];
 
     const mockResponse = {
@@ -54,8 +66,37 @@ describe(useLinks, () => {
       expect(result.current.isSuccess).toBeTruthy();
     });
 
-    expect(result.current.data).toEqual(mockResponse);
+    expect(result.current.data).toEqual({
+      links: [
+        {
+          id: '1',
+          sourceId: 'item-1',
+          source_id: 'item-1',
+          targetId: 'item-2',
+          target_id: 'item-2',
+          type: 'depends_on',
+        },
+        {
+          id: '2',
+          sourceId: 'item-2',
+          source_id: 'item-2',
+          targetId: 'item-3',
+          target_id: 'item-3',
+          type: 'implements',
+        },
+      ],
+      total: mockLinksArray.length,
+    });
     expect(mockFetch).toHaveBeenCalledOnce();
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining('/api/v1/links?'),
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          Authorization: `Bearer ${TEST_TOKEN}`,
+          'X-Bulk-Operation': 'true',
+        }),
+      }),
+    );
   });
 
   it('should fetch links with source filter', async () => {
@@ -84,7 +125,12 @@ describe(useLinks, () => {
     expect(result.current.data).toEqual(mockResponse);
     expect(globalThis.fetch).toHaveBeenCalledWith(
       expect.stringContaining('source_id=item-1'),
-      expect.any(Object),
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          Authorization: `Bearer ${TEST_TOKEN}`,
+          'X-Bulk-Operation': 'true',
+        }),
+      }),
     );
   });
 
@@ -113,7 +159,12 @@ describe(useLinks, () => {
 
     expect(globalThis.fetch).toHaveBeenCalledWith(
       expect.stringContaining('target_id=item-2'),
-      expect.any(Object),
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          Authorization: `Bearer ${TEST_TOKEN}`,
+          'X-Bulk-Operation': 'true',
+        }),
+      }),
     );
   });
 
@@ -137,7 +188,17 @@ describe(useLinks, () => {
 
 describe(useCreateLink, () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    globalThis.fetch = mockFetch as unknown as typeof fetch;
+    mockFetch.mockReset();
+    act(() => {
+      useAuthStore.setState({ token: TEST_TOKEN } as any);
+    });
+  });
+
+  afterEach(() => {
+    act(() => {
+      useAuthStore.setState({ token: null } as any);
+    });
   });
 
   it('should create a link', async () => {
@@ -172,6 +233,16 @@ describe(useCreateLink, () => {
     expect(globalThis.fetch).toHaveBeenCalledWith(
       expect.stringContaining('/api/v1/links'),
       expect.objectContaining({
+        body: JSON.stringify({
+          project_id: 'proj-1',
+          source_id: 'item-1',
+          target_id: 'item-2',
+          type: 'depends_on',
+        }),
+        headers: expect.objectContaining({
+          Authorization: `Bearer ${TEST_TOKEN}`,
+          'Content-Type': 'application/json',
+        }),
         method: 'POST',
       }),
     );

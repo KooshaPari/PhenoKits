@@ -3,12 +3,20 @@
  * Tests @tracertm/ui components for WCAG 2.1 Level AA compliance
  */
 
-import { render, screen } from '@testing-library/react';
+import { render as rtlRender, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { Alert, Badge, Button, Card, Input } from '@tracertm/ui';
 
 import { axe } from './setup';
+
+let container: HTMLElement;
+
+const render: typeof rtlRender = (...args) => {
+  const result = rtlRender(...args);
+  container = result.container;
+  return result;
+};
 
 // Mock Dialog and Tooltip to avoid hook violations
 const Dialog = ({ open, onOpenChange: _onOpenChange, children }: any) => (

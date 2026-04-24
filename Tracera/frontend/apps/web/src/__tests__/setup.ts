@@ -4,8 +4,9 @@
 
 import { cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { createRequire } from 'node:module';
 import React from 'react';
-import { afterEach, afterAll, beforeAll, vi } from 'vitest';
+import { afterEach, afterAll, beforeAll, beforeEach, vi } from 'vitest';
 
 type TestGlobals = typeof globalThis & {
   WebGL2RenderingContext?: unknown;
@@ -13,8 +14,17 @@ type TestGlobals = typeof globalThis & {
   ResizeObserver?: new (...args: unknown[]) => unknown;
   WebSocket?: new (url: string) => unknown;
   HTMLCanvasElement?: new (...args: unknown[]) => unknown;
+  __fetchMock__?: typeof fetch;
   __setFetchImpl__?: (impl: typeof fetch) => void;
+  user?: ReturnType<typeof import('@testing-library/user-event').default.setup>;
 };
+
+const require = createRequire(import.meta.url);
+const userEventModule = require('@testing-library/user-event') as {
+  default?: { setup: typeof import('@testing-library/user-event').default.setup } | undefined;
+  setup?: typeof import('@testing-library/user-event').default.setup | undefined;
+};
+const userEvent = userEventModule.default ?? userEventModule;
 
 // Mock WebGL2RenderingContext FIRST before any imports
 if (typeof globalThis !== 'undefined') {
@@ -46,6 +56,7 @@ vi.mock('@tanstack/react-router', async () => {
       navigate: vi.fn(),
     }),
     useLocation: () => ({ pathname: '/' }),
+    useMatches: () => [],
     useParams: () => ({}),
     Link: ({ children, to, ...props }: any) =>
       React.createElement(
@@ -115,10 +126,34 @@ Object.defineProperty(globalThis, 'localStorage', {
   writable: true,
 });
 
+beforeEach(() => {
+  if (typeof globalThis.window !== 'undefined' && !globalThis.window.navigator) {
+    Object.defineProperty(globalThis.window, 'navigator', {
+      configurable: true,
+      value: {},
+      writable: true,
+    });
+  }
+  if (typeof globalThis.window !== 'undefined' && !globalThis.window.navigator.clipboard) {
+    Object.defineProperty(globalThis.window.navigator, 'clipboard', {
+      configurable: true,
+      value: {
+        readText: vi.fn(async () => ''),
+        writeText: vi.fn(async () => {}),
+      },
+      writable: true,
+    });
+  }
+  (globalThis as TestGlobals).user = userEvent.setup!();
+});
+
 // Cleanup after each test
-afterEach(() => {
+afterEach(async () => {
   cleanup();
-  localStorageMock.clear();
+  await clearAllStores();
+  globalFetchImpl = defaultFetchImpl;
+  vi.mocked(fetchMock).mockClear();
+  vi.clearAllMocks();
 });
 
 // Mock window.matchMedia
@@ -141,6 +176,7 @@ if (typeof globalThis.window !== 'undefined') {
 // Mock navigator.clipboard
 if (typeof navigator !== 'undefined') {
   Object.defineProperty(navigator, 'clipboard', {
+    configurable: true,
     value: {
       readText: vi.fn(async () => ''),
       writeText: vi.fn(async () => {}),
@@ -285,7 +321,7 @@ if (typeof globalThis !== 'undefined') {
 
 // Mock fetch globally for API tests
 // Use a delegating mock so tests can override it in beforeEach
-let globalFetchImpl: typeof fetch = async (url) => {
+const defaultFetchImpl: typeof fetch = async (url) => {
   console.warn(`[WARN] Unmocked fetch to ${url}`);
   return Response.json(
     { error: 'Not mocked' },
@@ -296,11 +332,32 @@ let globalFetchImpl: typeof fetch = async (url) => {
   );
 };
 
-globalThis.fetch = vi.fn(async (url: string | URL | Request, options?: RequestInit) =>
+let globalFetchImpl: typeof fetch = defaultFetchImpl;
+
+const fetchMock = vi.fn(async (url: string | URL | Request, options?: RequestInit) =>
   globalFetchImpl(url, options),
 ) as typeof fetch;
 
+Object.defineProperty(globalThis, 'fetch', {
+  configurable: true,
+  get: () => fetchMock,
+  set: (impl: typeof fetch) => {
+    globalFetchImpl = impl;
+  },
+});
+
+if (typeof globalThis.window !== 'undefined') {
+  Object.defineProperty(globalThis.window, 'fetch', {
+    configurable: true,
+    get: () => fetchMock,
+    set: (impl: typeof fetch) => {
+      globalFetchImpl = impl;
+    },
+  });
+}
+
 // Export so tests can replace the implementation
+(globalThis as TestGlobals).__fetchMock__ = fetchMock;
 (globalThis as TestGlobals).__setFetchImpl__ = (impl: typeof fetch) => {
   globalFetchImpl = impl;
 };
@@ -420,22 +477,121 @@ export const waitForElementWithText = async (
  * Clear all stores and caches for a clean test state
  * Includes: zustand stores, React Query cache, localStorage
  */
-export const clearAllStores = () => {
-  // Clear localStorage
+export const clearAllStores = async () => {
+  const [
+    { useAuthStore },
+    { useChatStore },
+    { useItemsStore },
+    { useProjectStore },
+    { useSyncStore },
+    { useUIStore },
+    { useWebSocketStore },
+  ] = await Promise.all([
+    import('../stores/auth-store'),
+    import('../stores/chat-store'),
+    import('../stores/items-store'),
+    import('../stores/project-store'),
+    import('../stores/sync-store'),
+    import('../stores/ui-store'),
+    import('../stores/websocket-store'),
+  ]);
+
+  useAuthStore.getState().stopAutoRefresh();
+  useWebSocketStore.getState().disconnect();
+
   if (typeof localStorage !== 'undefined') {
     localStorage.clear();
   }
-
-  // Clear React Query cache (if it exists in the test)
-  if (typeof window !== 'undefined') {
-    (window as any).__REACT_QUERY_CACHE__ = undefined;
+  if (typeof sessionStorage !== 'undefined') {
+    sessionStorage.clear();
+  }
+  for (const key of [
+    'auth_token',
+    'tracertm-auth-store',
+    'tracertm-chat-store',
+    'tracertm-project-store',
+    'tracertm-ui-store',
+  ]) {
+    localStorageMock.removeItem(key);
   }
 
-  // Clear any zustand stores by removing from localStorage
-  Object.keys(localStorageMock).forEach((key) => {
-    if (key.includes('store') || key.includes('zustand')) {
-      localStorageMock.removeItem(key);
-    }
+  if (typeof window !== 'undefined') {
+    (window as any).__REACT_QUERY_CACHE__ = undefined;
+    window.document.documentElement.classList.remove('dark');
+  }
+
+  useAuthStore.persist.clearStorage();
+  useProjectStore.persist.clearStorage();
+  useUIStore.persist.clearStorage();
+  useChatStore.persist.clearStorage();
+
+  useAuthStore.setState({
+    account: null,
+    authKitRefreshToken: null,
+    isAuthenticated: false,
+    isLoading: false,
+    refreshTimer: null,
+    token: null,
+    user: null,
+  });
+  useItemsStore.setState({
+    isLoading: false,
+    items: new Map(),
+    itemsByProject: new Map(),
+    loadingItems: new Set(),
+    pendingCreates: new Map(),
+    pendingDeletes: new Set(),
+    pendingUpdates: new Map(),
+  });
+  useProjectStore.setState({
+    currentProject: null,
+    currentProjectId: null,
+    projectSettings: {},
+    recentProjects: [],
+  });
+  useSyncStore.setState({
+    conflicts: [],
+    failedMutations: [],
+    isOnline: typeof navigator !== 'undefined' ? navigator.onLine : true,
+    isSyncing: false,
+    lastSyncedAt: null,
+    pendingMutations: [],
+    syncError: null,
+  });
+  useUIStore.setState({
+    commandPaletteOpen: false,
+    currentView: 'FEATURE',
+    gridColumns: 3,
+    isDarkMode: false,
+    layoutMode: 'grid',
+    priorityFilter: [],
+    searchOpen: false,
+    searchQuery: '',
+    selectedItemId: null,
+    selectedItemIds: [],
+    sidebarOpen: true,
+    sidebarWidth: 280,
+    statusFilter: [],
+  });
+  useChatStore.setState({
+    abortController: null,
+    activeConversationId: null,
+    bubblePosition: { x: 24, y: 24 },
+    context: null,
+    conversations: [],
+    isOpen: false,
+    isStreaming: false,
+    mode: 'bubble',
+    selectedModel: 'gpt-4o-mini',
+    sidebarWidth: 420,
+    systemPromptOverride: null,
+  });
+  useWebSocketStore.setState({
+    activeChannels: new Set(),
+    events: [],
+    isConnected: false,
+    lastEvent: undefined,
+    reconnectAttempts: 0,
   });
 };
 
@@ -446,6 +602,6 @@ export const withAsyncCleanup = async (testFn: () => Promise<void>) => {
   try {
     await testFn();
   } finally {
-    clearAllStores();
+    await clearAllStores();
   }
 };

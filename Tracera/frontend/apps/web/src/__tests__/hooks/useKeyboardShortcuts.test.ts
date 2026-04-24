@@ -9,6 +9,8 @@ import {
   useKeyboardShortcuts,
 } from '@/hooks/useKeyboardShortcuts';
 
+const EMPTY_SHORTCUTS: KeyboardShortcutAction[] = [];
+
 describe(useKeyboardShortcuts, () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -22,13 +24,13 @@ describe(useKeyboardShortcuts, () => {
   });
 
   it('initializes with closed modal', () => {
-    const { result } = renderHook(() => useKeyboardShortcuts([]));
+    const { result } = renderHook(() => useKeyboardShortcuts(EMPTY_SHORTCUTS));
 
     expect(result.current.isShortcutsModalOpen).toBeFalsy();
   });
 
   it('opens and closes shortcuts modal', () => {
-    const { result } = renderHook(() => useKeyboardShortcuts([]));
+    const { result } = renderHook(() => useKeyboardShortcuts(EMPTY_SHORTCUTS));
 
     act(() => {
       result.current.setIsShortcutsModalOpen(true);
@@ -69,7 +71,7 @@ describe(useKeyboardShortcuts, () => {
   });
 
   it('registers new shortcuts dynamically', () => {
-    const { result } = renderHook(() => useKeyboardShortcuts([]));
+    const { result } = renderHook(() => useKeyboardShortcuts(EMPTY_SHORTCUTS));
 
     expect(result.current.allShortcuts).toHaveLength(0);
 
@@ -96,8 +98,9 @@ describe(useKeyboardShortcuts, () => {
       key: 's',
       meta: true,
     };
+    const shortcuts = [shortcut];
 
-    const { result } = renderHook(() => useKeyboardShortcuts([shortcut]));
+    const { result } = renderHook(() => useKeyboardShortcuts(shortcuts));
 
     expect(result.current.allShortcuts).toHaveLength(1);
 
@@ -151,8 +154,9 @@ describe(useKeyboardShortcuts, () => {
       key: 's',
       meta: true,
     };
+    const shortcuts = [shortcut];
 
-    const { result: resultDisabled } = renderHook(() => useKeyboardShortcuts([shortcut], false));
+    const { result: resultDisabled } = renderHook(() => useKeyboardShortcuts(shortcuts, false));
 
     expect(resultDisabled.current.allShortcuts).toHaveLength(0);
   });

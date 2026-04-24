@@ -1,9 +1,10 @@
 import { BarChart3, CheckCircle, Filter, Play, Plus, Search, XCircle } from 'lucide-react';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 
 import type { TestRun, TestRunStatus, TestRunType } from '@tracertm/types';
 
 import { useTestRunStats, useTestRuns } from '../../../hooks/useTestRuns';
+import type { TestRunFilters } from '../../../hooks/test-runs/test-run-types';
 
 const statusColors: Record<TestRunStatus, string> = {
   blocked: 'bg-yellow-100 text-yellow-700',
@@ -30,26 +31,58 @@ const typeLabels: Record<TestRunType, string> = {
   scheduled: 'Scheduled',
 };
 
+const testRunStatuses = [
+  'pending',
+  'running',
+  'passed',
+  'failed',
+  'blocked',
+  'cancelled',
+] as const satisfies TestRunStatus[];
+
+const testRunTypes = ['manual', 'automated', 'ci_cd', 'scheduled'] as const satisfies TestRunType[];
+
+const parseStatusFilter = (value: string): TestRunStatus | '' => {
+  const status = testRunStatuses.find((candidate) => candidate === value);
+  if (status !== undefined) {
+    return status;
+  }
+  return '';
+};
+
+const parseTypeFilter = (value: string): TestRunType | '' => {
+  const type = testRunTypes.find((candidate) => candidate === value);
+  if (type !== undefined) {
+    return type;
+  }
+  return '';
+};
+
 interface TestRunViewProps {
   projectId: string;
 }
 
 export function TestRunView({ projectId }: TestRunViewProps) {
+  const runNameId = useId();
+  const testSuiteId = useId();
+  const statusId = useId();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [statusFilter, setStatusFilter] = useState<TestRunStatus | ''>('');
   const [typeFilter, setTypeFilter] = useState<TestRunType | ''>('');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filters = {
-    projectId,
-    ...(statusFilter && { status: statusFilter }),
-    ...(typeFilter && { runType: typeFilter }),
-  };
+  const filters: TestRunFilters = { projectId };
+  if (statusFilter !== '') {
+    filters.status = statusFilter;
+  }
+  if (typeFilter !== '') {
+    filters.runType = typeFilter;
+  }
   const { data, isLoading, error } = useTestRuns(filters);
 
   const { data: stats } = useTestRunStats(projectId);
 
-  const testRuns = data?.testRuns ?? [];
+  const testRuns = data === undefined ? [] : data.testRuns;
   const filteredRuns = testRuns.filter((r) =>
     r.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
@@ -99,14 +132,18 @@ export function TestRunView({ projectId }: TestRunViewProps) {
               <CheckCircle className='h-4 w-4 text-green-500' />
               Passed
             </div>
-            <div className='mt-2 text-2xl font-bold'>{stats.byStatus?.['passed'] ?? 0}</div>
+            <div className='mt-2 text-2xl font-bold'>
+              {stats.byStatus === undefined ? 0 : (stats.byStatus['passed'] ?? 0)}
+            </div>
           </div>
           <div className='bg-card rounded-lg border p-4'>
             <div className='text-muted-foreground flex items-center gap-2 text-sm'>
               <XCircle className='h-4 w-4 text-red-500' />
               Failed
             </div>
-            <div className='mt-2 text-2xl font-bold'>{stats.byStatus?.['failed'] ?? 0}</div>
+            <div className='mt-2 text-2xl font-bold'>
+              {stats.byStatus === undefined ? 0 : (stats.byStatus['failed'] ?? 0)}
+            </div>
           </div>
           <div className='bg-card rounded-lg border p-4'>
             <div className='text-muted-foreground flex items-center gap-2 text-sm'>
@@ -139,7 +176,7 @@ export function TestRunView({ projectId }: TestRunViewProps) {
           <select
             value={statusFilter}
             onChange={(e) => {
-              setStatusFilter(e.target.value as TestRunStatus | '');
+              setStatusFilter(parseStatusFilter(e.target.value));
             }}
             className='bg-background rounded-lg border px-3 py-2'
           >
@@ -154,7 +191,7 @@ export function TestRunView({ projectId }: TestRunViewProps) {
           <select
             value={typeFilter}
             onChange={(e) => {
-              setTypeFilter(e.target.value as TestRunType | '');
+              setTypeFilter(parseTypeFilter(e.target.value));
             }}
             className='bg-background rounded-lg border px-3 py-2'
           >
@@ -243,8 +280,11 @@ export function TestRunView({ projectId }: TestRunViewProps) {
             </div>
             <div className='space-y-3'>
               <div>
-                <label className='text-xs font-semibold uppercase'>Run Name</label>
+                <label htmlFor={runNameId} className='text-xs font-semibold uppercase'>
+                  Run Name
+                </label>
                 <input
+                  id={runNameId}
                   type='text'
                   placeholder='e.g. Regression Tests - Build 123'
                   className='bg-muted/50 mt-1 w-full rounded-lg border px-3 py-2 text-sm'
@@ -252,8 +292,13 @@ export function TestRunView({ projectId }: TestRunViewProps) {
                 />
               </div>
               <div>
-                <label className='text-xs font-semibold uppercase'>Test Suite</label>
-                <select className='bg-muted/50 mt-1 w-full rounded-lg border px-3 py-2 text-sm'>
+                <label htmlFor={testSuiteId} className='text-xs font-semibold uppercase'>
+                  Test Suite
+                </label>
+                <select
+                  id={testSuiteId}
+                  className='bg-muted/50 mt-1 w-full rounded-lg border px-3 py-2 text-sm'
+                >
                   <option>Select a test suite...</option>
                   <option>Unit Tests</option>
                   <option>Integration Tests</option>
@@ -261,8 +306,13 @@ export function TestRunView({ projectId }: TestRunViewProps) {
                 </select>
               </div>
               <div>
-                <label className='text-xs font-semibold uppercase'>Status</label>
-                <select className='bg-muted/50 mt-1 w-full rounded-lg border px-3 py-2 text-sm'>
+                <label htmlFor={statusId} className='text-xs font-semibold uppercase'>
+                  Status
+                </label>
+                <select
+                  id={statusId}
+                  className='bg-muted/50 mt-1 w-full rounded-lg border px-3 py-2 text-sm'
+                >
                   <option>Pending</option>
                   <option>Running</option>
                   <option>Passed</option>

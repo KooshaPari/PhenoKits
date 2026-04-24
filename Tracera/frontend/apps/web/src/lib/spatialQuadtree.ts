@@ -171,10 +171,16 @@ class QuadtreeInternal<T> {
     this.divided = true;
 
     for (const node of existingNodes) {
-      this.northeast.insert(node) ||
-        this.northwest.insert(node) ||
-        this.southeast.insert(node) ||
-        this.southwest.insert(node);
+      if (this.northeast.insert(node)) {
+        continue;
+      }
+      if (this.northwest.insert(node)) {
+        continue;
+      }
+      if (this.southeast.insert(node)) {
+        continue;
+      }
+      this.southwest.insert(node);
     }
   }
 

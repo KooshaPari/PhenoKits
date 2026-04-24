@@ -66,8 +66,10 @@ export function StreamingGraphView({
     zoom,
   });
 
-  // Load graph on mount and viewport change
-  useEffect(() => {}, [loadGraph]);
+  // Load graph on mount and when the loader changes.
+  useEffect(() => {
+    void loadGraph();
+  }, [loadGraph]);
 
   // Update previous viewport reference
   useEffect(() => {
@@ -77,8 +79,12 @@ export function StreamingGraphView({
 
   // Handle viewport changes
   const handleViewportChange = useCallback(
-    (newViewport: ViewportBounds) => {},
-    [onViewportChange, loadViewport],
+    (newViewport: ViewportBounds) => {
+      setViewport(newViewport);
+      onViewportChange?.(newViewport);
+      void loadViewport(newViewport);
+    },
+    [loadViewport, onViewportChange],
   );
 
   // Pan handlers
@@ -124,7 +130,11 @@ export function StreamingGraphView({
   }, []);
 
   // Reset handler
-  const handleReset = useCallback(() => {}, [reset, initialViewport, loadGraph]);
+  const handleReset = useCallback(() => {
+    setViewport(initialViewport);
+    reset();
+    void loadGraph();
+  }, [initialViewport, loadGraph, reset]);
 
   return (
     <div className={`relative ${className}`}>

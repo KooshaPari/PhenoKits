@@ -20,7 +20,7 @@
 import type { Node, Edge } from '@xyflow/react';
 import type { Attributes } from 'graphology-types';
 
-import Graph from 'graphology';
+import GraphologyGraph from 'graphology';
 // Import clustering
 import louvain from 'graphology-communities-louvain';
 // Import layout algorithms
@@ -31,6 +31,10 @@ import random from 'graphology-layout/random';
 import { density, diameter } from 'graphology-metrics/graph';
 
 import { logger } from '@/lib/logger';
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
 
 /**
  * Node attributes stored in Graphology
@@ -109,12 +113,12 @@ export interface LayoutOptions {
  * Main GraphologyDataLayer class
  */
 export class GraphologyDataLayer {
-  private graph: Graph;
+  private graph: GraphologyGraph<GraphologyNodeData, GraphologyEdgeData>;
   private performanceMetrics: PerformanceMetrics;
   private communities?: Map<string, number> | undefined;
 
   constructor() {
-    this.graph = new Graph({
+    this.graph = new GraphologyGraph<GraphologyNodeData, GraphologyEdgeData>({
       multi: false,
       type: 'directed',
       allowSelfLoops: false,
@@ -133,7 +137,7 @@ export class GraphologyDataLayer {
   /**
    * Get the underlying Graphology instance
    */
-  getGraph(): Graph {
+  getGraph(): GraphologyGraph<GraphologyNodeData, GraphologyEdgeData> {
     return this.graph;
   }
 
@@ -179,15 +183,15 @@ export class GraphologyDataLayer {
    * Add a single node to the graph
    */
   addNode(node: Node): void {
-    const data = (node.data as any) || {};
+    const data = isRecord(node.data) ? node.data : {};
     const attributes: GraphologyNodeData = {
       id: node['id'],
-      label: typeof data.label === 'string' ? data.label : node['id'],
+      label: typeof data['label'] === 'string' ? data['label'] : node['id'],
       type: typeof node.type === 'string' ? node.type : 'default',
       x: node.position?.x || 0,
       y: node.position?.y || 0,
-      size: typeof data.size === 'number' ? data.size : 10,
-      color: typeof data.color === 'string' ? data.color : '#64748b',
+      size: typeof data['size'] === 'number' ? data['size'] : 10,
+      color: typeof data['color'] === 'string' ? data['color'] : '#64748b',
       ...data,
     };
 
@@ -209,19 +213,22 @@ export class GraphologyDataLayer {
     // Skip if source or target doesn't exist
     if (!this.graph.hasNode(edge.source) || !this.graph.hasNode(edge.target)) {
       logger.warn(
-        `[GraphologyDataLayer] Skipping edge ${edge['id']}: ` + `source or target node not found`,
+        `[GraphologyDataLayer] Skipping edge ${edge['id']}: source or target node not found`,
       );
       return;
     }
 
-    const data = (edge.data as any) || {};
+    const data = isRecord(edge.data) ? edge.data : {};
+    const stroke =
+      isRecord(edge.style) && typeof edge.style['stroke'] === 'string'
+        ? edge.style['stroke']
+        : '#94a3b8';
     const attributes: GraphologyEdgeData = {
       id: edge['id'],
-      label: typeof data.label === 'string' ? data.label : undefined,
+      label: typeof data['label'] === 'string' ? data['label'] : undefined,
       type: typeof edge.type === 'string' ? edge.type : 'default',
-      weight: typeof data.weight === 'number' ? data.weight : 1,
-      color:
-        typeof (edge.style as any)?.stroke === 'string' ? (edge.style as any).stroke : '#94a3b8',
+      weight: typeof data['weight'] === 'number' ? data['weight'] : 1,
+      color: stroke,
       ...data,
     };
 
@@ -231,14 +238,11 @@ export class GraphologyDataLayer {
 
       if (existingEdge) {
         // Update existing edge attributes using updateEdgeAttributes
-        this.graph.updateEdgeAttributes(edge.source, edge.target, (attrs) => ({
-          ...attrs,
-          ...attributes,
-        }));
+        this.graph.updateEdgeAttributes(edge.source, edge.target, (attrs) => ({ ...attrs, ...attributes }));
       } else {
         this.graph.addEdge(edge.source, edge.target, attributes);
       }
-    } catch (error) {
+    } catch {
       // Silently skip duplicate edges in simple directed graphs
       // This is expected when multi:false and edge already exists
     }
@@ -269,10 +273,7 @@ export class GraphologyDataLayer {
    */
   updateNode(nodeId: string, updates: Partial<GraphologyNodeData>): void {
     if (this.graph.hasNode(nodeId)) {
-      this.graph.updateNodeAttributes(nodeId, (attrs) => ({
-        ...attrs,
-        ...updates,
-      }));
+      this.graph.updateNodeAttributes(nodeId, (attrs) => ({ ...attrs, ...updates }));
     }
   }
 
@@ -281,10 +282,7 @@ export class GraphologyDataLayer {
    */
   updateEdge(source: string, target: string, updates: Partial<GraphologyEdgeData>): void {
     if (this.graph.hasEdge(source, target)) {
-      this.graph.updateEdgeAttributes(source, target, (attrs) => ({
-        ...attrs,
-        ...updates,
-      }));
+      this.graph.updateEdgeAttributes(source, target, (attrs) => ({ ...attrs, ...updates }));
     }
   }
 
@@ -300,31 +298,29 @@ export class GraphologyDataLayer {
 
     // Convert nodes
     this.graph.forEachNode((nodeId, attributes) => {
-      const attrs = attributes as GraphologyNodeData;
       nodes.push({
         id: nodeId,
-        type: attrs['type'] || 'default',
+        type: attributes['type'] || 'default',
         position: {
-          x: attrs.x || 0,
-          y: attrs.y || 0,
+          x: attributes['x'] || 0,
+          y: attributes['y'] || 0,
         },
         data: {
-          ...attrs,
+          ...attributes,
         },
       });
     });
 
     // Convert edges
     this.graph.forEachEdge((edgeId, attributes, source, target) => {
-      const attrs = attributes as GraphologyEdgeData;
       edges.push({
-        id: attrs['id'] || edgeId,
+        id: attributes['id'] || edgeId,
         source,
         target,
-        type: attrs['type'] || 'default',
-        ...(attrs['label'] !== undefined ? { label: attrs['label'] } : {}),
-        data: attrs,
-        ...(attrs.color ? { style: { stroke: attrs.color } } : {}),
+        type: attributes['type'] || 'default',
+        ...(attributes['label'] !== undefined ? { label: attributes['label'] } : {}),
+        data: attributes,
+        ...(attributes['color'] ? { style: { stroke: attributes['color'] } } : {}),
       });
     });
 
@@ -385,7 +381,7 @@ export class GraphologyDataLayer {
           break;
 
         default:
-          throw new Error(`Unknown layout algorithm: ${algorithm}`);
+          throw new Error('Unknown layout algorithm: ' + String(algorithm));
       }
 
       const endTime = performance.now();
@@ -455,7 +451,7 @@ export class GraphologyDataLayer {
       let totalDegree = 0;
       this.graph.forEachNode((node) => {
         totalDegree += this.graph.degree(node);
-      });
+        });
       avgDegree = nodeCount > 0 ? totalDegree / nodeCount : 0;
     } catch (error) {
       logger.warn('[GraphologyDataLayer] Failed to calculate some metrics:', error);

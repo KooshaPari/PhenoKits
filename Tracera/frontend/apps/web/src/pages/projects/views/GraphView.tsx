@@ -3,7 +3,7 @@
 // Uses Python backend for BOTH items and links so one DB source (avoids 0 nodes when Go has no items).
 
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { useNavigate, useParams } from '@tanstack/react-router';
+import { useParams } from '@tanstack/react-router';
 import { useEffect } from 'react';
 
 import { client } from '@/api/client';
@@ -22,10 +22,11 @@ interface GraphViewProps {
   projectId?: string;
 }
 
+const handleNavigateToItem = (_itemId: string): void => {};
+
 export function GraphView({ projectId: projectIdProp }: GraphViewProps) {
   const { projectId } = useParams({ strict: false });
   const resolvedProjectId = projectIdProp ?? projectId;
-  const navigate = useNavigate();
 
   // OPTIMIZATION: Reduced page sizes for faster initial load
   const pageSizeItems = 200;
@@ -44,9 +45,10 @@ export function GraphView({ projectId: projectIdProp }: GraphViewProps) {
     },
     initialPageParam: 0,
     queryFn: async ({ pageParam }) => {
+      const skip = typeof pageParam === 'number' ? pageParam : 0;
       const base = getGraphBackendURL();
       const res = await fetch(
-        `${base}/api/v1/items?project_id=${resolvedProjectId}&limit=${pageSizeItems}&skip=${pageParam}`,
+        `${base}/api/v1/items?project_id=${resolvedProjectId}&limit=${pageSizeItems}&skip=${skip}`,
         {
           headers: {
             'X-Bulk-Operation': 'true',
@@ -71,9 +73,10 @@ export function GraphView({ projectId: projectIdProp }: GraphViewProps) {
     },
     initialPageParam: 0,
     queryFn: async ({ pageParam }) => {
+      const skip = typeof pageParam === 'number' ? pageParam : 0;
       const base = getGraphBackendURL();
       const res = await fetch(
-        `${base}/api/v1/links?project_id=${resolvedProjectId}&limit=${pageSizeLinks}&skip=${pageParam}`,
+        `${base}/api/v1/links?project_id=${resolvedProjectId}&limit=${pageSizeLinks}&skip=${skip}`,
         {
           headers: {
             'X-Bulk-Operation': 'true', // Python backend skips rate limit when present
@@ -89,40 +92,24 @@ export function GraphView({ projectId: projectIdProp }: GraphViewProps) {
     queryKey: ['graph-links', resolvedProjectId],
   });
 
+  const { data: itemsData, fetchNextPage: fetchItemsNextPage } = itemsQuery;
+  const { data: linksData, fetchNextPage: fetchLinksNextPage } = linksQuery;
+
   // OPTIMIZATION: Parallel prefetch of first pages on mount
   // This reduces initial load time by ~30-40%
   useEffect(() => {
-    if (!resolvedProjectId || itemsQuery.data || linksQuery.data) {
+    if (!resolvedProjectId || itemsData || linksData) {
       return;
     }
 
     // Fetch initial pages in parallel instead of sequentially
-    Promise.all([itemsQuery.fetchNextPage(), linksQuery.fetchNextPage()]).catch(() => {
+    Promise.all([fetchItemsNextPage(), fetchLinksNextPage()]).catch(() => {
       // Errors handled by React Query
     });
-  }, [
-    resolvedProjectId,
-    itemsQuery.data,
-    itemsQuery.fetchNextPage,
-    linksQuery.data,
-    linksQuery.fetchNextPage,
-  ]);
+  }, [resolvedProjectId, itemsData, fetchItemsNextPage, linksData, fetchLinksNextPage]);
 
-  // Continue fetching next pages as user explores
-  useEffect(() => {
-    if (itemsQuery.hasNextPage && !itemsQuery.isFetchingNextPage) {
-      undefined;
-    }
-  }, [itemsQuery.hasNextPage, itemsQuery.isFetchingNextPage, itemsQuery.fetchNextPage]);
-
-  useEffect(() => {
-    if (linksQuery.hasNextPage && !linksQuery.isFetchingNextPage) {
-      undefined;
-    }
-  }, [linksQuery.hasNextPage, linksQuery.isFetchingNextPage, linksQuery.fetchNextPage]);
-
-  const items = itemsQuery.data?.pages.flatMap((p: any) => p.items ?? []) ?? [];
-  const rawLinks = linksQuery.data?.pages.flatMap((p: any) => p.links ?? []) ?? [];
+  const items = itemsData?.pages.flatMap((p: any) => p.items ?? []) ?? [];
+  const rawLinks = linksData?.pages.flatMap((p: any) => p.links ?? []) ?? [];
   // Const _itemsTotal = itemsQuery.data?.pages?.[itemsQuery.data.pages.length - 1]?.total ?? 0;
   // Const _linksTotal = linksQuery.data?.pages?.[linksQuery.data.pages.length - 1]?.total ?? 0;
   const itemsLoading = itemsQuery.isLoading || itemsQuery.isFetching;
@@ -144,8 +131,6 @@ export function GraphView({ projectId: projectIdProp }: GraphViewProps) {
   const visibleLinks = links
     .filter((l: any) => visibleNodeIds.has(l.sourceId) && visibleNodeIds.has(l.targetId))
     .slice(0, MAX_EDGES);
-
-  const handleNavigateToItem = (itemId: string) => {};
 
   return (
     <div className='relative h-full'>

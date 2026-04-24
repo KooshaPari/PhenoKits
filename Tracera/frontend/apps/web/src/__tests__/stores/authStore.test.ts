@@ -3,16 +3,38 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useAuthStore } from '../../stores/authStore';
 
+type TestGlobals = typeof globalThis & {
+  __setFetchImpl__?: (impl: typeof fetch) => void;
+};
+
+const mockUser = {
+  email: 'test@example.com',
+  id: '1',
+  name: 'Test User',
+};
+
 describe('authStore', () => {
   beforeEach(() => {
-    // Reset store state before each test
-    const { logout } = useAuthStore.getState();
-    logout();
+    const { refreshTimer } = useAuthStore.getState();
+    if (refreshTimer) {
+      clearInterval(refreshTimer);
+    }
+    useAuthStore.setState({
+      account: null,
+      authKitRefreshToken: null,
+      isAuthenticated: false,
+      isLoading: false,
+      refreshTimer: null,
+      token: null,
+      user: null,
+    });
     localStorage.clear();
+    sessionStorage.clear();
+    vi.restoreAllMocks();
   });
 
   describe('initial state', () => {
@@ -97,33 +119,40 @@ describe('authStore', () => {
     });
   });
 
-  describe('login', () => {
-    it('should login successfully', async () => {
+  describe('loginWithCode', () => {
+    it('should authenticate with AuthKit callback response', async () => {
       const { result } = renderHook(() => useAuthStore());
+      (globalThis as TestGlobals).__setFetchImpl__?.(async () =>
+        Response.json({
+          refresh_token: 'refresh-token',
+          token: 'mock-jwt-token',
+          user: mockUser,
+        }),
+      );
 
       await act(async () => {
-        await result.current.login('test@example.com', 'password');
+        await result.current.loginWithCode('auth-code', 'auth-state');
       });
 
       expect(result.current.isAuthenticated).toBeTruthy();
-      expect(result.current.user).toEqual({
-        email: 'test@example.com',
-        id: '1',
-        name: 'test',
-      });
+      expect(result.current.user).toEqual(mockUser);
       expect(result.current.token).toBe('mock-jwt-token');
+      expect(result.current.authKitRefreshToken).toBe('refresh-token');
+      expect(localStorage.getItem('auth_token')).toBe('mock-jwt-token');
     });
 
-    it('should set loading state during login', async () => {
+    it('should reject missing callback parameters without authenticating', async () => {
       const { result } = renderHook(() => useAuthStore());
 
-      // Start login
-      act(() => {
-        result.current.login('test@example.com', 'password');
+      await act(async () => {
+        await expect(result.current.loginWithCode('', 'auth-state')).rejects.toThrow(
+          'Authorization code and state are required',
+        );
       });
 
-      // Login should eventually complete
-      expect(result.current).toBeDefined();
+      expect(result.current.isLoading).toBeFalsy();
+      expect(result.current.isAuthenticated).toBeFalsy();
+      expect(result.current.user).toBeNull();
     });
   });
 
@@ -131,19 +160,20 @@ describe('authStore', () => {
     it('should clear all auth data', async () => {
       const { result } = renderHook(() => useAuthStore());
 
-      // Login first
-      await act(async () => {
-        await result.current.login('test@example.com', 'password');
+      act(() => {
+        result.current.setUser(mockUser);
+        result.current.setToken('mock-jwt-token');
+        useAuthStore.setState({ authKitRefreshToken: 'refresh-token' });
       });
 
-      // Then logout
-      act(() => {
-        result.current.logout();
+      await act(async () => {
+        await result.current.logout();
       });
 
       expect(result.current.user).toBeNull();
       expect(result.current.token).toBeNull();
       expect(result.current.isAuthenticated).toBeFalsy();
+      expect(result.current.authKitRefreshToken).toBeNull();
       expect(localStorage.getItem('auth_token')).toBeNull();
     });
   });
@@ -152,12 +182,10 @@ describe('authStore', () => {
     it('should update user profile', async () => {
       const { result } = renderHook(() => useAuthStore());
 
-      // Login first
-      await act(async () => {
-        await result.current.login('test@example.com', 'password');
+      act(() => {
+        result.current.setUser(mockUser);
       });
 
-      // Update profile
       act(() => {
         result.current.updateProfile({
           avatar: 'avatar.jpg',
@@ -190,17 +218,18 @@ describe('authStore', () => {
     it('should persist auth state to localStorage', async () => {
       const { result } = renderHook(() => useAuthStore());
 
-      await act(async () => {
-        await result.current.login('test@example.com', 'password');
+      act(() => {
+        result.current.setUser(mockUser);
+        result.current.setToken('mock-jwt-token');
       });
 
-      // Check that state was persisted
       const storedData = localStorage.getItem('tracertm-auth-store');
       expect(storedData).toBeTruthy();
 
       if (storedData) {
         const parsed = JSON.parse(storedData);
-        expect(parsed.state.user).toBeTruthy();
+        expect(parsed.state.user).toEqual(mockUser);
+        expect(parsed.state.token).toBe('mock-jwt-token');
         expect(parsed.state.isAuthenticated).toBeTruthy();
       }
     });

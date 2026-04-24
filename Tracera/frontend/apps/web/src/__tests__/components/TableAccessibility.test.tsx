@@ -17,7 +17,7 @@ import {
 
 describe('Table Components - Accessibility', () => {
   describe('Base Table Component', () => {
-    it('should render table with role and aria-label', () => {
+    it('should render semantic table with aria-label', () => {
       const { container } = render(
         <Table ariaLabel='Test table'>
           <TableHeader>
@@ -34,7 +34,7 @@ describe('Table Components - Accessibility', () => {
       );
 
       const table = container.querySelector('table');
-      expect(table).toHaveAttribute('role', 'table');
+      expect(table?.tagName).toBe('TABLE');
       expect(table).toHaveAttribute('aria-label', 'Test table');
     });
 
@@ -70,7 +70,7 @@ describe('Table Components - Accessibility', () => {
   });
 
   describe('TableHeader Component', () => {
-    it('should have rowgroup role', () => {
+    it('should render semantic table header', () => {
       const { container } = render(
         <Table>
           <TableHeader>
@@ -82,12 +82,12 @@ describe('Table Components - Accessibility', () => {
       );
 
       const thead = container.querySelector('thead');
-      expect(thead).toHaveAttribute('role', 'rowgroup');
+      expect(thead?.tagName).toBe('THEAD');
     });
   });
 
   describe('TableBody Component', () => {
-    it('should have rowgroup role', () => {
+    it('should render semantic table body', () => {
       const { container } = render(
         <Table>
           <TableBody>
@@ -99,12 +99,12 @@ describe('Table Components - Accessibility', () => {
       );
 
       const tbody = container.querySelector('tbody');
-      expect(tbody).toHaveAttribute('role', 'rowgroup');
+      expect(tbody?.tagName).toBe('TBODY');
     });
   });
 
   describe('TableRow Component', () => {
-    it('should have row role', () => {
+    it('should render semantic table row', () => {
       const { container } = render(
         <Table>
           <TableHeader>
@@ -116,7 +116,7 @@ describe('Table Components - Accessibility', () => {
       );
 
       const tr = container.querySelector('tr');
-      expect(tr).toHaveAttribute('role', 'row');
+      expect(tr?.tagName).toBe('TR');
     });
 
     it('should support aria-rowindex', () => {
@@ -228,7 +228,7 @@ describe('Table Components - Accessibility', () => {
   });
 
   describe('TableCell Component', () => {
-    it('should have gridcell role', () => {
+    it('should render semantic data cell', () => {
       const { container } = render(
         <Table>
           <TableBody>
@@ -240,7 +240,7 @@ describe('Table Components - Accessibility', () => {
       );
 
       const td = container.querySelector('td');
-      expect(td).toHaveAttribute('role', 'gridcell');
+      expect(td?.tagName).toBe('TD');
     });
 
     it('should support aria-colindex', () => {
@@ -322,14 +322,14 @@ describe('Table Components - Accessibility', () => {
       );
 
       const table = container.querySelector('table');
-      expect(table).toHaveAttribute('role', 'table');
+      expect(table?.tagName).toBe('TABLE');
       expect(table).toHaveAttribute('aria-label');
 
       const thead = container.querySelector('thead');
-      expect(thead).toHaveAttribute('role', 'rowgroup');
+      expect(thead?.tagName).toBe('THEAD');
 
       const tbody = container.querySelector('tbody');
-      expect(tbody).toHaveAttribute('role', 'rowgroup');
+      expect(tbody?.tagName).toBe('TBODY');
 
       const headers = container.querySelectorAll('th');
       expect(headers.length).toBe(3);
@@ -341,7 +341,7 @@ describe('Table Components - Accessibility', () => {
       const cells = container.querySelectorAll('td');
       expect(cells.length).toBe(3);
       cells.forEach((cell, index) => {
-        expect(cell).toHaveAttribute('role', 'gridcell');
+        expect(cell.tagName).toBe('TD');
         expect(cell).toHaveAttribute('aria-colindex', String(index + 1));
       });
     });

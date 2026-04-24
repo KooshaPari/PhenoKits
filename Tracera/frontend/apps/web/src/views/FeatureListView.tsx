@@ -32,12 +32,14 @@ interface FeatureListViewProps {
   projectId: string;
 }
 
+const EMPTY_FEATURES: Feature[] = [];
+
 export const FeatureListView = ({ projectId }: FeatureListViewProps) => {
   const navigate = useNavigate();
   const searchParams = useSearch({ strict: false });
 
   const { data: featuresData, isLoading } = useFeatures({ projectId });
-  const features = featuresData?.features ?? [];
+  const features = featuresData?.features ?? EMPTY_FEATURES;
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -297,7 +299,12 @@ export const FeatureListView = ({ projectId }: FeatureListViewProps) => {
       {/* Create Modal */}
       {showCreateModal && (
         <div className='fixed inset-0 z-50 flex items-center justify-center'>
-          <div className='fixed inset-0 bg-black/50 backdrop-blur-sm' onClick={handleCloseModal} />
+          <button
+            type='button'
+            className='fixed inset-0 bg-black/50 backdrop-blur-sm'
+            onClick={handleCloseModal}
+            aria-label='Close dialog'
+          />
           <div
             className='bg-background relative w-full max-w-2xl rounded-xl border p-6 shadow-2xl'
             role='dialog'
@@ -320,8 +327,11 @@ export const FeatureListView = ({ projectId }: FeatureListViewProps) => {
 
             <div className='space-y-4'>
               <div>
-                <label className='mb-1 block text-sm font-medium'>Feature Name</label>
+                <label htmlFor='feature-name-input' className='mb-1 block text-sm font-medium'>
+                  Feature Name
+                </label>
                 <Input
+                  id='feature-name-input'
                   value={newName}
                   onChange={handleNameChange}
                   placeholder='e.g., User Authentication'
@@ -330,9 +340,11 @@ export const FeatureListView = ({ projectId }: FeatureListViewProps) => {
               </div>
 
               <div>
-                <label className='mb-1 block text-sm font-medium'>Status</label>
+                <label htmlFor='feature-status-input' className='mb-1 block text-sm font-medium'>
+                  Status
+                </label>
                 <Select value={newStatus} onValueChange={handleNewStatusChange}>
-                  <SelectTrigger className='h-10'>
+                  <SelectTrigger id='feature-status-input' className='h-10'>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -345,8 +357,14 @@ export const FeatureListView = ({ projectId }: FeatureListViewProps) => {
               </div>
 
               <div>
-                <label className='mb-1 block text-sm font-medium'>Description</label>
+                <label
+                  htmlFor='feature-description-input'
+                  className='mb-1 block text-sm font-medium'
+                >
+                  Description
+                </label>
                 <textarea
+                  id='feature-description-input'
                   value={newDescription}
                   onChange={handleDescriptionChange}
                   placeholder='Describe the feature in business terms...'

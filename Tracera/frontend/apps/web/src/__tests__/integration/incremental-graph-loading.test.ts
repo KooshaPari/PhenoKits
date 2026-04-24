@@ -4,7 +4,7 @@
  * Tests the full flow from API request to graph rendering
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { StreamChunk } from '../../lib/graph/IncrementalGraphBuilder';
@@ -337,7 +337,9 @@ describe(useIncrementalGraph, () => {
     );
 
     // Trigger load
-    result.current.loadGraph();
+    await act(async () => {
+      await result.current.loadGraph();
+    });
 
     // Wait for loading to complete
     await waitFor(() => {
@@ -361,7 +363,9 @@ describe(useIncrementalGraph, () => {
       }),
     );
 
-    result.current.loadGraph();
+    await act(async () => {
+      await result.current.loadGraph();
+    });
 
     await waitFor(() => {
       expect(result.current.state.error).toBeDefined();
@@ -386,7 +390,10 @@ describe(useIncrementalGraph, () => {
       }),
     );
 
-    result.current.loadGraph();
+    let loadPromise: Promise<void> | undefined;
+    await act(async () => {
+      loadPromise = result.current.loadGraph();
+    });
 
     // Wait for loading to start
     await waitFor(() => {
@@ -394,9 +401,17 @@ describe(useIncrementalGraph, () => {
     });
 
     // Abort
-    result.current.abort();
+    act(() => {
+      result.current.abort();
+    });
 
-    expect(result.current.state.isLoading).toBeFalsy();
+    await act(async () => {
+      await loadPromise;
+    });
+
+    await waitFor(() => {
+      expect(result.current.state.isLoading).toBeFalsy();
+    });
   });
 });
 

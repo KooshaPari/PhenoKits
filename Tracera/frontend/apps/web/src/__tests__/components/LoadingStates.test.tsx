@@ -7,6 +7,9 @@ import { GraphSkeleton } from '@/components/graph/GraphSkeleton';
 import { LoadingProgress } from '@/components/graph/LoadingProgress';
 import { LoadingTransition } from '@/components/graph/LoadingTransition';
 
+const getSkeletonNodes = (container: HTMLElement) =>
+  container.querySelectorAll('[style*="width: 120px"][style*="height: 60px"]');
+
 describe(GraphSkeleton, () => {
   it('should render with default node and edge count', () => {
     const { container } = render(<GraphSkeleton />);
@@ -17,7 +20,7 @@ describe(GraphSkeleton, () => {
     expect(skeleton).toHaveClass('animate-pulse');
 
     // Default is 20 nodes
-    const nodes = container.querySelectorAll('[class*="absolute rounded-lg border bg-card"]');
+    const nodes = getSkeletonNodes(container);
     expect(nodes.length).toBe(20);
   });
 
@@ -25,7 +28,7 @@ describe(GraphSkeleton, () => {
     const { container } = render(<GraphSkeleton nodeCount={10} edgeCount={15} />);
 
     // Should have 10 nodes
-    const nodes = container.querySelectorAll('[class*="absolute rounded-lg border bg-card"]');
+    const nodes = getSkeletonNodes(container);
     expect(nodes.length).toBe(10);
   });
 
@@ -43,7 +46,7 @@ describe(GraphSkeleton, () => {
   it('should have proper positioning for nodes', () => {
     const { container } = render(<GraphSkeleton nodeCount={5} />);
 
-    const nodes = container.querySelectorAll('[class*="absolute rounded-lg border bg-card"]');
+    const nodes = getSkeletonNodes(container);
     nodes.forEach((node) => {
       if (node instanceof HTMLElement) {
         expect(node.style.top).toBeTruthy();

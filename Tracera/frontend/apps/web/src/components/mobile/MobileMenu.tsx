@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from '@tanstack/react-router';
 import { ChevronRight, FolderOpen, Home, LogIn, LogOut, Menu, Settings, X } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import type { User } from '@/stores/authStore';
 
@@ -97,9 +97,13 @@ const MenuPanel = function MenuPanel({
   return (
     <>
       <div
-        className='fixed inset-0 z-40 bg-black/50 md:hidden'
+        className={cn(
+          'fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 md:hidden',
+          isOpen ? 'opacity-100' : 'pointer-events-none opacity-0',
+        )}
         onClick={onClose}
         aria-hidden='true'
+        data-testid='mobile-menu-backdrop'
       />
       <div
         id='mobile-menu'
@@ -192,6 +196,23 @@ export const MobileMenu = function MobileMenu({ className }: MobileMenuProps) {
     setIsOpen((prev) => !prev);
   }, []);
 
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const handleEscape = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
+
+    globalThis.addEventListener('keydown', handleEscape);
+    return () => {
+      globalThis.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen]);
+
   const handleMenuClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       const href = e.currentTarget.getAttribute('data-href');
@@ -220,16 +241,14 @@ export const MobileMenu = function MobileMenu({ className }: MobileMenuProps) {
       >
         {isOpen ? <X className='h-6 w-6' /> : <Menu className='h-6 w-6' />}
       </Button>
-      {isOpen && (
-        <MenuPanel
-          isOpen={isOpen}
-          onClose={handleClose}
-          onMenuClick={handleMenuClick}
-          onLogout={handleLogout}
-          user={user}
-          isActive={isActive}
-        />
-      )}
+      <MenuPanel
+        isOpen={isOpen}
+        onClose={handleClose}
+        onMenuClick={handleMenuClick}
+        onLogout={handleLogout}
+        user={user}
+        isActive={isActive}
+      />
     </>
   );
 };

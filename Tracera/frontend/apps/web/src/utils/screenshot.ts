@@ -128,6 +128,9 @@ const createUploadError = function createUploadError(
   }) as UploadError;
 };
 
+const isUploadError = (error: unknown): error is UploadError =>
+  error instanceof Error && 'code' in error;
+
 const resolveCompressOptions = function resolveCompressOptions(
   options?: CompressOptions,
 ): Required<CompressOptions> {
@@ -144,12 +147,12 @@ const loadImage = async function loadImage(
 ): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const image = new Image();
-    image.onload = () => {
+    image.addEventListener('load', () => {
       resolve(image);
-    };
-    image.onerror = () => {
+    });
+    image.addEventListener('error', () => {
       reject(createUploadError('Failed to load image', 'INVALID_FILE'));
-    };
+    });
     if (crossOrigin) {
       image.crossOrigin = crossOrigin;
     }
@@ -285,7 +288,8 @@ const captureComponentScreenshot = async function captureComponentScreenshot(
       | undefined;
     try {
       // Any: external library with incomplete type definitions
-      html2canvas = (await import('html2canvas')).default as any;
+      const module = await import('html2canvas');
+      html2canvas = module.default;
     } catch {
       return `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==`;
     }
@@ -504,8 +508,8 @@ const uploadScreenshot = async function uploadScreenshot({
     return { fileSize: file.size, key, url };
   } catch (error) {
     logger.error('Screenshot upload failed:', error);
-    if (error instanceof Error && 'code' in error) {
-      throw error as UploadError;
+    if (isUploadError(error)) {
+      throw error;
     }
     throw createUploadError('Screenshot upload failed', 'UPLOAD_FAILED', String(error));
   }
@@ -533,8 +537,8 @@ const deleteScreenshot = async function deleteScreenshot(key: string): Promise<v
     }
   } catch (error) {
     logger.error('Failed to delete screenshot:', error);
-    if (error instanceof Error && 'code' in error) {
-      throw error as UploadError;
+    if (isUploadError(error)) {
+      throw error;
     }
     throw createUploadError('Failed to delete screenshot', 'NETWORK_ERROR', String(error));
   }

@@ -17,8 +17,10 @@ import { createGraphologyDataLayer } from './GraphologyDataLayer';
  * Example 1: Basic Usage with ReactFlow
  */
 export function BasicGraphologyExample() {
-  const [nodes, setNodes] = useNodesState<Node>([]);
-  const [edges, setEdges] = useEdgesState<Edge>([]);
+  const initialNodes: Node[] = [];
+  const initialEdges: Edge[] = [];
+  const [nodes, setNodes] = useNodesState(initialNodes);
+  const [edges, setEdges] = useEdgesState(initialEdges);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -72,7 +74,7 @@ export function BasicGraphologyExample() {
       console.log('Performance:', dataLayer.getPerformanceMetrics());
     }
 
-    loadGraph();
+    void loadGraph();
   }, [setNodes, setEdges]);
 
   if (loading) {
@@ -94,8 +96,10 @@ export function BasicGraphologyExample() {
  * Example 2: Large Graph with Community Detection
  */
 export function LargeGraphWithCommunities() {
-  const [nodes, setNodes] = useNodesState<Node>([]);
-  const [edges, setEdges] = useEdgesState<Edge>([]);
+  const initialNodes: Node[] = [];
+  const initialEdges: Edge[] = [];
+  const [nodes, setNodes] = useNodesState(initialNodes);
+  const [edges, setEdges] = useEdgesState(initialEdges);
   const [stats, setStats] = useState<any>(null);
 
   useEffect(() => {
@@ -161,7 +165,7 @@ export function LargeGraphWithCommunities() {
       console.log('Performance:', dataLayer.getPerformanceMetrics());
     }
 
-    loadLargeGraph();
+    void loadLargeGraph();
   }, [setNodes, setEdges]);
 
   return (
@@ -187,8 +191,10 @@ export function LargeGraphWithCommunities() {
  * Example 3: Incremental Updates
  */
 export function IncrementalGraphExample() {
-  const [nodes, setNodes] = useNodesState<Node>([]);
-  const [edges, setEdges] = useEdgesState<Edge>([]);
+  const initialNodes: Node[] = [];
+  const initialEdges: Edge[] = [];
+  const [nodes, setNodes] = useNodesState(initialNodes);
+  const [edges, setEdges] = useEdgesState(initialEdges);
   const dataLayerRef = React.useRef(createGraphologyDataLayer());
 
   const addRandomNode = () => {
@@ -332,7 +338,7 @@ export function GraphWithCustomHook() {
       target: `node-${Math.floor(Math.random() * 100)}`,
     }));
 
-    initialize(sampleNodes, sampleEdges);
+    void initialize(sampleNodes, sampleEdges);
   }, [initialize]);
 
   return (

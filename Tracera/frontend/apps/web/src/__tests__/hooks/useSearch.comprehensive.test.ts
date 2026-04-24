@@ -30,6 +30,15 @@ describe('useSearch - Comprehensive Coverage', () => {
 
   describe(useSearch, () => {
     it('should initialize with custom query', () => {
+      vi.mocked(api.search.search).mockResolvedValue({
+        hasMore: false,
+        items: [],
+        page: 2,
+        pageSize: 10,
+        query: 'initial',
+        total: 0,
+      });
+
       const { result } = renderHook(
         () =>
           useSearch({

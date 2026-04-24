@@ -4,7 +4,7 @@
  */
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen } from '@testing-library/react';
+import { render as rtlRender, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { axe } from './setup';
@@ -32,6 +32,16 @@ const queryClient = new QueryClient({
     queries: { retry: false },
   },
 });
+
+let container: HTMLElement;
+let rerender: ReturnType<typeof rtlRender>['rerender'];
+
+const render: typeof rtlRender = (...args) => {
+  const result = rtlRender(...args);
+  container = result.container;
+  rerender = result.rerender;
+  return result;
+};
 
 function TestWrapper({ children }: { children: React.ReactNode }) {
   return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;

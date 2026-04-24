@@ -1,6 +1,6 @@
 import type { Node, Edge } from '@xyflow/react';
 
-import Graph from 'graphology';
+import * as Graphology from 'graphology';
 
 import { logger } from '@/lib/logger';
 
@@ -10,11 +10,18 @@ import type {
   GraphologyEdgeAttributes,
 } from './types';
 
+type Graph = InstanceType<typeof Graphology.default>;
+const GraphCtor = Graphology.default;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
 export class GraphologyDataAdapter implements GraphologyAdapter {
   private graph: Graph;
 
   constructor() {
-    this.graph = new Graph({ multi: false, type: 'directed' });
+    this.graph = new GraphCtor({ multi: false, type: 'directed' });
   }
 
   getGraph(): Graph {
@@ -26,14 +33,14 @@ export class GraphologyDataAdapter implements GraphologyAdapter {
 
     // Add nodes with all data as attributes
     nodes.forEach((node) => {
-      const data = (node.data as any) || {};
+      const data = isRecord(node.data) ? node.data : {};
       const attributes: GraphologyNodeAttributes = {
-        label: data.label || node.id,
-        type: (node.type as string) || 'default',
-        x: node.position?.x || 0,
-        y: node.position?.y || 0,
+        label: typeof data['label'] === 'string' ? data['label'] : node.id,
+        type: typeof node.type === 'string' ? node.type : 'default',
+        x: node.position?.x ?? 0,
+        y: node.position?.y ?? 0,
         size: 10,
-        color: data.color || '#64748b',
+        color: typeof data['color'] === 'string' ? data['color'] : '#64748b',
         ...data,
       };
 
@@ -49,20 +56,20 @@ export class GraphologyDataAdapter implements GraphologyAdapter {
       }
 
       try {
-        const data = (edge.data as any) || {};
+        const data = isRecord(edge.data) ? edge.data : {};
+        const stroke = isRecord(edge.style) && typeof edge.style['stroke'] === 'string'
+          ? edge.style['stroke']
+          : '#94a3b8';
         const attributes: GraphologyEdgeAttributes = {
           id: edge.id,
           label: typeof edge.label === 'string' ? edge.label : undefined,
           weight: 1,
-          color:
-            typeof (edge.style as any)?.stroke === 'string'
-              ? (edge.style as any).stroke
-              : '#94a3b8',
+          color: stroke,
           ...data,
         };
 
         this.graph.addEdge(edge.source, edge.target, attributes);
-      } catch (error) {
+      } catch {
         // Edge already exists (shouldn't happen with multi: false, but catch anyway)
         logger.warn(`Edge ${edge.id} already exists or invalid`);
       }

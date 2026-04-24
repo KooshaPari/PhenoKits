@@ -5,10 +5,25 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { useUIStore } from '../../stores/uiStore';
+import { useUIStore } from '../../stores/ui-store';
 
 describe('uiStore', () => {
   beforeEach(() => {
+    useUIStore.setState({
+      commandPaletteOpen: false,
+      currentView: 'FEATURE',
+      gridColumns: 3,
+      isDarkMode: false,
+      layoutMode: 'grid',
+      priorityFilter: [],
+      searchOpen: false,
+      searchQuery: '',
+      selectedItemId: null,
+      selectedItemIds: [],
+      sidebarOpen: true,
+      sidebarWidth: 240,
+      statusFilter: [],
+    });
     localStorage.clear();
   });
 

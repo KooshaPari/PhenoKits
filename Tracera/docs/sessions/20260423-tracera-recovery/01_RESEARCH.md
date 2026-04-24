@@ -22,4 +22,6 @@
 
 - `python3 Tracera/validate_governance.py` passes after restoring FR specs 4-6.
 - `deploy/k8s/base/deployment-go-backend.yaml` was still pointing at the legacy tracing env var
-  and was updated to `PHENO_OBSERVABILITY_OTLP_GRPC_ENDPOINT=tracera-collector:4317`.
+  and was updated to the shared `PHENO_OBSERVABILITY_OTLP_GRPC_ENDPOINT` contract.
+  Kubernetes keeps the in-cluster collector endpoint while native dev sends apps to Alloy at
+  `127.0.0.1:4319`.

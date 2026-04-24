@@ -6,6 +6,7 @@
  */
 
 import { motion } from 'framer-motion';
+import type { LucideIcon } from 'lucide-react';
 import {
   AlertTriangle,
   ArrowRight,
@@ -74,7 +75,23 @@ interface ItemSpecsOverviewProps {
   className?: string;
 }
 
-const specTypeConfig = [
+type SpecType = 'defect' | 'epic' | 'requirement' | 'task' | 'test' | 'user_story';
+
+type SpecsResponse<T> = {
+  specs: T[];
+  total: number;
+};
+
+type SpecTypeConfig = {
+  bg: string;
+  color: string;
+  description: string;
+  icon: LucideIcon;
+  id: SpecType;
+  label: string;
+};
+
+const specTypeConfig: SpecTypeConfig[] = [
   {
     bg: 'bg-blue-500/10',
     color: 'text-blue-600',
@@ -125,17 +142,8 @@ const specTypeConfig = [
   },
 ];
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
-
-function extractSpecs<T>(data: unknown): T[] {
-  if (!isRecord(data)) {
-    return [];
-  }
-
-  const { specs } = data;
-  return Array.isArray(specs) ? (specs as T[]) : [];
+function extractSpecs<T>(data: SpecsResponse<T> | undefined): T[] {
+  return data ? data.specs : [];
 }
 
 export function ItemSpecsOverview({
@@ -170,7 +178,7 @@ export function ItemSpecsOverview({
     reqLoading || testLoading || epicLoading || storyLoading || taskLoading || defectLoading;
 
   // Calculate summary metrics
-  const specCounts = {
+  const specCounts: Record<SpecType, number> = {
     defect: defectSpecs.length,
     epic: epicSpecs.length,
     requirement: reqSpecs.length,
@@ -250,7 +258,7 @@ export function ItemSpecsOverview({
       <div className='grid gap-4 md:grid-cols-3 lg:grid-cols-6'>
         {specTypeConfig.map((config, index) => {
           const Icon = config.icon;
-          const count = specCounts[config.id as keyof typeof specCounts];
+          const count = specCounts[config.id];
 
           return (
             <motion.div
@@ -416,7 +424,7 @@ export function ItemSpecsOverview({
         <TabsList className='bg-muted/50 h-auto w-full flex-wrap justify-start gap-1 p-1'>
           {specTypeConfig.map((config) => {
             const Icon = config.icon;
-            const count = specCounts[config.id as keyof typeof specCounts];
+            const count = specCounts[config.id];
             return (
               <TabsTrigger key={config.id} value={config.id} className='gap-1.5 text-xs'>
                 <Icon className='h-3.5 w-3.5' />
@@ -559,9 +567,10 @@ export function ItemSpecsOverview({
                 {unverifiedReqs.length > 0 ? (
                   <div className='space-y-2'>
                     {unverifiedReqs.slice(0, 5).map((req) => (
-                      <div
+                      <button
+                        type='button'
                         key={req.id}
-                        className='bg-muted/30 hover:bg-muted/50 flex cursor-pointer items-center justify-between rounded-lg p-2'
+                        className='bg-muted/30 hover:bg-muted/50 flex w-full cursor-pointer items-center justify-between rounded-lg p-2 text-left'
                         onClick={() => onViewSpec?.('requirement', req.id)}
                       >
                         <div className='min-w-0 flex-1'>
@@ -573,7 +582,7 @@ export function ItemSpecsOverview({
                           </p>
                         </div>
                         <ArrowRight className='text-muted-foreground h-4 w-4' />
-                      </div>
+                      </button>
                     ))}
                     {unverifiedReqs.length > 5 && (
                       <p className='text-muted-foreground pt-2 text-center text-xs'>
@@ -603,9 +612,10 @@ export function ItemSpecsOverview({
                 {highRiskReqs.length > 0 ? (
                   <div className='space-y-2'>
                     {highRiskReqs.slice(0, 5).map((req) => (
-                      <div
+                      <button
+                        type='button'
                         key={req.id}
-                        className='flex cursor-pointer items-center justify-between rounded-lg border border-red-500/20 bg-red-500/10 p-2 hover:bg-red-500/20'
+                        className='flex w-full cursor-pointer items-center justify-between rounded-lg border border-red-500/20 bg-red-500/10 p-2 text-left hover:bg-red-500/20'
                         onClick={() => onViewSpec?.('requirement', req.id)}
                       >
                         <div className='min-w-0 flex-1'>
@@ -617,7 +627,7 @@ export function ItemSpecsOverview({
                           </Badge>
                         </div>
                         <ArrowRight className='text-muted-foreground h-4 w-4' />
-                      </div>
+                      </button>
                     ))}
                     {highRiskReqs.length > 5 && (
                       <p className='text-muted-foreground pt-2 text-center text-xs'>

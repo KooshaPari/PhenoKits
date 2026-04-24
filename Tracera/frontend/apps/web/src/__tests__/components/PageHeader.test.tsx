@@ -396,9 +396,7 @@ describe('PageHeader Component', () => {
     it('should have semantic heading element', () => {
       render(<PageHeader title='Dashboard' />);
 
-      const heading = container.querySelector('h1');
-      expect(heading).toBeInTheDocument();
-      expect(heading?.textContent).toBe('Dashboard');
+      expect(screen.getByRole('heading', { level: 1, name: 'Dashboard' })).toBeInTheDocument();
     });
 
     it('should have proper breadcrumb navigation', () => {
@@ -409,8 +407,7 @@ describe('PageHeader Component', () => {
         />,
       );
 
-      const nav = container.querySelector('nav[aria-label="Breadcrumb"]');
-      expect(nav).toBeInTheDocument();
+      expect(screen.getByRole('navigation', { name: 'Breadcrumb' })).toBeInTheDocument();
     });
 
     it('should have ordered list for breadcrumbs', () => {
@@ -421,8 +418,7 @@ describe('PageHeader Component', () => {
         />,
       );
 
-      const ol = container.querySelector('ol');
-      expect(ol).toBeInTheDocument();
+      expect(screen.getByRole('list')).toBeInTheDocument();
     });
 
     it('should have descriptive link text', () => {

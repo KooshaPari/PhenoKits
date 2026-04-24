@@ -9,9 +9,19 @@ import type {
 } from '@atoms/types';
 
 import '@testing-library/jest-dom';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { vi } from 'vitest';
 
 import { ProgressDashboard } from '../../components/temporal/ProgressDashboard';
+
+async function selectTab(name: RegExp) {
+  const tab = screen.getByRole('tab', { name });
+  fireEvent.pointerDown(tab);
+  fireEvent.mouseDown(tab);
+  fireEvent.mouseUp(tab);
+  fireEvent.click(tab);
+  await waitFor(() => expect(tab).toHaveAttribute('aria-selected', 'true'));
+}
 
 // Mock data
 const mockMilestone: Milestone = {
@@ -91,93 +101,102 @@ const mockSnapshot: ProgressSnapshot = {
 
 describe(ProgressDashboard, () => {
   const defaultProps = {
-    metrics: mockMetrics,
     milestones: [mockMilestone],
     projectId: 'proj-1',
-    snapshots: [mockSnapshot],
     sprints: [mockSprint],
   };
 
   it('renders dashboard with summary cards', () => {
     render(<ProgressDashboard {...defaultProps} />);
 
-    expect(screen.getByText('Total Milestones')).toBeInTheDocument();
+    expect(screen.getByText('Overall Progress')).toBeInTheDocument();
+    expect(screen.getByText('Active Milestones')).toBeInTheDocument();
     expect(screen.getByText('At Risk')).toBeInTheDocument();
-    expect(screen.getByText('Blockers')).toBeInTheDocument();
-    expect(screen.getByText('Velocity')).toBeInTheDocument();
+    expect(screen.getByText('Completed')).toBeInTheDocument();
   });
 
   it('displays correct summary values', () => {
     render(<ProgressDashboard {...defaultProps} />);
 
-    expect(screen.getByText('1')).toBeInTheDocument(); // Total milestones
-    expect(screen.getByText('0')).toBeInTheDocument(); // At risk
-    expect(screen.getByText('2')).toBeInTheDocument(); // Blockers
+    expect(screen.getByText('70%')).toBeInTheDocument(); // Overall progress
+    expect(screen.getByText('1')).toBeInTheDocument(); // Active milestones
+    expect(screen.getAllByText('0').length).toBeGreaterThanOrEqual(2); // At risk and completed
   });
 
-  it('renders milestone hierarchy', () => {
+  it('renders milestone hierarchy', async () => {
     render(<ProgressDashboard {...defaultProps} />);
 
-    expect(screen.getByText('Milestone Hierarchy')).toBeInTheDocument();
+    await selectTab(/milestones/i);
+
+    expect(screen.getByText('In Progress')).toBeInTheDocument();
     expect(screen.getByText('v1.0 Release')).toBeInTheDocument();
   });
 
-  it('renders sprint timeline', () => {
+  it('renders sprint timeline', async () => {
     render(<ProgressDashboard {...defaultProps} />);
 
-    expect(screen.getByText('Sprint Timeline')).toBeInTheDocument();
+    await selectTab(/sprints/i);
+
+    expect(screen.getByText('Active Sprint')).toBeInTheDocument();
     expect(screen.getByText('Sprint 1')).toBeInTheDocument();
   });
 
-  it('calls onMilestoneClick when milestone is selected', () => {
-    const onMilestoneClick = jest.fn();
+  it('calls onMilestoneClick when milestone is selected', async () => {
+    const onMilestoneClick = vi.fn();
     render(<ProgressDashboard {...defaultProps} onMilestoneClick={onMilestoneClick} />);
 
+    await selectTab(/milestones/i);
     const milestoneElement = screen.getByText('v1.0 Release');
     fireEvent.click(milestoneElement);
 
-    expect(onMilestoneClick).toHaveBeenCalledWith(mockMilestone);
+    expect(onMilestoneClick).toHaveBeenCalledWith(mockMilestone.id);
   });
 
-  it('calls onSprintClick when sprint is selected', () => {
-    const onSprintClick = jest.fn();
+  it('calls onSprintClick when sprint is selected', async () => {
+    const onSprintClick = vi.fn();
     render(<ProgressDashboard {...defaultProps} onSprintClick={onSprintClick} />);
 
+    await selectTab(/sprints/i);
     const sprintElement = screen.getByText('Sprint 1');
     fireEvent.click(sprintElement);
 
-    expect(onSprintClick).toHaveBeenCalledWith(mockSprint);
+    expect(onSprintClick).toHaveBeenCalledWith(mockSprint.id);
   });
 
-  it('renders health status section', () => {
+  it('renders health status section', async () => {
     render(<ProgressDashboard {...defaultProps} />);
 
-    expect(screen.getByText('Health Status')).toBeInTheDocument();
+    await selectTab(/milestones/i);
+
     expect(screen.getByText('Milestones')).toBeInTheDocument();
+    expect(screen.getByText('In Progress')).toBeInTheDocument();
     expect(screen.getByText('Sprints')).toBeInTheDocument();
-    expect(screen.getByText('Items')).toBeInTheDocument();
   });
 
   it('renders progress snapshots', () => {
     render(<ProgressDashboard {...defaultProps} />);
 
-    expect(screen.getByText('Recent Progress Snapshots')).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /overview/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /velocity/i })).toBeInTheDocument();
   });
 
-  it('handles empty milestones list', () => {
+  it('handles empty milestones list', async () => {
     render(<ProgressDashboard {...defaultProps} milestones={[]} />);
 
-    expect(screen.getByText('Milestone Hierarchy')).toBeInTheDocument();
+    await selectTab(/milestones/i);
+
+    expect(screen.getByText('No milestones found')).toBeInTheDocument();
   });
 
-  it('handles empty sprints list', () => {
+  it('handles empty sprints list', async () => {
     render(<ProgressDashboard {...defaultProps} sprints={[]} />);
 
-    // Sprint timeline should not render
-    expect(screen.queryByText('Sprint Timeline')).not.toBeInTheDocument();
+    await selectTab(/sprints/i);
+
+    expect(screen.getByText('No sprints found')).toBeInTheDocument();
   });
 
-  it('displays multiple milestones', () => {
+  it('displays multiple milestones', async () => {
     const milestone2: Milestone = {
       ...mockMilestone,
       id: '2',
@@ -185,6 +204,8 @@ describe(ProgressDashboard, () => {
     };
 
     render(<ProgressDashboard {...defaultProps} milestones={[mockMilestone, milestone2]} />);
+
+    await selectTab(/milestones/i);
 
     expect(screen.getByText('v1.0 Release')).toBeInTheDocument();
     expect(screen.getByText('v1.1 Patch')).toBeInTheDocument();
@@ -195,16 +216,16 @@ describe(ProgressDashboard, () => {
       ...mockMilestone,
       id: '2',
       health: 'red' satisfies HealthStatus,
+      status: 'blocked' satisfies MilestoneStatus,
     };
 
     render(<ProgressDashboard {...defaultProps} milestones={[mockMilestone, atRiskMilestone]} />);
 
-    // Should display "1" for at-risk count
-    const atRiskCards = screen.getAllByText('1');
-    expect(atRiskCards.length).toBeGreaterThan(0);
+    expect(screen.getAllByText('1').length).toBeGreaterThan(0);
+    expect(screen.getByText('At-Risk Milestones')).toBeInTheDocument();
   });
 
-  it('shows active sprint highlighted', () => {
+  it('shows active sprint highlighted', async () => {
     const activeSprint: Sprint = {
       ...mockSprint,
       status: 'active' satisfies SprintStatus,
@@ -218,6 +239,8 @@ describe(ProgressDashboard, () => {
     };
 
     render(<ProgressDashboard {...defaultProps} sprints={[activeSprint, planningSprint]} />);
+
+    await selectTab(/sprints/i);
 
     expect(screen.getByText('Active Sprint')).toBeInTheDocument();
   });

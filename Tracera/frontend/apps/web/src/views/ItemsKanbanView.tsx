@@ -1,4 +1,4 @@
-import { Link, useNavigate, useSearch } from '@tanstack/react-router';
+import { Link, useSearch } from '@tanstack/react-router';
 import {
   AlertCircle,
   ArrowRight,
@@ -67,6 +67,16 @@ const columns: KanbanColumn[] = [
     title: 'BLOCKED',
   },
 ];
+
+const EMPTY_ITEMS: Item[] = [];
+
+const handleProjectFilterChange = (_value: string): void => {};
+
+const handleTypeFilterChange = (_value: string): void => {};
+
+const handleNavigateToTable = (): void => {};
+
+const handleNavigateToCreate = (): void => {};
 
 interface ItemCardProps {
   item: Item;
@@ -254,7 +264,6 @@ const ColumnDropZone = memo(
 );
 
 export function ItemsKanbanView() {
-  const navigate = useNavigate();
   const searchParams = useSearch({ strict: false });
   const projectFilter = searchParams?.project ?? undefined;
   const typeFilter = searchParams?.type ?? undefined;
@@ -262,7 +271,7 @@ export function ItemsKanbanView() {
   const { data: itemsData, isLoading } = useItems({ projectId: projectFilter });
   const { data: projects } = useProjects();
   const projectsArray = useMemo(() => (Array.isArray(projects) ? projects : []), [projects]);
-  const items = itemsData?.items ?? [];
+  const items = itemsData?.items ?? EMPTY_ITEMS;
   const updateItem = useUpdateItem();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -341,14 +350,6 @@ export function ItemsKanbanView() {
   const handleDragLeave = useCallback(() => {
     setIsDraggingOver(null);
   }, []);
-
-  const handleProjectFilterChange = useCallback((_v: string) => {}, [navigate]);
-
-  const handleTypeFilterChange = useCallback((_v: string) => {}, [navigate]);
-
-  const handleNavigateToTable = useCallback(() => {}, [navigate, searchParams, projectFilter]);
-
-  const handleNavigateToCreate = useCallback(() => {}, [navigate, searchParams, projectFilter]);
 
   if (isLoading) {
     return (
@@ -452,7 +453,9 @@ export function ItemsKanbanView() {
               column={column}
               items={colItems}
               isOver={isOver}
-              onDrop={async () => handleDrop(column.status)}
+              onDrop={() => {
+                void handleDrop(column.status);
+              }}
               onDragOver={(e) => {
                 handleDragOver(column.status, e);
               }}

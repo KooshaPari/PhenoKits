@@ -84,8 +84,8 @@ describe(ResponsiveCardView, () => {
     const { container } = render(<ResponsiveCardView items={items} />);
 
     const button = container.querySelector('button');
-    expect(button).toHaveClass('min-h-[120px]');
-    expect(button).toHaveClass('sm:min-h-[140px]');
+    expect(button?.parentElement).toHaveClass('min-h-[120px]');
+    expect(button?.parentElement).toHaveClass('sm:min-h-[140px]');
   });
 
   it('renders badges, status, and priority when provided', () => {
@@ -118,5 +118,8 @@ describe(ResponsiveCardView, () => {
     render(<ResponsiveCardView items={items} />);
 
     expect(screen.getByText('Action')).toBeInTheDocument();
+    const buttons = screen.getAllByRole('button');
+    expect(buttons).toHaveLength(2);
+    expect(buttons[0]).not.toContainElement(buttons[1]);
   });
 });

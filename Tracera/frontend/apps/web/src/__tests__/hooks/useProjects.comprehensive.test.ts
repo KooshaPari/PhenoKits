@@ -4,9 +4,9 @@
  */
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   useCreateProject,
@@ -15,10 +15,12 @@ import {
   useProjects,
   useUpdateProject,
 } from '../../hooks/useProjects';
+import { useAuthStore } from '../../stores/authStore';
 
 // Mock fetch (vi.fn() compatible with fetch at runtime)
 const mockFetch = vi.fn();
 globalThis.fetch = mockFetch as unknown as typeof fetch;
+const TEST_TOKEN = 'test-token';
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -34,7 +36,17 @@ const createWrapper = () => {
 
 describe('useProjects - Comprehensive Coverage', () => {
   beforeEach(() => {
+    globalThis.fetch = mockFetch as unknown as typeof fetch;
     vi.clearAllMocks();
+    act(() => {
+      useAuthStore.setState({ token: TEST_TOKEN } as any);
+    });
+  });
+
+  afterEach(() => {
+    act(() => {
+      useAuthStore.setState({ token: null } as any);
+    });
   });
 
   describe(useProjects, () => {

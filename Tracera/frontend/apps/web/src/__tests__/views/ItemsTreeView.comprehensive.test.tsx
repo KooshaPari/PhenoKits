@@ -1,33 +1,34 @@
 /**
  * Comprehensive Tests for ItemsTreeView
+ * Traces to: FR-TRACERA-VIEWS-005
  */
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { useItems } from '../../hooks/useItems';
-import { useProjects } from '../../hooks/useProjects';
-import { ItemsTreeView } from '../../views/ItemsTreeView';
+import { useItems } from "../../hooks/useItems";
+import { useProjects } from "../../hooks/useProjects";
+import { ItemsTreeView } from "../../views/ItemsTreeView";
 
 // Mock TanStack Router
-vi.mock('@tanstack/react-router', async () => {
-  const actual = await vi.importActual('@tanstack/react-router');
+vi.mock("@tanstack/react-router", async () => {
+  const actual = await vi.importActual("@tanstack/react-router");
   return {
     ...actual,
     Link: ({ children, to }: any) => (
-      <a href={typeof to === 'string' ? to : to.toString()}>{children}</a>
+      <a href={typeof to === "string" ? to : to.toString()}>{children}</a>
     ),
     useNavigate: () => vi.fn(),
     useSearch: () => ({}),
   };
 });
 
-vi.mock('../../hooks/useItems', () => ({
+vi.mock("../../hooks/useItems", () => ({
   useItems: vi.fn(),
 }));
 
-vi.mock('../../hooks/useProjects', () => ({
+vi.mock("../../hooks/useProjects", () => ({
   useProjects: vi.fn(),
 }));
 
@@ -46,26 +47,28 @@ describe(ItemsTreeView, () => {
     vi.clearAllMocks();
   });
 
-  it('renders tree view with items', () => {
+  it("renders tree view with items", () => {
     const mockItems = [
       {
-        id: 'item-1',
+        createdAt: new Date("2024-01-01").toISOString(),
+        id: "item-1",
         parentId: null,
-        status: 'todo',
-        title: 'Parent Item',
-        type: 'feature',
+        status: "todo",
+        title: "Parent Item",
+        type: "feature",
       },
       {
-        id: 'item-2',
-        parentId: 'item-1',
-        status: 'done',
-        title: 'Child Item',
-        type: 'feature',
+        createdAt: new Date("2024-01-02").toISOString(),
+        id: "item-2",
+        parentId: "item-1",
+        status: "done",
+        title: "Child Item",
+        type: "feature",
       },
     ];
 
     vi.mocked(useItems).mockReturnValue({
-      data: mockItems,
+      data: { items: mockItems },
       error: null,
       isError: false,
       isLoading: false,
@@ -84,10 +87,10 @@ describe(ItemsTreeView, () => {
       </QueryClientProvider>,
     );
 
-    expect(screen.getByText('Parent Item')).toBeInTheDocument();
+    expect(screen.getByText("Parent Item")).toBeInTheDocument();
   });
 
-  it('displays loading state', () => {
+  it("displays loading state", () => {
     vi.mocked(useItems).mockReturnValue({
       data: undefined,
       error: null,
@@ -104,26 +107,28 @@ describe(ItemsTreeView, () => {
     // Should show loading skeleton
   });
 
-  it('handles expand/collapse', async () => {
+  it("handles expand/collapse", async () => {
     const mockItems = [
       {
-        id: 'item-1',
+        createdAt: new Date("2024-01-01").toISOString(),
+        id: "item-1",
         parentId: null,
-        status: 'todo',
-        title: 'Parent Item',
-        type: 'feature',
+        status: "todo",
+        title: "Parent Item",
+        type: "feature",
       },
       {
-        id: 'item-2',
-        parentId: 'item-1',
-        status: 'done',
-        title: 'Child Item',
-        type: 'feature',
+        createdAt: new Date("2024-01-02").toISOString(),
+        id: "item-2",
+        parentId: "item-1",
+        status: "done",
+        title: "Child Item",
+        type: "feature",
       },
     ];
 
     vi.mocked(useItems).mockReturnValue({
-      data: mockItems,
+      data: { items: mockItems },
       error: null,
       isError: false,
       isLoading: false,
@@ -143,16 +148,17 @@ describe(ItemsTreeView, () => {
     );
 
     // Find expand button
-    const expandButtons = screen.getAllByText('▶');
-    if (expandButtons.length > 0) {
-      await user.click(expandButtons[0]);
+    const expandButton = document.querySelector('button[class*="h-6"][class*="w-6"]');
+    expect(expandButton).toBeInTheDocument();
+    if (expandButton instanceof HTMLElement) {
+      await user.click(expandButton);
       await waitFor(() => {
-        expect(screen.getByText('Child Item')).toBeInTheDocument();
+        expect(screen.getByText("Child Item")).toBeInTheDocument();
       });
     }
   });
 
-  it('displays search functionality', async () => {
+  it("displays search functionality", async () => {
     vi.mocked(useItems).mockReturnValue({
       data: [],
       error: null,
@@ -175,7 +181,7 @@ describe(ItemsTreeView, () => {
 
     const searchInput = screen.getByPlaceholderText(/Search/i);
     if (searchInput) {
-      await user.type(searchInput, 'test');
+      await user.type(searchInput, "test");
       // Should filter tree items
     }
   });

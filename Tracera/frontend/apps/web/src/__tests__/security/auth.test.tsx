@@ -3,6 +3,40 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useAuthStore } from '@/stores/authStore';
 
+const TEST_USER = {
+  email: 'test@example.com',
+  id: '1',
+};
+const TEST_TOKEN = 'test-token-123';
+const TEST_REFRESH_TOKEN = 'refresh-token-123';
+
+const mockFetch = vi.fn();
+globalThis.fetch = mockFetch as unknown as typeof fetch;
+
+const resetAuthStore = (): void => {
+  useAuthStore.getState().stopAutoRefresh();
+  useAuthStore.setState({
+    account: null,
+    authKitRefreshToken: null,
+    isAuthenticated: false,
+    isLoading: false,
+    refreshTimer: null,
+    token: null,
+    user: null,
+  });
+};
+
+const mockAuthKitCallback = (token = TEST_TOKEN): void => {
+  mockFetch.mockResolvedValueOnce({
+    json: async () => ({
+      refresh_token: TEST_REFRESH_TOKEN,
+      token,
+      user: TEST_USER,
+    }),
+    ok: true,
+  });
+};
+
 /**
  * Authentication Security Tests
  *
@@ -11,9 +45,9 @@ import { useAuthStore } from '@/stores/authStore';
  */
 describe('Authentication Security Tests', () => {
   beforeEach(() => {
-    // Reset auth store before each test
-    const { logout } = useAuthStore.getState();
-    logout();
+    globalThis.fetch = mockFetch as unknown as typeof fetch;
+    mockFetch.mockReset();
+    resetAuthStore();
     localStorage.clear();
     sessionStorage.clear();
   });
@@ -34,7 +68,7 @@ describe('Authentication Security Tests', () => {
       expect(sessionToken).toBeNull();
     });
 
-    it('should clear tokens on logout', () => {
+    it('should clear tokens on logout', async () => {
       const { result } = renderHook(() => useAuthStore());
 
       act(() => {
@@ -47,8 +81,13 @@ describe('Authentication Security Tests', () => {
 
       expect(localStorage.getItem('auth_token')).toBe('test-token-123');
 
-      act(() => {
-        result.current.logout();
+      mockFetch.mockResolvedValueOnce({
+        json: async () => ({}),
+        ok: true,
+      });
+
+      await act(async () => {
+        await result.current.logout();
       });
 
       expect(localStorage.getItem('auth_token')).toBeNull();
@@ -189,8 +228,10 @@ describe('Authentication Security Tests', () => {
     it('should update authentication state on login', async () => {
       const { result } = renderHook(() => useAuthStore());
 
+      mockAuthKitCallback();
+
       await act(async () => {
-        await result.current.login('test@example.com', 'password123');
+        await result.current.loginWithCode('auth-code', 'auth-state');
       });
 
       expect(result.current.isAuthenticated).toBeTruthy();
@@ -206,7 +247,12 @@ describe('Authentication Security Tests', () => {
       try {
         await act(async () => {
           // Mock API failure would happen here in real implementation
-          await result.current.login('test@example.com', 'wrong-password');
+          mockFetch.mockResolvedValueOnce({
+            json: async () => ({ error: 'Authentication failed' }),
+            ok: false,
+            status: 401,
+          });
+          await result.current.loginWithCode('auth-code', 'wrong-state');
         });
       } catch {
         // Expected to potentially throw in future implementation
@@ -260,7 +306,7 @@ describe('Authentication Security Tests', () => {
       expect(refreshSpy).toHaveBeenCalled();
     });
 
-    it('should clear sensitive data on session timeout', () => {
+    it('should clear sensitive data on session timeout', async () => {
       const { result } = renderHook(() => useAuthStore());
 
       act(() => {
@@ -272,8 +318,13 @@ describe('Authentication Security Tests', () => {
         });
       });
 
-      act(() => {
-        result.current.logout();
+      mockFetch.mockResolvedValueOnce({
+        json: async () => ({}),
+        ok: true,
+      });
+
+      await act(async () => {
+        await result.current.logout();
       });
 
       expect(result.current.token).toBeNull();
@@ -281,7 +332,7 @@ describe('Authentication Security Tests', () => {
       expect(localStorage.getItem('auth_token')).toBeNull();
     });
 
-    it('should not leak authentication state between users', () => {
+    it('should not leak authentication state between users', async () => {
       const { result } = renderHook(() => useAuthStore());
 
       // User 1 logs in
@@ -296,8 +347,13 @@ describe('Authentication Security Tests', () => {
       expect(result.current.user?.id).toBe('1');
 
       // User 1 logs out
-      act(() => {
-        result.current.logout();
+      mockFetch.mockResolvedValueOnce({
+        json: async () => ({}),
+        ok: true,
+      });
+
+      await act(async () => {
+        await result.current.logout();
       });
 
       // User 2 logs in
@@ -321,13 +377,15 @@ describe('Authentication Security Tests', () => {
       const { result } = renderHook(() => useAuthStore());
 
       const password = 'super-secret-password';
+      mockAuthKitCallback();
 
       await act(async () => {
-        await result.current.login('test@example.com', password);
+        await result.current.loginWithCode('auth-code', password);
       });
 
       // Check that password is not stored anywhere
-      const stateString = JSON.stringify(useAuthStore.getState());
+      const { authKitRefreshToken, isAuthenticated, token, user } = useAuthStore.getState();
+      const stateString = JSON.stringify({ authKitRefreshToken, isAuthenticated, token, user });
       expect(stateString).not.toContain(password);
 
       const localStorageString = JSON.stringify(localStorage);
@@ -535,14 +593,15 @@ describe('Authentication Security Tests', () => {
         result.current.setToken(oldToken);
       });
 
+      mockAuthKitCallback('new-session-token');
+
       await act(async () => {
-        await result.current.login('test@example.com', 'password');
+        await result.current.loginWithCode('auth-code', 'auth-state');
       });
 
       // Token should be set (in real implementation, would be different from old token)
       expect(result.current.token).not.toBeNull();
-      // Current mock uses 'mock-jwt-token', future implementation would generate new token
-      expect(result.current.token).toBe('mock-jwt-token');
+      expect(result.current.token).toBe('new-session-token');
     });
 
     it('should invalidate old tokens after password change', () => {

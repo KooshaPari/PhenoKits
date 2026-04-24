@@ -6,8 +6,6 @@ import type { ChangeEvent } from 'react';
 
 import { useCallback, useMemo, useState } from 'react';
 
-import type { StreamingStats } from '../../lib/ndjson-parser';
-
 import { useStreamExport, useStreamGraph, useStreamItems } from '../../hooks/useStreaming';
 import { StreamingProgress, StreamingProgressBar } from '../StreamingProgress';
 
@@ -15,9 +13,25 @@ const SLICE_SIZE = 10;
 const PREVIEW_SIZE = 3;
 const DATE_SPLIT_INDEX = 0;
 
-const getItemKey = (item: { id?: string }, index: number) => `item-${item.id ?? index}`;
+const hasObjectId = (value: unknown): value is { id?: unknown } => {
+  return typeof value === 'object' && value !== null && 'id' in value;
+};
 
-const getNodeKey = (node: { id?: string }, index: number) => `node-${node.id ?? index}`;
+const getItemKey = (item: unknown, index: number) => {
+  if (hasObjectId(item) && typeof item.id === 'string') {
+    return `item-${item.id}`;
+  }
+
+  return `item-${index}`;
+};
+
+const getNodeKey = (node: unknown, index: number) => {
+  if (hasObjectId(node) && typeof node.id === 'string') {
+    return `node-${node.id}`;
+  }
+
+  return `node-${index}`;
+};
 
 interface ErrorNoticeProps {
   error?: Error | undefined;
@@ -42,7 +56,7 @@ const ItemsList = ({ items }: ItemsListProps) => (
     <div className='max-h-64 space-y-1 overflow-y-auto'>
       {items.map((item, index) => (
         <div
-          key={getItemKey(item as { id?: string }, index)}
+          key={getItemKey(item, index)}
           className='bg-muted rounded p-2 text-sm'
         >
           {JSON.stringify(item)}
@@ -117,7 +131,7 @@ const StreamItemsExample = () => {
 
   const handleStart = useCallback(() => {
     if (projectId) {
-      startStreaming({ projectId });
+      void startStreaming({ projectId });
     }
   }, [projectId, startStreaming]);
 
@@ -238,7 +252,7 @@ const GraphPreview = ({ nodes, previewNodes, remainingCount }: GraphPreviewProps
     <div className='text-muted-foreground mb-2 text-sm'>Graph Preview</div>
     <div className='space-y-1 text-xs'>
       {previewNodes.map((node, index) => (
-        <div key={getNodeKey(node as { id?: string }, index)}>Node: {JSON.stringify(node)}</div>
+        <div key={getNodeKey(node, index)}>Node: {JSON.stringify(node)}</div>
       ))}
       {remainingCount > 0 && <div>... and {remainingCount} more</div>}
     </div>
@@ -252,7 +266,7 @@ const StreamGraphExample = () => {
 
   const handleStart = useCallback(() => {
     if (graphId) {
-      startStreaming(graphId);
+      void startStreaming(graphId);
     }
   }, [graphId, startStreaming]);
 
@@ -394,7 +408,7 @@ const StreamExportExample = () => {
 
   const handleStart = useCallback(() => {
     if (projectId) {
-      startExport({ projectId, type: exportType });
+      void startExport({ projectId, type: exportType });
     }
   }, [exportType, projectId, startExport]);
 

@@ -68,12 +68,12 @@ describe(MobileMenu, () => {
   });
 
   it('closes menu when backdrop is clicked', () => {
-    const { container } = render(<MobileMenu />);
+    render(<MobileMenu />);
 
     const button = screen.getByLabelText('Open menu');
     fireEvent.click(button);
 
-    const backdrop = container.querySelector('.bg-black/50');
+    const backdrop = screen.getByTestId('mobile-menu-backdrop');
     if (backdrop) {
       fireEvent.click(backdrop);
     }

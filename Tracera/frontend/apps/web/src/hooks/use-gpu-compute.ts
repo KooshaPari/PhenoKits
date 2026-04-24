@@ -71,9 +71,10 @@ async function initializeWebGPU(): Promise<GPUComputeDevice | null> {
       },
     });
 
-    device.lost.then((info) => {
+    void (async (): Promise<void> => {
+      const info = await device.lost;
       logger.error('WebGPU device lost:', info.message);
-    });
+    })();
 
     logger.info('WebGPU device initialized successfully');
     return { adapter, device };
@@ -93,6 +94,10 @@ interface GPUBuffers {
   forces: GPUBuffer;
   edges: GPUBuffer;
   params: GPUBuffer;
+}
+
+function arrayBufferForWrite(data: Float32Array | Uint32Array): Uint8Array<ArrayBuffer> {
+  return new Uint8Array(data.buffer, data.byteOffset, data.byteLength).slice();
 }
 
 /**
@@ -142,10 +147,10 @@ function uploadBufferData(
   data: GPUBufferData,
   params: ForceComputeParams,
 ): void {
-  device.queue.writeBuffer(buffers.positions, 0, data.positions as unknown as BufferSource);
-  device.queue.writeBuffer(buffers.velocities, 0, data.velocities as unknown as BufferSource);
-  device.queue.writeBuffer(buffers.forces, 0, data.forces as unknown as BufferSource);
-  device.queue.writeBuffer(buffers.edges, 0, params.edges as unknown as BufferSource);
+  device.queue.writeBuffer(buffers.positions, 0, arrayBufferForWrite(data.positions));
+  device.queue.writeBuffer(buffers.velocities, 0, arrayBufferForWrite(data.velocities));
+  device.queue.writeBuffer(buffers.forces, 0, arrayBufferForWrite(data.forces));
+  device.queue.writeBuffer(buffers.edges, 0, arrayBufferForWrite(params.edges));
 
   // Pack parameters into uniform buffer (aligned to 16 bytes)
   const paramsArray = new Float32Array(16);
@@ -287,7 +292,7 @@ export function useGPUCompute(shaderCode: string): UseGPUComputeResult {
       }
     };
 
-    init();
+    void init();
 
     return () => {
       mounted = false;

@@ -46,14 +46,14 @@ describe(TraceabilityMatrixView, () => {
 
   it('renders traceability matrix interface', () => {
     vi.mocked(useItems).mockReturnValue({
-      data: [],
+      data: { items: [], total: 0 },
       error: null,
       isError: false,
       isLoading: false,
     } as any);
 
     vi.mocked(useLinks).mockReturnValue({
-      data: [],
+      data: { links: [], total: 0 },
       error: null,
       isError: false,
       isLoading: false,
@@ -66,19 +66,21 @@ describe(TraceabilityMatrixView, () => {
     );
 
     expect(screen.getByText('Traceability Matrix')).toBeInTheDocument();
-    expect(screen.getByText(/Requirements coverage overview/i)).toBeInTheDocument();
+    expect(
+      screen.getByText('Requirements coverage mapped to functional features.'),
+    ).toBeInTheDocument();
   });
 
   it('displays loading state', () => {
     vi.mocked(useItems).mockReturnValue({
-      data: undefined,
+      data: { items: [], total: 0 },
       error: null,
       isError: false,
       isLoading: true,
     } as any);
 
     vi.mocked(useLinks).mockReturnValue({
-      data: undefined,
+      data: { links: [], total: 0 },
       error: null,
       isError: false,
       isLoading: false,
@@ -110,14 +112,14 @@ describe(TraceabilityMatrixView, () => {
     ];
 
     vi.mocked(useItems).mockReturnValue({
-      data: [...requirements, ...features],
+      data: { items: [...requirements, ...features], total: 4 },
       error: null,
       isError: false,
       isLoading: false,
     } as any);
 
     vi.mocked(useLinks).mockReturnValue({
-      data: links,
+      data: { links, total: 2 },
       error: null,
       isError: false,
       isLoading: false,
@@ -135,14 +137,14 @@ describe(TraceabilityMatrixView, () => {
 
   it('shows export button', () => {
     vi.mocked(useItems).mockReturnValue({
-      data: [],
+      data: { items: [], total: 0 },
       error: null,
       isError: false,
       isLoading: false,
     } as any);
 
     vi.mocked(useLinks).mockReturnValue({
-      data: [],
+      data: { links: [], total: 0 },
       error: null,
       isError: false,
       isLoading: false,
@@ -154,19 +156,19 @@ describe(TraceabilityMatrixView, () => {
       </QueryClientProvider>,
     );
 
-    expect(screen.getByText('Export')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Export CSV/i })).toBeInTheDocument();
   });
 
   it('handles empty state', () => {
     vi.mocked(useItems).mockReturnValue({
-      data: [],
+      data: { items: [], total: 0 },
       error: null,
       isError: false,
       isLoading: false,
     } as any);
 
     vi.mocked(useLinks).mockReturnValue({
-      data: [],
+      data: { links: [], total: 0 },
       error: null,
       isError: false,
       isLoading: false,

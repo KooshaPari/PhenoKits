@@ -31,14 +31,14 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
-import type { Item, Link } from '@tracertm/types';
+import type { Item, Link, LinkType } from '@tracertm/types';
 
 import { Badge } from '@tracertm/ui/components/Badge';
 import { Button } from '@tracertm/ui/components/Button';
 
-import '@xyflow/react/dist/style.css';
 import { Card } from '@tracertm/ui/components/Card';
 import { Separator } from '@tracertm/ui/components/Separator';
+import _xyflowStyle from '@xyflow/react/dist/style.css';
 
 import type { ClusteringAlgorithm } from '../../hooks/useClustering';
 import type { ClusterNode as _ClusterNodeType } from '../../lib/graphClustering';
@@ -53,6 +53,30 @@ import { LayoutSelector } from './layouts/LayoutSelector';
 import { useDagLayout } from './layouts/useDagLayout';
 import { NodeDetailPanel } from './NodeDetailPanel';
 import { RichNodePill } from './RichNodePill';
+
+void _xyflowStyle;
+
+const EMPTY_LINK_TYPE_COUNTS = {
+  alternative_to: 0,
+  blocks: 0,
+  calls: 0,
+  conflicts_with: 0,
+  derives_from: 0,
+  depends_on: 0,
+  documents: 0,
+  imports: 0,
+  implements: 0,
+  manifests_as: 0,
+  mentions: 0,
+  parent_of: 0,
+  related_to: 0,
+  represents: 0,
+  same_as: 0,
+  supersedes: 0,
+  tests: 0,
+  traces_to: 0,
+  validates: 0,
+} satisfies Record<LinkType, number>;
 
 const customNodeTypes = {
   clusterNode: ClusterNode,
@@ -109,8 +133,43 @@ export function ClusteredGraphView({
   const clusterEdges = useClusterEdges(clustering, links, 0);
 
   // Combine visible items and clusters for layout
-  const nodesForLayout = useMemo((): Node[] => {
-    const nodes: Node[] = [];
+  const nodesForLayout = useMemo((): Array<Node<ClusterNodeData | RichNodeData>> => {
+    const nodes: Array<Node<ClusterNodeData | RichNodeData>> = [];
+    const visibleItemIds = new Set(visibleItems.map((item) => item.id));
+    const connectionsByItemId = new Map<
+      string,
+      {
+        byType: Record<LinkType, number>;
+        incoming: number;
+        outgoing: number;
+      }
+    >();
+
+    for (const link of links) {
+      if (visibleItemIds.has(link.sourceId)) {
+        const sourceConnections =
+          connectionsByItemId.get(link.sourceId) ?? {
+            byType: { ...EMPTY_LINK_TYPE_COUNTS },
+            incoming: 0,
+            outgoing: 0,
+          };
+        sourceConnections.outgoing += 1;
+        sourceConnections.byType[link.type] += 1;
+        connectionsByItemId.set(link.sourceId, sourceConnections);
+      }
+
+      if (visibleItemIds.has(link.targetId)) {
+        const targetConnections =
+          connectionsByItemId.get(link.targetId) ?? {
+            byType: { ...EMPTY_LINK_TYPE_COUNTS },
+            incoming: 0,
+            outgoing: 0,
+          };
+        targetConnections.incoming += 1;
+        targetConnections.byType[link.type] += 1;
+        connectionsByItemId.set(link.targetId, targetConnections);
+      }
+    }
 
     // Add cluster nodes
     for (const cluster of visibleClusters) {
@@ -128,28 +187,39 @@ export function ClusteredGraphView({
           onDrillDown: drillDownToCluster,
           onItemSelect: setSelectedNodeId,
           onToggle: toggleCluster,
-        } as unknown as Record<string, unknown>,
+        },
         id: cluster.id,
         position: { x: 0, y: 0 },
         type: 'clusterNode',
-      });
+      } satisfies Node<ClusterNodeData>);
     }
 
     // Add individual item nodes
     for (const item of visibleItems) {
+      const connections =
+        connectionsByItemId.get(item.id) ?? {
+          byType: { ...EMPTY_LINK_TYPE_COUNTS },
+          incoming: 0,
+          outgoing: 0,
+        };
+
       nodes.push({
         data: {
+          connections: {
+            ...connections,
+            total: connections.incoming + connections.outgoing,
+          },
           id: item.id,
           item,
           label: item.title || 'Untitled',
           onSelect: setSelectedNodeId,
           status: item.status,
           type: item.type || 'item',
-        } as RichNodeData,
+        },
         id: item.id,
         position: { x: 0, y: 0 },
         type: 'richPill',
-      });
+      } satisfies Node<RichNodeData>);
     }
 
     return nodes;
@@ -266,12 +336,14 @@ export function ClusteredGraphView({
   // Auto-fit on initial load
   useEffect(() => {
     if (autoFit && nodes.length > 0) {
-      const timer = setTimeout(() => {}, 100);
+      const timer = setTimeout(() => {
+        void fitView();
+      }, 100);
       return () => {
         clearTimeout(timer);
       };
     }
-    return;
+    return undefined;
   }, [autoFit, fitView, nodes.length]);
 
   // Selected node data
@@ -303,20 +375,45 @@ export function ClusteredGraphView({
   }, [selectedNodeId, links, items]);
 
   // Handlers
-  const handleFit = () => {};
+  const handleFit = (): void => {
+    void fitView();
+  };
   const handleReset = () => {
     setLayout('flow-chart');
     setSelectedNodeId(null);
     collapseAll();
   };
 
-  const handleFocusNode = (nodeId: string) => {
+  const handleFocusNode = (nodeId: string): void => {
     setSelectedNodeId(nodeId);
     const node = nodes.find((n) => n.id === nodeId);
-    if (node) {
-      undefined;
+    if (node !== undefined) {
+      void fitView({ nodes: [node], duration: 200 });
     }
   };
+
+  const selectedNodeData = useMemo((): EnhancedNodeData | null => {
+    if (selectedNode === null) {
+      return null;
+    }
+
+    return {
+      connections: {
+        byType: EMPTY_LINK_TYPE_COUNTS,
+        incoming: incomingLinks.length,
+        outgoing: outgoingLinks.length,
+        total: incomingLinks.length + outgoingLinks.length,
+      },
+      depth: 0,
+      hasChildren: false,
+      id: selectedNode.id,
+      item: selectedNode,
+      label: selectedNode.title || 'Untitled',
+      perspective: [],
+      status: selectedNode.status,
+      type: selectedNode.type || 'item',
+    };
+  }, [incomingLinks.length, outgoingLinks.length, selectedNode]);
 
   return (
     <div className='flex h-full flex-col'>
@@ -444,26 +541,9 @@ export function ClusteredGraphView({
         </Card>
 
         {/* Node Detail Panel */}
-        {showDetailPanel && selectedNode && (
+        {showDetailPanel && selectedNodeData !== null && (
           <NodeDetailPanel
-            node={
-              {
-                connections: {
-                  byType: {},
-                  incoming: incomingLinks.length,
-                  outgoing: outgoingLinks.length,
-                  total: incomingLinks.length + outgoingLinks.length,
-                },
-                depth: 0,
-                hasChildren: false,
-                id: selectedNode.id,
-                item: selectedNode,
-                label: selectedNode.title || 'Untitled',
-                perspective: [],
-                status: selectedNode.status,
-                type: selectedNode.type || 'item',
-              } as unknown as EnhancedNodeData
-            }
+            node={selectedNodeData}
             relatedItems={relatedItems}
             incomingLinks={incomingLinks}
             outgoingLinks={outgoingLinks}

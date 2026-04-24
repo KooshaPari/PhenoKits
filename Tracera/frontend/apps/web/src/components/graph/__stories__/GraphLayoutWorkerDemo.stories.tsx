@@ -7,10 +7,7 @@
 
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { useEffect, useState } from 'react';
-
-import type { BenchmarkResult } from '@/lib/graphLayoutBenchmark';
-import type { LayoutOptions } from '@/workers/graphLayout.worker';
+import { useEffect, useId, useState } from 'react';
 
 import { useGraphLayoutWorker } from '@/hooks/useGraphLayoutWorker';
 import { generateTestGraph } from '@/lib/graphLayoutBenchmark';
@@ -18,16 +15,43 @@ import { logger } from '@/lib/logger';
 import { Button } from '@tracertm/ui/components/Button';
 import { Card } from '@tracertm/ui/components/Card';
 
+type StoryLayoutAlgorithm = 'dagre' | 'elk' | 'd3-force' | 'grid' | 'circular' | 'radial';
+
+interface StoryBenchmarkResult {
+  algorithm: StoryLayoutAlgorithm;
+  nodeCount: number;
+  edgeCount: number;
+  duration: number;
+  fps: number;
+  mainThreadBlocked: boolean;
+}
+
+const parseStoryLayoutAlgorithm = (value: string): StoryLayoutAlgorithm => {
+  switch (value) {
+    case 'circular':
+    case 'd3-force':
+    case 'dagre':
+    case 'elk':
+    case 'grid':
+    case 'radial':
+      return value;
+    default:
+      return 'elk';
+  }
+};
+
 // ============================================================================
 // DEMO COMPONENT
 // ============================================================================
 
 function GraphLayoutWorkerDemo() {
+  const nodeCountId = useId();
+  const algorithmId = useId();
   const [nodeCount, setNodeCount] = useState(1000);
-  const [algorithm, setAlgorithm] = useState<LayoutOptions['algorithm']>('elk');
+  const [algorithm, setAlgorithm] = useState<StoryLayoutAlgorithm>('elk');
   const [isRunning, setIsRunning] = useState(false);
-  const [syncResult, setSyncResult] = useState<BenchmarkResult | null>(null);
-  const [workerResult, setWorkerResult] = useState<BenchmarkResult | null>(null);
+  const [syncResult, setSyncResult] = useState<StoryBenchmarkResult | null>(null);
+  const [workerResult, setWorkerResult] = useState<StoryBenchmarkResult | null>(null);
   const [mainThreadFPS, setMainThreadFPS] = useState(60);
 
   const { computeLayout, isReady, isComputing, progress } = useGraphLayoutWorker({
@@ -112,11 +136,13 @@ function GraphLayoutWorkerDemo() {
           main thread, keeping the UI responsive.
         </p>
 
-        {/* Controls */}
         <div className='mb-6 space-y-4'>
           <div className='flex items-center gap-4'>
-            <label className='w-32'>Node Count:</label>
+            <label htmlFor={nodeCountId} className='w-32'>
+              Node Count:
+            </label>
             <input
+              id={nodeCountId}
               type='range'
               min='100'
               max='10000'
@@ -132,11 +158,14 @@ function GraphLayoutWorkerDemo() {
           </div>
 
           <div className='flex items-center gap-4'>
-            <label className='w-32'>Algorithm:</label>
+            <label htmlFor={algorithmId} className='w-32'>
+              Algorithm:
+            </label>
             <select
+              id={algorithmId}
               value={algorithm}
               onChange={(e) => {
-                setAlgorithm(e.target.value as LayoutOptions['algorithm']);
+                setAlgorithm(parseStoryLayoutAlgorithm(e.target.value));
               }}
               disabled={isRunning}
               className='flex-1 rounded border p-2'

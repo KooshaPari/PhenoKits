@@ -3,7 +3,7 @@
  * Tests traceability chain visualization, code references, and user interactions
  */
 
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { CanonicalConcept, CodeReference } from '@tracertm/types';
@@ -115,9 +115,11 @@ describe(UICodeTracePanel, () => {
   const mockOnOpenRequirement = vi.fn();
   const mockOnNavigateToUI = vi.fn();
   const mockOnRefreshTrace = vi.fn();
+  let container: HTMLElement;
 
   beforeEach(() => {
     vi.clearAllMocks();
+    container = document.body;
   });
 
   // =========================================================================
@@ -273,7 +275,7 @@ describe(UICodeTracePanel, () => {
 
       const openButtons = screen.getAllByText(/Open in Editor/);
       if (openButtons.length > 0) {
-        await user.click(openButtons[0]);
+        fireEvent.click(openButtons[0]);
         expect(mockOnOpenCode).toHaveBeenCalledWith(mockCodeReference);
       }
     });
@@ -285,7 +287,7 @@ describe(UICodeTracePanel, () => {
 
       const viewButtons = screen.getAllByText(/View Requirement/);
       if (viewButtons.length > 0) {
-        await user.click(viewButtons[0]);
+        fireEvent.click(viewButtons[0]);
         expect(mockOnOpenRequirement).toHaveBeenCalledWith('req-auth-001');
       }
     });
@@ -295,7 +297,7 @@ describe(UICodeTracePanel, () => {
 
       const componentButtons = screen.getAllByText(/Open Component/);
       if (componentButtons.length > 0) {
-        await user.click(componentButtons[0]);
+        fireEvent.click(componentButtons[0]);
         expect(mockOnNavigateToUI).toHaveBeenCalledWith('src/components/LoginForm.tsx');
       }
     });
@@ -304,7 +306,7 @@ describe(UICodeTracePanel, () => {
       render(<UICodeTracePanel traceChain={mockTraceChain} onRefreshTrace={mockOnRefreshTrace} />);
 
       const refreshButton = screen.getByText('Refresh');
-      await user.click(refreshButton);
+      fireEvent.click(refreshButton);
       expect(mockOnRefreshTrace).toHaveBeenCalled();
     });
   });
@@ -320,7 +322,7 @@ describe(UICodeTracePanel, () => {
       // Tooltips are displayed on hover
       const confidenceBadges = screen.getAllByText(/\d+%/);
       if (confidenceBadges.length > 0) {
-        await user.hover(confidenceBadges[0]);
+        fireEvent.mouseOver(confidenceBadges[0]);
         // Wait for tooltip to appear
         await waitFor(() => {
           // Strategy labels should be in the document

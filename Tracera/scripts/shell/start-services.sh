@@ -9,7 +9,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 # Colors
 GREEN='\033[0;32m'
@@ -75,8 +75,10 @@ start_nats() {
         return 0
     fi
 
-    # Start NATS with JetStream in background
-    nats-server -js -D &
+    # Start NATS with the repo config so the monitoring endpoint on 8222 is available.
+    # Redirect logs so callers that capture stdout/stderr do not wait on the background process.
+    mkdir -p "$ROOT_DIR/.logs"
+    nats-server -c "$ROOT_DIR/config/nats-server.conf" >"$ROOT_DIR/.logs/nats-server.log" 2>&1 &
     NATS_PID=$!
 
     sleep 3

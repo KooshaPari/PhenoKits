@@ -27,7 +27,7 @@ import type { Item, Link, LinkType } from '@tracertm/types';
 import { Badge } from '@tracertm/ui/components/Badge';
 import { Button } from '@tracertm/ui/components/Button';
 
-import '@xyflow/react/dist/style.css';
+import _xyflowStyle from '@xyflow/react/dist/style.css';
 import { Card } from '@tracertm/ui/components/Card';
 import { Separator } from '@tracertm/ui/components/Separator';
 
@@ -50,6 +50,8 @@ import {
   TYPE_TO_PERSPECTIVE,
 } from './types';
 
+void _xyflowStyle;
+
 const readString = (
   record: Record<string, unknown> | undefined,
   key: string,
@@ -60,6 +62,32 @@ const readString = (
   const value = record[key];
   return typeof value === 'string' ? value : undefined;
 };
+
+const EMPTY_LINK_TYPE_COUNTS: Record<LinkType, number> = {
+  alternative_to: 0,
+  blocks: 0,
+  calls: 0,
+  conflicts_with: 0,
+  derives_from: 0,
+  depends_on: 0,
+  documents: 0,
+  imports: 0,
+  implements: 0,
+  manifests_as: 0,
+  mentions: 0,
+  parent_of: 0,
+  related_to: 0,
+  represents: 0,
+  same_as: 0,
+  supersedes: 0,
+  tests: 0,
+  traces_to: 0,
+  validates: 0,
+};
+
+function createEmptyLinkTypeCounts(): Record<LinkType, number> {
+  return { ...EMPTY_LINK_TYPE_COUNTS };
+}
 
 // Simplified node component for LOD rendering
 function SimplifiedNodePill({ data }: { data: { id: string; type: string } }) {
@@ -166,16 +194,20 @@ function VirtualizedGraphViewComponent({
       outgoingCount.set(link.sourceId, (outgoingCount.get(link.sourceId) ?? 0) + 1);
 
       if (!connectionsByType.has(link.targetId)) {
-        connectionsByType.set(link.targetId, {} as Record<LinkType, number>);
+        connectionsByType.set(link.targetId, createEmptyLinkTypeCounts());
       }
-      const targetTypes = connectionsByType.get(link.targetId)!;
-      targetTypes[link.type] = (targetTypes[link.type] || 0) + 1;
+      const targetTypes = connectionsByType.get(link.targetId);
+      if (targetTypes !== undefined) {
+        targetTypes[link.type] = (targetTypes[link.type] ?? 0) + 1;
+      }
 
       if (!connectionsByType.has(link.sourceId)) {
-        connectionsByType.set(link.sourceId, {} as Record<LinkType, number>);
+        connectionsByType.set(link.sourceId, createEmptyLinkTypeCounts());
       }
-      const sourceTypes = connectionsByType.get(link.sourceId)!;
-      sourceTypes[link.type] = (sourceTypes[link.type] || 0) + 1;
+      const sourceTypes = connectionsByType.get(link.sourceId);
+      if (sourceTypes !== undefined) {
+        sourceTypes[link.type] = (sourceTypes[link.type] ?? 0) + 1;
+      }
     }
 
     return items.map((item) => {
@@ -194,12 +226,12 @@ function VirtualizedGraphViewComponent({
       while (currentId && depth < 10) {
         depth += 1;
         const parent = itemMap.get(currentId);
-        currentId = parent?.parentId;
+        currentId = parent === undefined ? undefined : parent.parentId;
       }
 
       return {
         connections: {
-          byType: connectionsByType.get(item.id) ?? ({} as Record<LinkType, number>),
+          byType: connectionsByType.get(item.id) ?? createEmptyLinkTypeCounts(),
           incoming,
           outgoing,
           total: incoming + outgoing,
@@ -357,28 +389,34 @@ function VirtualizedGraphViewComponent({
       const defaultStyle = { arrow: false, color: '#64748b', dashed: true };
       return filteredLinks.map((link) => {
         const linkStyle = LINK_STYLES[link.type] ?? defaultStyle;
-        return {
+        const edgeStyle: NonNullable<Edge['style']> = {
+          stroke: linkStyle.color,
+          strokeWidth: 2,
+        };
+        if (linkStyle.dashed) {
+          edgeStyle.strokeDasharray = '5,5';
+        }
+        const edge = {
           animated: link.type === 'depends_on' || link.type === 'blocks',
           id: link.id,
           label: link.type.replaceAll('_', ' '),
           labelBgPadding: [4, 2] as [number, number],
           labelBgStyle: { fill: 'rgba(26, 26, 46, 0.9)' },
           labelStyle: { fill: linkStyle.color, fontSize: 10 },
-          markerEnd: linkStyle.arrow
-            ? {
-                color: linkStyle.color,
-                type: MarkerType.ArrowClosed,
-              }
-            : undefined,
           source: link.sourceId,
-          style: {
-            stroke: linkStyle.color,
-            strokeWidth: 2,
-            ...(linkStyle.dashed && { strokeDasharray: '5,5' }),
-          },
+          style: edgeStyle,
           target: link.targetId,
           type: 'smoothstep',
-        } as Edge;
+          ...(linkStyle.arrow
+            ? {
+                markerEnd: {
+                  color: linkStyle.color,
+                  type: MarkerType.ArrowClosed,
+                },
+              }
+            : {}),
+        } satisfies Edge;
+        return edge;
       });
     }
 
@@ -388,24 +426,30 @@ function VirtualizedGraphViewComponent({
       .filter((link) => visibleNodeIds.has(link.sourceId) && visibleNodeIds.has(link.targetId))
       .map((link) => {
         const linkStyle = LINK_STYLES[link.type] ?? defaultStyle;
-        return {
+        const edgeStyle: NonNullable<Edge['style']> = {
+          stroke: linkStyle.color,
+          strokeWidth: 1,
+        };
+        if (linkStyle.dashed) {
+          edgeStyle.strokeDasharray = '5,5';
+        }
+        const edge = {
           id: link.id,
           source: link.sourceId,
           target: link.targetId,
           type: 'smoothstep',
           animated: false, // Disable animation for large graphs
-          style: {
-            stroke: linkStyle.color,
-            strokeWidth: 1,
-            ...(linkStyle.dashed && { strokeDasharray: '5,5' }),
-          },
-          markerEnd: linkStyle.arrow
+          style: edgeStyle,
+          ...(linkStyle.arrow
             ? {
-                color: linkStyle.color,
-                type: MarkerType.ArrowClosed,
+                markerEnd: {
+                  color: linkStyle.color,
+                  type: MarkerType.ArrowClosed,
+                },
               }
-            : undefined,
-        } as Edge;
+            : {}),
+        } satisfies Edge;
+        return edge;
       });
   }, [filteredLinks, visibleNodeIds, enableVirtualization]);
 
@@ -425,13 +469,13 @@ function VirtualizedGraphViewComponent({
   useEffect(() => {
     if (autoFit && nodes.length > 0) {
       const timer = setTimeout(() => {
-        fitView();
+        void fitView();
       }, 100);
       return () => {
         clearTimeout(timer);
       };
     }
-    return;
+    return undefined;
   }, [autoFit, fitView, nodes.length]);
 
   // Update viewport on move/zoom
@@ -475,21 +519,21 @@ function VirtualizedGraphViewComponent({
   }, [selectedNodeId, links, items]);
 
   // Handlers
-  const handleFit = () => {
-    fitView();
+  const handleFit = (): void => {
+    void fitView();
   };
-  const handleReset = () => {
+  const handleReset = (): void => {
     setPerspective('all');
     setLayout('flow-chart');
     setSelectedNodeId(null);
     setExpandedNodes(new Set());
   };
 
-  const handleFocusNode = (nodeId: string) => {
+  const handleFocusNode = (nodeId: string): void => {
     setSelectedNodeId(nodeId);
     const node = nodes.find((n) => n.id === nodeId);
     if (node) {
-      fitView({ nodes: [node], duration: 200 });
+      void fitView({ nodes: [node], duration: 200 });
     }
   };
 
@@ -542,7 +586,7 @@ function VirtualizedGraphViewComponent({
                 <Button
                   variant='ghost'
                   size='sm'
-                  onClick={async () => zoomIn()}
+                  onClick={() => zoomIn()}
                   className='h-7 w-7 p-0'
                 >
                   <ZoomIn className='h-4 w-4' />
@@ -550,7 +594,7 @@ function VirtualizedGraphViewComponent({
                 <Button
                   variant='ghost'
                   size='sm'
-                  onClick={async () => zoomOut()}
+                  onClick={() => zoomOut()}
                   className='h-7 w-7 p-0'
                 >
                   <ZoomOut className='h-4 w-4' />

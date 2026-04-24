@@ -12,7 +12,7 @@
  * - ARIA sort indicators for sortable columns
  */
 
-import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useNavigate, useRouter, useSearch } from '@tanstack/react-router';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import {
   AlertCircle,
@@ -98,6 +98,26 @@ function parseSearchFilters(search: unknown): SearchFilters {
     project: readNonEmptyString(search['project']),
     type: readNonEmptyString(search['type']),
   };
+}
+
+function pushSearchPatch(
+  router: ReturnType<typeof useRouter>,
+  patch: Record<string, string | undefined>,
+): void {
+  const currentUrl = new URL(router.history.location.href, globalThis.location.origin);
+  const nextParams = new URLSearchParams(currentUrl.search);
+
+  for (const [key, value] of Object.entries(patch)) {
+    if (value === undefined) {
+      nextParams.delete(key);
+    } else {
+      nextParams.set(key, value);
+    }
+  }
+
+  const nextSearch = nextParams.toString();
+  currentUrl.search = nextSearch === '' ? '' : `?${nextSearch}`;
+  router.history.push(`${currentUrl.pathname}${currentUrl.search}${currentUrl.hash}`);
 }
 
 function getTypeValue(type: string | undefined, view: ViewType | undefined): string {
@@ -370,6 +390,7 @@ export function ItemsTableViewA11y({
   type,
 }: ItemsTableViewA11yProps = {}): JSX.Element {
   const navigate = useNavigate();
+  const router = useRouter();
   const searchParams = parseSearchFilters(useSearch({ strict: false }));
   const projectFilter = searchParams.project;
   const typeFilter = searchParams.type;
@@ -463,13 +484,8 @@ export function ItemsTableViewA11y({
     if (actionParam !== 'create') {
       return;
     }
-    navigate({
-      search: ((previousSearch: Record<string, unknown>) => {
-        const { action: _, ...rest } = isRecord(previousSearch) ? previousSearch : {};
-        return rest;
-      }) as never,
-    });
-  }, [actionParam, navigate]);
+    pushSearchPatch(router, { action: undefined });
+  }, [actionParam, router]);
 
   const handleOpenCreateModal = useCallback((): void => {
     setShowCreateModal(true);
@@ -481,7 +497,7 @@ export function ItemsTableViewA11y({
         return;
       }
       const viewSegment = (view ?? item.view).toLowerCase();
-      navigate({
+      void navigate({
         to: `/projects/${effectiveProjectId}/views/${viewSegment}/${item.id}`,
       });
     },
@@ -583,34 +599,16 @@ export function ItemsTableViewA11y({
 
   const handleProjectFilterChange = useCallback(
     (value: string): void => {
-      navigate({
-        search: ((previousSearch: Record<string, unknown>) => {
-          const base = isRecord(previousSearch) ? previousSearch : {};
-          if (value === 'all') {
-            const { project: _, ...rest } = base;
-            return rest;
-          }
-          return { ...base, project: value };
-        }) as never,
-      });
+      pushSearchPatch(router, { project: value === 'all' ? undefined : value });
     },
-    [navigate],
+    [router],
   );
 
   const handleTypeFilterChange = useCallback(
     (value: string): void => {
-      navigate({
-        search: ((previousSearch: Record<string, unknown>) => {
-          const base = isRecord(previousSearch) ? previousSearch : {};
-          if (value === 'all') {
-            const { type: _, ...rest } = base;
-            return rest;
-          }
-          return { ...base, type: value };
-        }) as never,
-      });
+      pushSearchPatch(router, { type: value === 'all' ? undefined : value });
     },
-    [navigate],
+    [router],
   );
 
   const handleNewTitleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>): void => {

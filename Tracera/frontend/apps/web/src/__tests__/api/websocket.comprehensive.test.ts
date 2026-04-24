@@ -32,6 +32,13 @@ class MockWebSocket {
       if (this.onopen) {
         this.onopen(new Event('open'));
       }
+      if (this.onmessage) {
+        this.onmessage(
+          new MessageEvent('message', {
+            data: JSON.stringify({ type: 'auth_success' }),
+          }),
+        );
+      }
     }, 10);
   }
 }
@@ -54,25 +61,30 @@ globalThis.window = globalThis.window;
 describe('WebSocket - Comprehensive Coverage (Remaining Gaps)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.spyOn(globalThis, 'setInterval').mockImplementation(
+      (_fn: TimerHandler, _delay?: number) => 1 as unknown as ReturnType<typeof setInterval>,
+    );
+    vi.spyOn(globalThis, 'clearInterval').mockImplementation(() => undefined);
+    getWebSocketManager(() => 'test-token').disconnect();
     // Reset singleton
     vi.resetModules();
   });
 
   describe('Heartbeat functionality', () => {
     it('should send heartbeat when connection is open', async () => {
-      const manager = getWebSocketManager();
+      const manager = getWebSocketManager(() => 'test-token');
       const sendSpy = vi.spyOn(manager as any, 'send');
 
-      await connectWebSocket();
+      await connectWebSocket(() => 'test-token');
 
       // Wait for connection
       await new Promise((resolve) => setTimeout(resolve, 50));
 
       // Verify heartbeat interval was set
-      expect(globalThis.window.setInterval).toHaveBeenCalled();
+      expect(globalThis.setInterval).toHaveBeenCalled();
 
       // Simulate heartbeat tick
-      const heartbeatFn = vi.mocked(globalThis.window.setInterval).mock.calls[0]?.[0];
+      const heartbeatFn = vi.mocked(globalThis.setInterval).mock.calls[0]?.[0];
       if (heartbeatFn && typeof heartbeatFn === 'function') {
         heartbeatFn();
       }
@@ -85,7 +97,7 @@ describe('WebSocket - Comprehensive Coverage (Remaining Gaps)', () => {
     });
 
     it('should not send heartbeat when connection is not open', async () => {
-      const manager = getWebSocketManager();
+      const manager = getWebSocketManager(() => 'test-token');
       const sendSpy = vi.spyOn(manager as any, 'send');
 
       // Create a WebSocket that stays in CONNECTING state
@@ -93,18 +105,20 @@ describe('WebSocket - Comprehensive Coverage (Remaining Gaps)', () => {
         constructor(url: string) {
           super(url);
           this.readyState = MockWebSocket.CONNECTING;
+          this.onmessage = null;
         }
       }
 
       globalThis.WebSocket = ConnectingWebSocket as any;
 
-      await connectWebSocket();
+      await connectWebSocket(() => 'test-token');
 
       // Wait a bit
       await new Promise((resolve) => setTimeout(resolve, 50));
+      (manager as any).ws.readyState = MockWebSocket.CONNECTING;
 
       // Simulate heartbeat tick
-      const heartbeatFn = vi.mocked(globalThis.window.setInterval).mock.calls[0]?.[0];
+      const heartbeatFn = vi.mocked(globalThis.setInterval).mock.calls[0]?.[0];
       if (heartbeatFn && typeof heartbeatFn === 'function') {
         heartbeatFn();
       }
@@ -118,7 +132,7 @@ describe('WebSocket - Comprehensive Coverage (Remaining Gaps)', () => {
 
   describe('Reconnection logic', () => {
     it('should attempt reconnection with exponential backoff', async () => {
-      const manager = getWebSocketManager();
+      const manager = getWebSocketManager(() => 'test-token');
       const connectSpy = vi.spyOn(manager as any, 'connect');
 
       // Simulate connection failure
@@ -138,7 +152,7 @@ describe('WebSocket - Comprehensive Coverage (Remaining Gaps)', () => {
 
       globalThis.WebSocket = FailingWebSocket as any;
 
-      await connectWebSocket();
+      await connectWebSocket(() => 'test-token');
 
       // Wait for reconnection attempt
       await new Promise((resolve) => setTimeout(resolve, 100));
@@ -150,7 +164,7 @@ describe('WebSocket - Comprehensive Coverage (Remaining Gaps)', () => {
     });
 
     it('should stop reconnecting after max attempts', async () => {
-      const manager = getWebSocketManager();
+      const manager = getWebSocketManager(() => 'test-token');
       const maxAttempts = (manager as any).maxReconnectAttempts;
 
       // Simulate multiple failures
@@ -172,7 +186,7 @@ describe('WebSocket - Comprehensive Coverage (Remaining Gaps)', () => {
 
       // Trigger multiple connection attempts
       for (let i = 0; i < maxAttempts + 1; i++) {
-        await connectWebSocket();
+        await connectWebSocket(() => 'test-token');
         await new Promise((resolve) => setTimeout(resolve, 50));
       }
 
@@ -184,7 +198,7 @@ describe('WebSocket - Comprehensive Coverage (Remaining Gaps)', () => {
     });
 
     it('should calculate exponential backoff delay', async () => {
-      const manager = getWebSocketManager();
+      const manager = getWebSocketManager(() => 'test-token');
       const { reconnectDelay } = manager as any;
 
       // Simulate reconnection attempts
@@ -209,11 +223,11 @@ describe('WebSocket - Comprehensive Coverage (Remaining Gaps)', () => {
       (globalThis as any).window = undefined;
       (globalThis as any).window = undefined;
 
-      const manager = getWebSocketManager();
+      const manager = getWebSocketManager(() => 'test-token');
       const startHeartbeatSpy = vi.spyOn(manager as any, 'startHeartbeat');
 
       // Should not start heartbeat without window
-      await connectWebSocket();
+      await connectWebSocket(() => 'test-token');
       expect(startHeartbeatSpy).not.toHaveBeenCalled();
 
       // Restore window
@@ -224,24 +238,24 @@ describe('WebSocket - Comprehensive Coverage (Remaining Gaps)', () => {
     });
 
     it('should properly clean up heartbeat on disconnect', async () => {
-      const manager = getWebSocketManager();
+      const manager = getWebSocketManager(() => 'test-token');
       const stopHeartbeatSpy = vi.spyOn(manager as any, 'stopHeartbeat');
 
-      await connectWebSocket();
+      await connectWebSocket(() => 'test-token');
       await new Promise((resolve) => setTimeout(resolve, 50));
 
       disconnectWebSocket();
 
       // Should have stopped heartbeat
       expect(stopHeartbeatSpy).toHaveBeenCalled();
-      expect(globalThis.window.clearInterval).toHaveBeenCalled();
+      expect(globalThis.clearInterval).toHaveBeenCalled();
     });
   });
 
   describe('Edge cases', () => {
     it('should handle rapid connect/disconnect cycles', async () => {
       for (let i = 0; i < 5; i++) {
-        await connectWebSocket();
+        await connectWebSocket(() => 'test-token');
         await new Promise((resolve) => setTimeout(resolve, 10));
         disconnectWebSocket();
         await new Promise((resolve) => setTimeout(resolve, 10));
@@ -252,7 +266,7 @@ describe('WebSocket - Comprehensive Coverage (Remaining Gaps)', () => {
     });
 
     it('should handle send when not connected', async () => {
-      const manager = getWebSocketManager();
+      const manager = getWebSocketManager(() => 'test-token');
       const sendSpy = vi.spyOn(manager as any, 'send');
 
       // Try to send without connecting

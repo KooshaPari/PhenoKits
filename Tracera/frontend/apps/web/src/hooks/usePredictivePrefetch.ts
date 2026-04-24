@@ -209,7 +209,7 @@ export function usePredictivePrefetch({
 
         // Trigger prefetch
         try {
-          undefined;
+          void loadViewport(predictedViewport);
         } catch (error) {
           if (process.env['NODE_ENV'] === 'development') {
             logger.warn('[usePredictivePrefetch] Prefetch failed:', error);

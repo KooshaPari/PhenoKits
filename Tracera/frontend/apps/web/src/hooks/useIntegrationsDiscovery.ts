@@ -32,6 +32,187 @@ interface LinearProjectsResponse {
   projects: TracerTypes.LinearProject[];
 }
 
+type JsonRecord = Record<string, unknown>;
+
+const ZERO = Number('0');
+
+function isRecord(value: unknown): value is JsonRecord {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function toRecord(value: unknown): JsonRecord {
+  return isRecord(value) ? value : {};
+}
+
+function toRecordArray(value: unknown): JsonRecord[] {
+  return Array.isArray(value) ? value.filter(isRecord) : [];
+}
+
+function toBoolean(value: unknown): boolean {
+  return value === true;
+}
+
+function toNumber(value: unknown): number {
+  return typeof value === 'number' ? value : ZERO;
+}
+
+function toString(value: unknown): string {
+  return typeof value === 'string' ? value : '';
+}
+
+function toOptionalString(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined;
+}
+
+function parseGithubRepo(value: unknown): TracerTypes.GitHubRepo {
+  const repo = toRecord(value);
+  const owner = toRecord(repo['owner']);
+  return {
+    id: toNumber(repo['id']),
+    name: toString(repo['name']),
+    fullName: toString(repo['full_name']),
+    description: toOptionalString(repo['description']),
+    htmlUrl: toString(repo['html_url']),
+    private: toBoolean(repo['private']),
+    owner: {
+      avatarUrl: toString(owner['avatar_url']),
+      login: toString(owner['login']),
+    },
+    defaultBranch: toString(repo['default_branch']),
+    updatedAt: toOptionalString(repo['updated_at']),
+  };
+}
+
+function parseGithubIssue(value: unknown): TracerTypes.GitHubIssue {
+  const issue = toRecord(value);
+  const user = toRecord(issue['user']);
+  return {
+    id: toNumber(issue['id']),
+    number: toNumber(issue['number']),
+    title: toString(issue['title']),
+    state: toString(issue['state']),
+    htmlUrl: toString(issue['html_url']),
+    body: toOptionalString(issue['body']),
+    user: {
+      avatarUrl: toString(user['avatar_url']),
+      login: toString(user['login']),
+    },
+    labels: toRecordList(issue['labels']),
+    assignees: toRecordList(issue['assignees']),
+    createdAt: toString(issue['created_at']),
+    updatedAt: toString(issue['updated_at']),
+  };
+}
+
+function parseGithubProject(value: unknown): TracerTypes.GitHubProject {
+  const project = toRecord(value);
+  return {
+    id: toString(project['id']),
+    title: toString(project['title']),
+    description: toOptionalString(project['description']),
+    url: toString(project['url']),
+    closed: toBoolean(project['closed']),
+    public: toBoolean(project['public']),
+    createdAt: toOptionalString(project['created_at']),
+    updatedAt: toOptionalString(project['updated_at']),
+  };
+}
+
+function parseLinearTeam(value: unknown): TracerTypes.LinearTeam {
+  const team = toRecord(value);
+  return {
+    id: toString(team['id']),
+    name: toString(team['name']),
+    key: toString(team['key']),
+    description: toOptionalString(team['description']),
+    icon: toOptionalString(team['icon']),
+    color: toOptionalString(team['color']),
+  };
+}
+
+function parseLinearIssue(value: unknown): TracerTypes.LinearIssue {
+  const issue = toRecord(value);
+  return {
+    id: toString(issue['id']),
+    identifier: toString(issue['identifier']),
+    title: toString(issue['title']),
+    description: toOptionalString(issue['description']),
+    state: toOptionalString(issue['state']),
+    priority: toNumber(issue['priority']),
+    url: toString(issue['url']),
+    assignee: toOptionalString(issue['assignee']),
+    labels: toRecordList(issue['labels']),
+    createdAt: toOptionalString(issue['created_at']),
+    updatedAt: toOptionalString(issue['updated_at']),
+  };
+}
+
+function parseLinearProject(value: unknown): TracerTypes.LinearProject {
+  const project = toRecord(value);
+  return {
+    id: toString(project['id']),
+    name: toString(project['name']),
+    description: toOptionalString(project['description']),
+    state: toOptionalString(project['state']),
+    progress: toNumber(project['progress']),
+    url: toString(project['url']),
+    startDate: toOptionalString(project['start_date']),
+    targetDate: toOptionalString(project['target_date']),
+  };
+}
+
+function parseGitHubReposResponse(raw: unknown): GitHubReposResponse {
+  const payload = toRecord(raw);
+  return {
+    page: toNumber(payload['page']),
+    perPage: toNumber(payload['per_page']),
+    repos: toRecordArray(payload['repos']).map(parseGithubRepo),
+  };
+}
+
+function parseGitHubIssuesResponse(raw: unknown): GitHubIssuesResponse {
+  const payload = toRecord(raw);
+  return {
+    issues: toRecordArray(payload['issues']).map(parseGithubIssue),
+    page: toNumber(payload['page']),
+    perPage: toNumber(payload['per_page']),
+  };
+}
+
+function parseGitHubProjectsResponse(raw: unknown): GitHubProjectsResponse {
+  const payload = toRecord(raw);
+  return {
+    projects: toRecordArray(payload['projects']).map(parseGithubProject),
+  };
+}
+
+function parseLinearTeamsResponse(raw: unknown): LinearTeamsResponse {
+  const payload = toRecord(raw);
+  return {
+    teams: toRecordArray(payload['teams']).map(parseLinearTeam),
+  };
+}
+
+function parseLinearIssuesResponse(raw: unknown): LinearIssuesResponse {
+  const payload = toRecord(raw);
+  return {
+    issues: toRecordArray(payload['issues']).map(parseLinearIssue),
+  };
+}
+
+function parseLinearProjectsResponse(raw: unknown): LinearProjectsResponse {
+  const payload = toRecord(raw);
+  return {
+    projects: toRecordArray(payload['projects']).map(parseLinearProject),
+  };
+}
+
+function toRecordList(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === 'string')
+    : [];
+}
+
 async function fetchGitHubRepos(
   credentialId: string,
   search?: string,
@@ -51,26 +232,7 @@ async function fetchGitHubRepos(
   if (!res.ok) {
     throw new Error(`Failed to fetch GitHub repos: ${res.status}`);
   }
-  const data = await res.json();
-  const repos = (data['repos'] as Record<string, unknown>[] | undefined) ?? [];
-  return {
-    page: data['page'],
-    perPage: data['per_page'],
-    repos: repos.map((repo) => ({
-      defaultBranch: repo['default_branch'],
-      description: repo['description'],
-      fullName: repo['full_name'],
-      htmlUrl: repo['html_url'],
-      id: repo['id'],
-      name: repo['name'],
-      owner: {
-        avatarUrl: (repo['owner'] as { avatar_url?: string } | undefined)?.avatar_url,
-        login: (repo['owner'] as { login?: string } | undefined)?.login,
-      },
-      private: repo['private'],
-      updatedAt: repo['updated_at'],
-    })) as TracerTypes.GitHubRepo[],
-  };
+  return parseGitHubReposResponse(await res.json());
 }
 
 async function fetchGitHubIssues(
@@ -95,28 +257,7 @@ async function fetchGitHubIssues(
   if (!res.ok) {
     throw new Error(`Failed to fetch GitHub issues: ${res.status}`);
   }
-  const data = await res.json();
-  const issues = (data['issues'] as Record<string, unknown>[] | undefined) ?? [];
-  return {
-    issues: issues.map((issue) => ({
-      assignees: (issue['assignees'] as string[] | undefined) ?? [],
-      body: issue['body'],
-      createdAt: issue['created_at'],
-      htmlUrl: issue['html_url'],
-      id: issue['id'],
-      labels: (issue['labels'] as string[] | undefined) ?? [],
-      number: issue['number'],
-      state: issue['state'],
-      title: issue['title'],
-      updatedAt: issue['updated_at'],
-      user: {
-        avatarUrl: (issue['user'] as { avatar_url?: string } | undefined)?.avatar_url,
-        login: (issue['user'] as { login?: string } | undefined)?.login,
-      },
-    })) as TracerTypes.GitHubIssue[],
-    page: data['page'],
-    perPage: data['per_page'],
-  };
+  return parseGitHubIssuesResponse(await res.json());
 }
 
 async function fetchGitHubProjects(
@@ -138,20 +279,7 @@ async function fetchGitHubProjects(
   if (!res.ok) {
     throw new Error(`Failed to fetch GitHub projects: ${res.status}`);
   }
-  const data = await res.json();
-  const projects = (data['projects'] as Record<string, unknown>[] | undefined) ?? [];
-  return {
-    projects: projects.map((project) => ({
-      closed: project['closed'],
-      createdAt: project['created_at'],
-      description: project['description'],
-      id: project['id'],
-      public: project['public'],
-      title: project['title'],
-      updatedAt: project['updated_at'],
-      url: project['url'],
-    })) as TracerTypes.GitHubProject[],
-  };
+  return parseGitHubProjectsResponse(await res.json());
 }
 
 async function fetchLinearTeams(credentialId: string): Promise<LinearTeamsResponse> {
@@ -162,18 +290,7 @@ async function fetchLinearTeams(credentialId: string): Promise<LinearTeamsRespon
   if (!res.ok) {
     throw new Error(`Failed to fetch Linear teams: ${res.status}`);
   }
-  const data = await res.json();
-  const teams = (data['teams'] as Record<string, unknown>[] | undefined) ?? [];
-  return {
-    teams: teams.map((team) => ({
-      color: team['color'],
-      description: team['description'],
-      icon: team['icon'],
-      id: team['id'],
-      key: team['key'],
-      name: team['name'],
-    })) as TracerTypes.LinearTeam[],
-  };
+  return parseLinearTeamsResponse(await res.json());
 }
 
 async function fetchLinearIssues(
@@ -193,23 +310,7 @@ async function fetchLinearIssues(
   if (!res.ok) {
     throw new Error(`Failed to fetch Linear issues: ${res.status}`);
   }
-  const data = await res.json();
-  const issues = (data['issues'] as Record<string, unknown>[] | undefined) ?? [];
-  return {
-    issues: issues.map((issue) => ({
-      assignee: issue['assignee'],
-      createdAt: issue['created_at'],
-      description: issue['description'],
-      id: issue['id'],
-      identifier: issue['identifier'],
-      labels: (issue['labels'] as string[] | undefined) ?? [],
-      priority: issue['priority'],
-      state: issue['state'],
-      title: issue['title'],
-      updatedAt: issue['updated_at'],
-      url: issue['url'],
-    })) as TracerTypes.LinearIssue[],
-  };
+  return parseLinearIssuesResponse(await res.json());
 }
 
 async function fetchLinearProjects(
@@ -227,20 +328,7 @@ async function fetchLinearProjects(
   if (!res.ok) {
     throw new Error(`Failed to fetch Linear projects: ${res.status}`);
   }
-  const data = await res.json();
-  const projects = (data['projects'] as Record<string, unknown>[] | undefined) ?? [];
-  return {
-    projects: projects.map((project) => ({
-      description: project['description'],
-      id: project['id'],
-      name: project['name'],
-      progress: project['progress'],
-      startDate: project['start_date'],
-      state: project['state'],
-      targetDate: project['target_date'],
-      url: project['url'],
-    })) as TracerTypes.LinearProject[],
-  };
+  return parseLinearProjectsResponse(await res.json());
 }
 
 const useGitHubRepos = (

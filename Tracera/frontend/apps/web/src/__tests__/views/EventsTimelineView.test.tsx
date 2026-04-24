@@ -1,15 +1,16 @@
 /**
  * Comprehensive Tests for EventsTimelineView
+ * Traces to: FR-TRACERA-VIEWS-001
  */
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { useItems } from '../../hooks/useItems';
-import { EventsTimelineView } from '../../views/EventsTimelineView';
+import { useItems } from "../../hooks/useItems";
+import { EventsTimelineView } from "../../views/EventsTimelineView";
 
-vi.mock('../../hooks/useItems', () => ({
+vi.mock("../../hooks/useItems", () => ({
   useItems: vi.fn(),
 }));
 
@@ -26,7 +27,7 @@ describe(EventsTimelineView, () => {
     vi.clearAllMocks();
   });
 
-  it('renders events timeline interface', () => {
+  it("renders events timeline interface", () => {
     vi.mocked(useItems).mockReturnValue({
       data: [],
       error: null,
@@ -40,10 +41,11 @@ describe(EventsTimelineView, () => {
       </QueryClientProvider>,
     );
 
-    expect(screen.getByText('Events Timeline')).toBeInTheDocument();
+    expect(screen.getByText("Audit Timeline")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Search audit trail...")).toBeInTheDocument();
   });
 
-  it('displays loading state', () => {
+  it("displays loading state", () => {
     vi.mocked(useItems).mockReturnValue({
       data: undefined,
       error: null,
@@ -60,19 +62,19 @@ describe(EventsTimelineView, () => {
     // Should show loading state
   });
 
-  it('displays events in timeline', () => {
+  it("displays events in timeline", () => {
     const events = [
       {
         created_at: new Date().toISOString(),
-        id: 'event-1',
-        title: 'Event 1',
-        type: 'event',
+        id: "event-1",
+        title: "Event 1",
+        type: "event",
       },
       {
         created_at: new Date().toISOString(),
-        id: 'event-2',
-        title: 'Event 2',
-        type: 'event',
+        id: "event-2",
+        title: "Event 2",
+        type: "event",
       },
     ];
 
@@ -89,6 +91,7 @@ describe(EventsTimelineView, () => {
       </QueryClientProvider>,
     );
 
-    expect(screen.getByText('Events Timeline')).toBeInTheDocument();
+    expect(screen.getByText("Audit Timeline")).toBeInTheDocument();
+    expect(screen.getByText("User Authentication")).toBeInTheDocument();
   });
 });

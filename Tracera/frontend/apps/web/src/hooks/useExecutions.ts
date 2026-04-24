@@ -8,7 +8,7 @@ import type {
   ExecutionEnvironmentConfigUpdate,
 } from '../api/executions';
 
-import executionsApi from '../api/executions';
+import { executionsApi } from '../api/executions';
 
 export function useExecutions(
   projectId: string,

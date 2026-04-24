@@ -38,7 +38,7 @@ describe(ConfirmationDialog, () => {
     render(<ConfirmationDialog {...defaultProps} />);
 
     expect(screen.getByText('Delete item?')).toBeInTheDocument();
-    expect(screen.getByText('This action cannot be undone.')).toBeInTheDocument();
+    expect(screen.getAllByText('This action cannot be undone.')).not.toHaveLength(0);
   });
 
   it('does not render when closed', () => {
@@ -87,7 +87,7 @@ describe(ConfirmationDialog, () => {
   it('shows warning for critical severity', () => {
     render(<ConfirmationDialog {...defaultProps} severity='critical' showWarning />);
 
-    expect(screen.getByText('This action cannot be undone.')).toBeInTheDocument();
+    expect(screen.getAllByText('This action cannot be undone.')).toHaveLength(2);
   });
 
   it('renders custom confirm and cancel text', () => {
@@ -100,10 +100,9 @@ describe(ConfirmationDialog, () => {
   });
 
   it('has proper ARIA attributes', () => {
-    const { container } = render(<ConfirmationDialog {...defaultProps} />);
+    render(<ConfirmationDialog {...defaultProps} />);
 
-    const alertDialog = container.querySelector('[role="alertdialog"]');
-    expect(alertDialog).toBeInTheDocument();
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument();
   });
 
   it('closes dialog when onOpenChange is called with false', () => {
@@ -174,11 +173,11 @@ describe(BulkConfirmationDialog, () => {
   it('shows correct action type text', () => {
     const { rerender } = render(<BulkConfirmationDialog {...defaultProps} actionType='delete' />);
 
-    expect(screen.getByText(/delete 5 items/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /delete 5 items/i })).toBeInTheDocument();
 
     rerender(<BulkConfirmationDialog {...defaultProps} actionType='archive' />);
 
-    expect(screen.getByText(/archive 5 items/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /archive 5 items/i })).toBeInTheDocument();
   });
 
   it('calls onConfirm with correct action', async () => {
@@ -211,9 +210,9 @@ describe(BulkConfirmationDialog, () => {
     actionTypes.forEach(({ type }) => {
       const { unmount } = render(<BulkConfirmationDialog {...defaultProps} actionType={type} />);
 
-      expect(document.body).toContainElement(
-        screen.getByText(new RegExp(type.replace('-', ' '), 'i')),
-      );
+      const expectedTitle =
+        type === 'status-change' ? /change status of 5 items/i : new RegExp(`${type} 5 items`, 'i');
+      expect(screen.getByRole('heading', { name: expectedTitle })).toBeInTheDocument();
 
       unmount();
     });

@@ -416,7 +416,7 @@ export function computeWebGL(
 function createDataTexture(
   gl: WebGL2RenderingContext,
   data: Float32Array,
-  count: number,
+  _count: number,
 ): WebGLTexture | null {
   const tex = gl.createTexture();
   if (!tex) return null;
@@ -437,7 +437,7 @@ function createDataTexture(
 function createEdgeTexture(
   gl: WebGL2RenderingContext,
   data: Uint32Array,
-  count: number,
+  _count: number,
 ): WebGLTexture | null {
   const tex = gl.createTexture();
   if (!tex) return null;

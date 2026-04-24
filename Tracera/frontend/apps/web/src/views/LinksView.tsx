@@ -48,7 +48,7 @@ export function LinksView() {
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
 
-  const links = linksData?.links ?? [];
+  const links = useMemo(() => linksData?.links ?? [], [linksData?.links]);
   const items = itemsData?.items ?? [];
 
   const filteredLinks = useMemo(

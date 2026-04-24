@@ -49,6 +49,9 @@ class MockApiClient {
 
   async searchItems(query: string) {
     await new Promise((resolve) => setTimeout(resolve, this.delay));
+    if (query === 'nonexistent') {
+      return [];
+    }
     return [
       { id: '1', name: `Result matching "${query}"` },
       { id: '2', name: `Another result for "${query}"` },
@@ -602,11 +605,11 @@ describe('Cross-Feature Workflow Integration', () => {
         <div className='rounded bg-green-50 p-3'>
           <input
             type='number'
-            value={workflowState.itemsAdded}
+            value={Number.isNaN(workflowState.itemsAdded) ? '' : workflowState.itemsAdded}
             onChange={(e) => {
               setWorkflowState({
                 ...workflowState,
-                itemsAdded: Number.parseInt(e.target.value, 10),
+                itemsAdded: e.target.value === '' ? 0 : Number.parseInt(e.target.value, 10),
               });
             }}
             min='0'
@@ -617,11 +620,11 @@ describe('Cross-Feature Workflow Integration', () => {
         <div className='rounded bg-purple-50 p-3'>
           <input
             type='number'
-            value={workflowState.linksCreated}
+            value={Number.isNaN(workflowState.linksCreated) ? '' : workflowState.linksCreated}
             onChange={(e) => {
               setWorkflowState({
                 ...workflowState,
-                linksCreated: Number.parseInt(e.target.value, 10),
+                linksCreated: e.target.value === '' ? 0 : Number.parseInt(e.target.value, 10),
               });
             }}
             min='0'

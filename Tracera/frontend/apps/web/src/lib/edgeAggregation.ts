@@ -21,7 +21,7 @@ export interface EdgeBase {
   source: string;
   target: string;
   type: LinkType;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface AggregatedEdge extends EdgeBase {
@@ -55,7 +55,7 @@ export interface NodePosition {
 export interface Node {
   id: string;
   position: NodePosition;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface EdgeSamplingConfig {
@@ -113,23 +113,15 @@ export function aggregateParallelEdges(
     if (groupEdges.length < minEdgesForAggregation) {
       // Don't aggregate, return original edges
       for (const edge of groupEdges) {
-        aggregatedEdges.push({
-          ...edge,
-          _isAggregated: false,
-          _aggregatedCount: 1,
-          _aggregatedTypes: { [edge.type]: 1 } as any,
-          _originalEdgeIds: [edge.id],
-          strokeWidth: 2,
-          opacity: 1.0,
-        } as unknown as AggregatedEdge);
+        aggregatedEdges.push(createNonAggregatedEdge(edge));
       }
     } else {
       // Aggregate edges
-      const typeDistribution: Record<string, number> = {};
+      const typeDistribution: Partial<Record<LinkType, number>> = {};
       const originalIds: string[] = [];
 
       for (const edge of groupEdges) {
-        typeDistribution[edge.type] = (typeDistribution[edge.type] || 0) + 1;
+        typeDistribution[edge.type] = (typeDistribution[edge.type] ?? 0) + 1;
         originalIds.push(edge.id);
       }
 
@@ -152,7 +144,7 @@ export function aggregateParallelEdges(
         type: dominantType,
         _isAggregated: true,
         _aggregatedCount: groupEdges.length,
-        _aggregatedTypes: typeDistribution as Record<LinkType, number>,
+        _aggregatedTypes: typeDistribution,
         _originalEdgeIds: originalIds,
         strokeWidth: Math.min(2 + Math.log2(groupEdges.length), 8),
         opacity: 1.0,
@@ -206,9 +198,9 @@ export function detectEdgeClusters(
     if (groupEdges.length < densityThreshold) continue;
 
     // Calculate type distribution
-    const typeDistribution: Record<string, number> = {};
+    const typeDistribution: Partial<Record<LinkType, number>> = {};
     for (const edge of groupEdges) {
-      typeDistribution[edge.type] = (typeDistribution[edge.type] || 0) + 1;
+      typeDistribution[edge.type] = (typeDistribution[edge.type] ?? 0) + 1;
     }
 
     // Find dominant type
@@ -229,7 +221,7 @@ export function detectEdgeClusters(
       target: firstClusterEdge.target,
       edges: groupEdges,
       totalCount: groupEdges.length,
-      typeDistribution: typeDistribution as Record<LinkType, number>,
+      typeDistribution,
       dominantType,
     });
   }
@@ -253,15 +245,41 @@ function hashString(str: string): number {
   return hash >>> 0;
 }
 
+function isAggregatedEdge(edge: EdgeBase): edge is AggregatedEdge {
+  return (
+    typeof edge['_isAggregated'] === 'boolean' &&
+    typeof edge['_aggregatedCount'] === 'number' &&
+    typeof edge['strokeWidth'] === 'number' &&
+    typeof edge['opacity'] === 'number' &&
+    Array.isArray(edge['_originalEdgeIds'])
+  );
+}
+
+function createNonAggregatedEdge(edge: EdgeBase): AggregatedEdge {
+  return {
+    ...edge,
+    _aggregatedCount: 1,
+    _aggregatedTypes: { [edge.type]: 1 },
+    _isAggregated: false,
+    _originalEdgeIds: [edge.id],
+    opacity: 1,
+    strokeWidth: 2,
+  };
+}
+
+function toAggregatedEdge(edge: EdgeBase): AggregatedEdge {
+  return isAggregatedEdge(edge) ? edge : createNonAggregatedEdge(edge);
+}
+
 /**
  * Statistical sampling - render representative sample
  * User sees 5% of edges but gets accurate density visualization
  */
-export function sampleEdgesStatistically(
-  edges: EdgeBase[],
+export function sampleEdgesStatistically<T extends EdgeBase>(
+  edges: readonly T[],
   sampleRatio: number = 0.05,
-): EdgeBase[] {
-  const sampledEdges: EdgeBase[] = [];
+): T[] {
+  const sampledEdges: T[] = [];
 
   for (const edge of edges) {
     // Deterministic sampling based on edge ID hash
@@ -280,7 +298,7 @@ export function sampleEdgesStatistically(
  * Importance-based sampling - prioritize certain edge types
  */
 export function sampleEdgesByImportance(
-  edges: EdgeBase[],
+  edges: readonly EdgeBase[],
   maxEdges: number,
   priorityTypes: LinkType[] = ['implements', 'tests', 'blocks'],
 ): AggregatedEdge[] {
@@ -307,7 +325,7 @@ export function sampleEdgesByImportance(
     sampledNormal = sampleEdgesStatistically(normalEdges, sampleRatio);
   }
 
-  return [...priorityEdges.slice(0, priorityCount), ...sampledNormal] as AggregatedEdge[];
+  return [...priorityEdges.slice(0, priorityCount), ...sampledNormal].map(toAggregatedEdge);
 }
 
 /**
@@ -319,14 +337,10 @@ export function sampleEdgesHybrid(edges: EdgeBase[], config: EdgeSamplingConfig)
 
   // If still too many, apply importance sampling
   if (aggregated.length > config.maxVisibleEdges) {
-    return sampleEdgesByImportance(
-      aggregated,
-      config.maxVisibleEdges,
-      config.priorityTypes,
-    ) as unknown as AggregatedEdge[];
+    return sampleEdgesByImportance(aggregated, config.maxVisibleEdges, config.priorityTypes);
   }
 
-  return aggregated as unknown as AggregatedEdge[];
+  return aggregated;
 }
 
 // ============================================================================
@@ -540,22 +554,18 @@ export function applyLazyEdgeRendering(
     const aggregated = aggregateParallelEdges(filteredEdges, config.minEdgesForAggregation);
     const sampleRatio = Math.min(config.maxVisibleEdges / aggregated.length, 1.0);
     const sampled = sampleEdgesStatistically(aggregated, sampleRatio);
-    visibleEdges = sampled as AggregatedEdge[];
+    visibleEdges = sampled;
   } else if (config.samplingStrategy === 'importance') {
     // Importance-based sampling
     const aggregated = aggregateParallelEdges(filteredEdges, config.minEdgesForAggregation);
-    visibleEdges = sampleEdgesByImportance(
-      aggregated,
-      config.maxVisibleEdges,
-      config.priorityTypes,
-    ) as AggregatedEdge[];
+    visibleEdges = sampleEdgesByImportance(aggregated, config.maxVisibleEdges, config.priorityTypes);
   } else {
     // Hybrid (default)
-    visibleEdges = sampleEdgesHybrid(filteredEdges, config) as any;
+    visibleEdges = sampleEdgesHybrid(filteredEdges, config);
   }
 
   return {
-    visibleEdges: visibleEdges as AggregatedEdge[],
+    visibleEdges,
     stats: {
       totalEdges,
       aggregatedEdges: visibleEdges.filter((e) => e._isAggregated).length,

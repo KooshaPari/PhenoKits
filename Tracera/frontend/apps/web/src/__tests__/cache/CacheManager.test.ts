@@ -366,7 +366,12 @@ describe('Cache Integration Scenarios', () => {
   let cache: CacheManager;
 
   beforeEach(() => {
-    cache = new CacheManager({ enableLogging: false });
+    cache = new CacheManager({
+      enableMemory: true,
+      enableIndexedDB: false,
+      enableServiceWorker: false,
+      enableLogging: false,
+    });
   });
 
   afterEach(async () => {

@@ -10,9 +10,7 @@ import type {
   MCPTool,
   ProgressNotification,
 } from './mcp-client-types';
-import type { MCPClientState, ProgressCallbacks } from './mcp-client-utils';
-
-import { mcpClientUtils } from './mcp-client-utils';
+import { mcpClientUtils, type MCPClientState, type ProgressCallbacks } from './mcp-client-utils';
 
 interface InitializeResponse {
   capabilities: Record<string, unknown>;
@@ -25,6 +23,26 @@ interface InitializeParams {
   clientInfo?: { name: string; version: string } | undefined;
   protocolVersion?: string | undefined;
 }
+
+const toInitializeParamsRecord = (
+  params?: InitializeParams,
+): Record<string, unknown> | undefined => {
+  if (!params) {
+    return undefined;
+  }
+
+  const record: Record<string, unknown> = {};
+  if (params.capabilities) {
+    record['capabilities'] = params.capabilities;
+  }
+  if (params.clientInfo) {
+    record['clientInfo'] = params.clientInfo;
+  }
+  if (params.protocolVersion) {
+    record['protocolVersion'] = params.protocolVersion;
+  }
+  return record;
+};
 
 class MCPClient {
   private state: MCPClientState;
@@ -75,34 +93,34 @@ class MCPClient {
     }
   }
 
-  async initialize(params?: InitializeParams): Promise<InitializeResponse> {
-    return this.sendRequest('initialize', params as Record<string, unknown> | undefined);
+  initialize(params?: InitializeParams): Promise<InitializeResponse> {
+    return this.sendRequest('initialize', toInitializeParamsRecord(params));
   }
 
-  async listTools(): Promise<{ tools: MCPTool[] }> {
+  listTools(): Promise<{ tools: MCPTool[] }> {
     return this.sendRequest('tools/list');
   }
 
-  async callTool<TResult = unknown>(
+  callTool<TResult = unknown>(
     name: string,
     args?: Record<string, unknown>,
   ): Promise<TResult> {
     return this.sendRequest('tools/call', { arguments: args, name });
   }
 
-  async listResources(): Promise<{ resources: MCPResource[] }> {
+  listResources(): Promise<{ resources: MCPResource[] }> {
     return this.sendRequest('resources/list');
   }
 
-  async readResource(uri: string): Promise<{ contents: unknown }> {
+  readResource(uri: string): Promise<{ contents: unknown }> {
     return this.sendRequest('resources/read', { uri });
   }
 
-  async listPrompts(): Promise<{ prompts: MCPPrompt[] }> {
+  listPrompts(): Promise<{ prompts: MCPPrompt[] }> {
     return this.sendRequest('prompts/list');
   }
 
-  async getPrompt(name: string, args?: Record<string, unknown>): Promise<{ messages: unknown[] }> {
+  getPrompt(name: string, args?: Record<string, unknown>): Promise<{ messages: unknown[] }> {
     return this.sendRequest('prompts/get', { arguments: args, name });
   }
 
@@ -118,9 +136,10 @@ class MCPClient {
       { headers },
     );
 
-    eventSource.onmessage = (event: MessageEvent): void => {
+    eventSource.addEventListener('message', (event: MessageEvent): void => {
       try {
-        const parsed = mcpClientUtils.parseJson(event.data);
+        const rawData = typeof event.data === 'string' ? event.data : String(event.data);
+        const parsed = mcpClientUtils.parseJson(rawData);
         const notification = mcpClientUtils.parseProgressNotification(parsed);
 
         if (!notification) {
@@ -132,13 +151,13 @@ class MCPClient {
       } catch (error) {
         mcpClientUtils.handleProgressError(callbacks, error);
       }
-    };
+    });
 
-    eventSource.onerror = (_error: Event): void => {
-      if (callbacks.onError !== undefined) {
+    eventSource.addEventListener('error', (_error: Event): void => {
+      if (callbacks.onError) {
         callbacks.onError(new Error('SSE connection error'));
       }
-    };
+    });
 
     return () => {
       eventSource.close();
@@ -157,7 +176,7 @@ class MCPClient {
         method: 'POST',
       });
     } catch {
-      return;
+      // Best effort cancellation notification only.
     }
   }
 }

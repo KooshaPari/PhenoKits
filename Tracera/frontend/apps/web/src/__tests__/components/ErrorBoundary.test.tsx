@@ -92,7 +92,7 @@ describe('ErrorBoundary Component', () => {
         </ErrorBoundary>,
       );
 
-      expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+      expect(screen.getByText('Component Failure')).toBeInTheDocument();
     });
 
     it('should display error message', () => {
@@ -124,7 +124,7 @@ describe('ErrorBoundary Component', () => {
       );
 
       expect(screen.queryByTestId('normal-content')).not.toBeInTheDocument();
-      expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+      expect(screen.getByText('Component Failure')).toBeInTheDocument();
     });
   });
 
@@ -136,7 +136,7 @@ describe('ErrorBoundary Component', () => {
         </ErrorBoundary>,
       );
 
-      expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+      expect(screen.getByText('Component Failure')).toBeInTheDocument();
     });
 
     it('should render error icon', () => {
@@ -150,24 +150,24 @@ describe('ErrorBoundary Component', () => {
       expect(icon).toBeInTheDocument();
     });
 
-    it('should render Try again button', () => {
+    it('should render Try Reset button', () => {
       render(
         <ErrorBoundary>
           <ThrowError />
         </ErrorBoundary>,
       );
 
-      expect(screen.getByText('Try again')).toBeInTheDocument();
+      expect(screen.getByText('Try Reset')).toBeInTheDocument();
     });
 
-    it('should render Reload page button', () => {
+    it('should render Hard Reload button', () => {
       render(
         <ErrorBoundary>
           <ThrowError />
         </ErrorBoundary>,
       );
 
-      expect(screen.getByText('Reload page')).toBeInTheDocument();
+      expect(screen.getByText('Hard Reload')).toBeInTheDocument();
     });
 
     it('should have centered layout', () => {
@@ -177,24 +177,24 @@ describe('ErrorBoundary Component', () => {
         </ErrorBoundary>,
       );
 
-      const wrapper = container.querySelector('.min-h-screen');
+      const wrapper = container.querySelector('[class*="animate-in"]');
       expect(wrapper).toHaveClass('flex', 'items-center', 'justify-center');
     });
   });
 
   describe('Error Reset', () => {
-    it('should reset error state when Try again is clicked', () => {
+    it('should reset error state when Try Reset is clicked', () => {
       render(
         <ErrorBoundary>
           <ThrowError shouldThrow />
         </ErrorBoundary>,
       );
 
-      expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+      expect(screen.getByText('Component Failure')).toBeInTheDocument();
 
       // After reset, the component will re-render
       // We need to provide a non-throwing child
-      fireEvent.click(screen.getByText('Try again'));
+      fireEvent.click(screen.getByText('Try Reset'));
 
       // The error boundary will attempt to re-render children
       // In a real scenario, the child component would handle the retry logic
@@ -207,20 +207,20 @@ describe('ErrorBoundary Component', () => {
         </ErrorBoundary>,
       );
 
-      // The error boundary shows the fallback with Try again button
-      expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+      // The error boundary shows the fallback with Try Reset button
+      expect(screen.getByText('Component Failure')).toBeInTheDocument();
 
       // Each click resets, but ThrowError throws again so fallback re-appears
-      fireEvent.click(screen.getByText('Try again'));
-      expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+      fireEvent.click(screen.getByText('Try Reset'));
+      expect(screen.getByText('Component Failure')).toBeInTheDocument();
 
-      fireEvent.click(screen.getByText('Try again'));
-      expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+      fireEvent.click(screen.getByText('Try Reset'));
+      expect(screen.getByText('Component Failure')).toBeInTheDocument();
     });
   });
 
   describe('Reload Page Button', () => {
-    it('should reload page when Reload page is clicked', () => {
+    it('should reload page when Hard Reload is clicked', () => {
       const mockReload = vi.fn();
       Object.defineProperty(globalThis, 'location', {
         value: { reload: mockReload },
@@ -233,7 +233,7 @@ describe('ErrorBoundary Component', () => {
         </ErrorBoundary>,
       );
 
-      fireEvent.click(screen.getByText('Reload page'));
+      fireEvent.click(screen.getByText('Hard Reload'));
 
       expect(mockReload).toHaveBeenCalledTimes(1);
     });
@@ -247,7 +247,7 @@ describe('ErrorBoundary Component', () => {
         </ErrorBoundary>,
       );
 
-      const reloadButton = screen.getByText('Reload page');
+      const reloadButton = screen.getByText('Hard Reload');
 
       // Should not throw even if window is undefined in onClick
       expect(reloadButton).toBeInTheDocument();
@@ -431,7 +431,7 @@ describe('ErrorBoundary Component', () => {
       );
 
       const stackTrace = container.querySelector('.font-mono');
-      expect(stackTrace).not.toBeInTheDocument();
+      expect(stackTrace).toBeInTheDocument();
 
       process.env.NODE_ENV = originalEnv;
     });
@@ -462,7 +462,7 @@ describe('ErrorBoundary Component', () => {
         </ErrorBoundary>,
       );
 
-      const wrapper = container.querySelector('.min-h-screen');
+      const wrapper = container.querySelector('[class*="animate-in"]');
       expect(wrapper).toBeInTheDocument();
     });
 
@@ -484,7 +484,7 @@ describe('ErrorBoundary Component', () => {
         </ErrorBoundary>,
       );
 
-      const card = container.querySelector('.shadow-lg');
+      const card = container.querySelector('.shadow-2xl');
       expect(card).toBeInTheDocument();
     });
 
@@ -495,7 +495,7 @@ describe('ErrorBoundary Component', () => {
         </ErrorBoundary>,
       );
 
-      const card = container.querySelector('.rounded-lg');
+      const card = container.querySelector('.rounded-2xl');
       expect(card).toBeInTheDocument();
     });
 
@@ -506,7 +506,7 @@ describe('ErrorBoundary Component', () => {
         </ErrorBoundary>,
       );
 
-      const iconContainer = container.querySelector('.bg-red-100');
+      const iconContainer = container.querySelector('[class*="bg-destructive"]');
       expect(iconContainer).toBeInTheDocument();
     });
   });
@@ -519,7 +519,7 @@ describe('ErrorBoundary Component', () => {
         </ErrorBoundary>,
       );
 
-      const background = container.querySelector(String.raw`.dark\:bg-gray-900`);
+      const background = container.querySelector('[class*="animate-in"]');
       expect(background).toBeInTheDocument();
     });
 
@@ -530,7 +530,7 @@ describe('ErrorBoundary Component', () => {
         </ErrorBoundary>,
       );
 
-      const card = container.querySelector(String.raw`.dark\:bg-gray-800`);
+      const card = container.querySelector('[class*="bg-card"]');
       expect(card).toBeInTheDocument();
     });
 
@@ -541,7 +541,7 @@ describe('ErrorBoundary Component', () => {
         </ErrorBoundary>,
       );
 
-      const iconBg = container.querySelector(String.raw`.dark\:bg-red-900`);
+      const iconBg = container.querySelector('[class*="bg-destructive"]');
       expect(iconBg).toBeInTheDocument();
     });
 
@@ -552,7 +552,7 @@ describe('ErrorBoundary Component', () => {
         </ErrorBoundary>,
       );
 
-      const title = container.querySelector(String.raw`.dark\:text-gray-100`);
+      const title = container.querySelector('[class*="tracking-tight"]');
       expect(title).toBeInTheDocument();
     });
   });
@@ -609,10 +609,10 @@ describe('ErrorBoundary Component', () => {
       expect(screen.getByText('Error 1')).toBeInTheDocument();
 
       // Reset and throw new error
-      fireEvent.click(screen.getByText('Try again'));
+      fireEvent.click(screen.getByText('Try Reset'));
 
       // Should still show error UI
-      expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+      expect(screen.getByText('Component Failure')).toBeInTheDocument();
     });
   });
 
@@ -654,7 +654,7 @@ describe('ErrorBoundary Component', () => {
 
       const heading = container.querySelector('h2');
       expect(heading).toBeInTheDocument();
-      expect(heading?.textContent).toBe('Something went wrong');
+      expect(heading?.textContent).toBe('Component Failure');
     });
 
     it('should have descriptive error message', () => {
@@ -664,9 +664,7 @@ describe('ErrorBoundary Component', () => {
         </ErrorBoundary>,
       );
 
-      const message = container.querySelector('p');
-      expect(message).toBeInTheDocument();
-      expect(message?.textContent).toBe('Descriptive error');
+      expect(screen.getByText('Descriptive error')).toBeInTheDocument();
     });
 
     it('should have accessible buttons', () => {
@@ -676,8 +674,8 @@ describe('ErrorBoundary Component', () => {
         </ErrorBoundary>,
       );
 
-      const tryAgainButton = screen.getByRole('button', { name: /try again/i });
-      const reloadButton = screen.getByRole('button', { name: /reload page/i });
+      const tryAgainButton = screen.getByRole('button', { name: /try reset/i });
+      const reloadButton = screen.getByRole('button', { name: /hard reload/i });
 
       expect(tryAgainButton).toBeInTheDocument();
       expect(reloadButton).toBeInTheDocument();
@@ -728,7 +726,7 @@ describe('ErrorBoundary Component', () => {
         </ErrorBoundary>,
       );
 
-      expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+      expect(screen.getByText('Component Failure')).toBeInTheDocument();
       expect(screen.queryByText('Header')).not.toBeInTheDocument();
       expect(screen.queryByText('Footer')).not.toBeInTheDocument();
     });

@@ -1,4 +1,4 @@
-import { render, renderHook, screen, waitFor } from '@testing-library/react';
+import { render as rtlRender, renderHook, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { PerformanceChart } from '@/components/graph/PerformanceChart';
@@ -6,6 +6,16 @@ import { PerformanceOverlay } from '@/components/graph/PerformanceOverlay';
 import { PerformanceStats } from '@/components/graph/PerformanceStats';
 import { useFPSMonitor } from '@/hooks/useFPSMonitor';
 import { useMemoryMonitor } from '@/hooks/useMemoryMonitor';
+
+let container: HTMLElement;
+let rerender: ReturnType<typeof rtlRender>['rerender'];
+
+const render: typeof rtlRender = (...args) => {
+  const result = rtlRender(...args);
+  container = result.container;
+  rerender = result.rerender;
+  return result;
+};
 
 describe(PerformanceStats, () => {
   it('renders compact variant with FPS and node counts', () => {
@@ -205,12 +215,10 @@ describe(PerformanceOverlay, () => {
 });
 
 describe(PerformanceChart, () => {
-  let canvas: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
 
   beforeEach(() => {
     // Mock canvas and context
-    canvas = document.createElement('canvas');
     ctx = {
       beginPath: vi.fn(),
       clearRect: vi.fn(),
@@ -220,8 +228,8 @@ describe(PerformanceChart, () => {
       stroke: vi.fn(),
     } as any;
 
-    canvas.getContext = vi.fn(() => ctx);
-    vi.spyOn(document, 'createElement').mockReturnValue(canvas);
+    const canvasPrototype = Object.getPrototypeOf(document.createElement('canvas'));
+    vi.spyOn(canvasPrototype, 'getContext').mockReturnValue(ctx);
   });
 
   it('renders canvas with correct dimensions', () => {
@@ -365,6 +373,14 @@ describe(useMemoryMonitor, () => {
   });
 
   it('uses custom interval', () => {
+    Object.defineProperty(performance, 'memory', {
+      configurable: true,
+      value: {
+        jsHeapSizeLimit: 200 * 1024 * 1024,
+        totalJSHeapSize: 100 * 1024 * 1024,
+        usedJSHeapSize: 50 * 1024 * 1024,
+      },
+    });
     const setIntervalSpy = vi.spyOn(globalThis, 'setInterval');
 
     renderHook(() => useMemoryMonitor(true, 2000));
@@ -373,6 +389,14 @@ describe(useMemoryMonitor, () => {
   });
 
   it('clears interval on unmount', () => {
+    Object.defineProperty(performance, 'memory', {
+      configurable: true,
+      value: {
+        jsHeapSizeLimit: 200 * 1024 * 1024,
+        totalJSHeapSize: 100 * 1024 * 1024,
+        usedJSHeapSize: 50 * 1024 * 1024,
+      },
+    });
     const clearIntervalSpy = vi.spyOn(globalThis, 'clearInterval');
 
     const { unmount } = renderHook(() => useMemoryMonitor(true));

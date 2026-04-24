@@ -86,8 +86,8 @@ const statusIcons: Record<WebhookStatus, React.ReactNode> = {
   paused: <PauseCircle className='h-4 w-4' />,
 };
 
-function copyToClipboard(text: string): void {
-  undefined;
+function copyToClipboard(_text: string): void {
+  void _text;
 }
 
 export function WebhookIntegrationsView({ projectId }: WebhookIntegrationsViewProps) {
@@ -96,11 +96,13 @@ export function WebhookIntegrationsView({ projectId }: WebhookIntegrationsViewPr
   const [providerFilter, setProviderFilter] = useState<WebhookProvider | 'all'>('all');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showSecrets, setShowSecrets] = useState<Record<string, boolean>>({});
+  const selectedProvider = providerFilter === 'all' ? undefined : providerFilter;
+  const selectedStatus = statusFilter === 'all' ? undefined : statusFilter;
 
   const { data, isLoading, error } = useWebhooks({
     projectId,
-    provider: (providerFilter !== 'all' ? providerFilter : undefined) as any,
-    status: statusFilter !== 'all' ? statusFilter : undefined,
+    provider: selectedProvider,
+    status: selectedStatus,
   });
 
   const { data: stats } = useWebhookStats(projectId);
@@ -226,10 +228,20 @@ export function WebhookIntegrationsView({ projectId }: WebhookIntegrationsViewPr
                 <Select
                   value={formData.provider}
                   onValueChange={(v) => {
-                    setFormData((prev) => ({
-                      ...prev,
-                      provider: v as WebhookProvider,
-                    }));
+                    if (
+                      v === 'azure_devops' ||
+                      v === 'circleci' ||
+                      v === 'custom' ||
+                      v === 'github_actions' ||
+                      v === 'gitlab_ci' ||
+                      v === 'jenkins' ||
+                      v === 'travis_ci'
+                    ) {
+                      setFormData((prev) => ({
+                        ...prev,
+                        provider: v,
+                      }));
+                    }
                   }}
                 >
                   <SelectTrigger>
@@ -346,7 +358,7 @@ export function WebhookIntegrationsView({ projectId }: WebhookIntegrationsViewPr
             {isLoading ? (
               <Skeleton className='h-8 w-16' />
             ) : (
-              <div className='text-2xl font-bold'>{stats?.byStatus?.['active' as any] ?? 0}</div>
+              <div className='text-2xl font-bold'>{stats?.byStatus['active'] ?? 0}</div>
             )}
           </CardContent>
         </Card>
@@ -404,7 +416,9 @@ export function WebhookIntegrationsView({ projectId }: WebhookIntegrationsViewPr
             <Select
               value={statusFilter}
               onValueChange={(v) => {
-                setStatusFilter(v as WebhookStatus | 'all');
+                if (v === 'all' || v === 'active' || v === 'disabled' || v === 'paused') {
+                  setStatusFilter(v);
+                }
               }}
             >
               <SelectTrigger className='w-[140px]'>
@@ -420,7 +434,18 @@ export function WebhookIntegrationsView({ projectId }: WebhookIntegrationsViewPr
             <Select
               value={providerFilter}
               onValueChange={(v) => {
-                setProviderFilter(v as WebhookProvider | 'all');
+                if (
+                  v === 'all' ||
+                  v === 'azure_devops' ||
+                  v === 'circleci' ||
+                  v === 'custom' ||
+                  v === 'github_actions' ||
+                  v === 'gitlab_ci' ||
+                  v === 'jenkins' ||
+                  v === 'travis_ci'
+                ) {
+                  setProviderFilter(v);
+                }
               }}
             >
               <SelectTrigger className='w-[160px]'>

@@ -4,9 +4,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { MCPClient } from '../../api/mcp-client';
-
-import { createMCPClient } from '../../api/mcp-client';
+import { MCPClient, createMCPClient } from '../../api/mcp-client';
 
 // Mock fetch globally
 globalThis.fetch = vi.fn();
@@ -271,20 +269,25 @@ describe(MCPClient, () => {
     it('should handle network timeout', async () => {
       vi.useFakeTimers();
 
-      const fetchPromise = new Promise(() => {
-        // Never resolves
-      });
+      (globalThis.fetch as any).mockImplementationOnce(
+        (_url: string, options: { signal?: AbortSignal }) =>
+          new Promise((_resolve, reject) => {
+            options.signal?.addEventListener('abort', () => {
+              reject(new DOMException('The operation was aborted.', 'AbortError'));
+            });
+          }),
+      );
 
-      (globalThis.fetch as any).mockReturnValueOnce(fetchPromise);
+      try {
+        const callPromise = client.listTools();
+        const expectation = expect(callPromise).rejects.toThrow('Request timeout');
 
-      const callPromise = client.listTools();
-      const expectation = expect(callPromise).rejects.toThrow();
-
-      // Fast-forward past timeout
-      await vi.advanceTimersByTimeAsync(6000);
-      await expectation;
-
-      vi.useRealTimers();
+        // Fast-forward past timeout
+        await vi.advanceTimersByTimeAsync(6000);
+        await expectation;
+      } finally {
+        vi.useRealTimers();
+      }
     });
   });
 

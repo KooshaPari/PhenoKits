@@ -18,11 +18,13 @@
  * - 100k nodes: 60 FPS (with aggressive optimizations)
  */
 
-import type Graph from 'graphology';
+import type { default as Graph } from 'graphology';
 
 import { SigmaContainer, useLoadGraph, useRegisterEvents, useSigma } from '@react-sigma/core';
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
-import '@react-sigma/core/lib/react-sigma.min.css';
+import _sigmaStyle from '@react-sigma/core/lib/react-sigma.min.css';
+
+void _sigmaStyle;
 
 export interface SigmaGraphViewProps {
   graph: Graph;
@@ -73,7 +75,7 @@ function SigmaGraphContent({
 
   const lastFrameTime = useRef<number>(performance.now());
   const frameCount = useRef<number>(0);
-  const fpsUpdateInterval = useRef<number | null>(null);
+  const fpsUpdateInterval = useRef<ReturnType<typeof globalThis.setInterval> | null>(null);
 
   // Load graph data
   useEffect(() => {
@@ -89,10 +91,6 @@ function SigmaGraphContent({
 
   // Apply performance mode settings
   useEffect(() => {
-    if (!sigma) {
-      return;
-    }
-
     const settings = sigma.getSettings();
 
     switch (performanceMode) {
@@ -139,10 +137,6 @@ function SigmaGraphContent({
 
   // Highlight selected node
   useEffect(() => {
-    if (!sigma) {
-      return;
-    }
-
     const graph = sigma.getGraph();
 
     // Clear all highlights first
@@ -151,7 +145,7 @@ function SigmaGraphContent({
     });
 
     // Highlight selected node and its neighbors
-    if (selectedNodeId && graph.hasNode(selectedNodeId)) {
+    if (selectedNodeId != null && selectedNodeId !== '' && graph.hasNode(selectedNodeId)) {
       graph.setNodeAttribute(selectedNodeId, 'highlighted', true);
 
       // Highlight neighbors
@@ -165,10 +159,6 @@ function SigmaGraphContent({
 
   // Highlight hovered node
   useEffect(() => {
-    if (!sigma) {
-      return;
-    }
-
     const graph = sigma.getGraph();
 
     // Clear all hover highlights
@@ -177,7 +167,7 @@ function SigmaGraphContent({
     });
 
     // Highlight hovered node
-    if (hoveredNodeId && graph.hasNode(hoveredNodeId)) {
+    if (hoveredNodeId != null && hoveredNodeId !== '' && graph.hasNode(hoveredNodeId)) {
       graph.setNodeAttribute(hoveredNodeId, 'hovered', true);
     }
 
@@ -186,10 +176,6 @@ function SigmaGraphContent({
 
   // Event handlers
   useEffect(() => {
-    if (!sigma) {
-      return;
-    }
-
     const events = {
       clickNode: ({ node }: { node: string }) => {
         onNodeClick?.(node);
@@ -214,10 +200,6 @@ function SigmaGraphContent({
 
   // FPS monitoring
   useEffect(() => {
-    if (!sigma) {
-      return;
-    }
-
     const updateFPS = () => {
       const now = performance.now();
       const delta = now - lastFrameTime.current;
@@ -237,22 +219,19 @@ function SigmaGraphContent({
     };
 
     // Update FPS on each render
-    const interval = globalThis.setInterval(updateFPS, 100) as unknown as number;
+    const interval = globalThis.setInterval(updateFPS, 100);
     fpsUpdateInterval.current = interval;
 
     return () => {
-      if (fpsUpdateInterval.current) {
+      if (fpsUpdateInterval.current !== null) {
         clearInterval(fpsUpdateInterval.current);
+        fpsUpdateInterval.current = null;
       }
     };
   }, [sigma]);
 
   // Camera state monitoring for viewport culling
   useEffect(() => {
-    if (!sigma) {
-      return;
-    }
-
     const camera = sigma.getCamera();
     const updateViewport = () => {
       const graph = sigma.getGraph();
@@ -269,8 +248,7 @@ function SigmaGraphContent({
         }
 
         // Transform to viewport coordinates (sigma API may vary by version)
-        const sigmaWithViewport = sigma as any;
-        const viewportPos = sigmaWithViewport.graphToViewport({ x, y });
+        const viewportPos = sigma.graphToViewport({ x, y });
 
         // Check if node is in viewport
         if (
@@ -294,14 +272,13 @@ function SigmaGraphContent({
     };
 
     // Update on camera change (event name may vary by sigma version)
-    const cameraWithEvents = camera as any;
-    cameraWithEvents.on('updated', updateViewport);
+    camera.on('updated', updateViewport);
 
     // Initial update
     updateViewport();
 
     return () => {
-      cameraWithEvents.off('updated', updateViewport);
+      camera.off('updated', updateViewport);
     };
   }, [sigma]);
 

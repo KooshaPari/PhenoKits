@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRight, X } from 'lucide-react';
+import { useId } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -14,8 +15,8 @@ const linkTypes = [
 
 const linkSchema = z.object({
   description: z.string().max(1000).optional(),
-  sourceId: z.string().uuid('Select a source item'),
-  targetId: z.string().uuid('Select a target item'),
+  sourceId: z.uuid('Select a source item'),
+  targetId: z.uuid('Select a target item'),
   type: z.enum(linkTypes),
 });
 
@@ -40,9 +41,10 @@ export function CreateLinkForm({
   onSubmit,
   onCancel,
   items,
-  isLoading,
+  isLoading = false,
   preselectedSource,
 }: CreateLinkFormProps) {
+  const formId = useId();
   const {
     register,
     handleSubmit,
@@ -58,15 +60,26 @@ export function CreateLinkForm({
   const sourceItem = items.find((i) => i.id === sourceId);
   const targetItem = items.find((i) => i.id === targetId);
 
-  const groupedItems = items.reduce<Record<string, Item[]>>((acc: Record<string, Item[]>, item) => {
-    acc[item.view] ??= [];
-    acc[item.view]?.push(item);
-    return acc;
-  }, {});
+  const groupedItems: Record<string, Item[]> = {};
+  for (const item of items) {
+    const viewItems = groupedItems[item.view] ?? [];
+    viewItems.push(item);
+    groupedItems[item.view] = viewItems;
+  }
+
+  const submitForm = handleSubmit(onSubmit);
+  const handleFormSubmit = (event: Parameters<typeof submitForm>[0]) => {
+    void submitForm(event);
+  };
 
   return (
     <div className='fixed inset-0 z-50 flex items-center justify-center'>
-      <div className='fixed inset-0 bg-black/50 backdrop-blur-sm' onClick={onCancel} />
+      <button
+        type='button'
+        aria-label='Close create link form'
+        className='fixed inset-0 bg-black/50 backdrop-blur-sm'
+        onClick={onCancel}
+      />
       <div className='bg-background relative w-full max-w-lg rounded-xl border p-6 shadow-2xl'>
         <div className='flex items-center justify-between'>
           <h2 className='text-lg font-semibold'>Create Traceability Link</h2>
@@ -75,13 +88,14 @@ export function CreateLinkForm({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className='mt-6 space-y-4'>
+        <form onSubmit={handleFormSubmit} className='mt-6 space-y-4'>
           <div className='flex items-center gap-4'>
             <div className='flex-1'>
-              <label className='block text-sm font-medium'>
+              <label htmlFor={`${formId}-source`} className='block text-sm font-medium'>
                 Source Item <span className='text-red-500'>*</span>
               </label>
               <select
+                id={`${formId}-source`}
                 {...register('sourceId')}
                 className='bg-background mt-1 w-full rounded-lg border px-3 py-2'
               >
@@ -102,10 +116,11 @@ export function CreateLinkForm({
             </div>
             <ArrowRight className='text-muted-foreground mt-6 h-5 w-5' />
             <div className='flex-1'>
-              <label className='block text-sm font-medium'>
+              <label htmlFor={`${formId}-target`} className='block text-sm font-medium'>
                 Target Item <span className='text-red-500'>*</span>
               </label>
               <select
+                id={`${formId}-target`}
                 {...register('targetId')}
                 className='bg-background mt-1 w-full rounded-lg border px-3 py-2'
               >
@@ -137,10 +152,11 @@ export function CreateLinkForm({
           )}
 
           <div>
-            <label className='block text-sm font-medium'>
+            <label htmlFor={`${formId}-type`} className='block text-sm font-medium'>
               Link Type <span className='text-red-500'>*</span>
             </label>
             <select
+              id={`${formId}-type`}
               {...register('type')}
               className='bg-background mt-1 w-full rounded-lg border px-3 py-2'
             >
@@ -153,8 +169,11 @@ export function CreateLinkForm({
           </div>
 
           <div>
-            <label className='block text-sm font-medium'>Description</label>
+            <label htmlFor={`${formId}-description`} className='block text-sm font-medium'>
+              Description
+            </label>
             <textarea
+              id={`${formId}-description`}
               {...register('description')}
               rows={2}
               placeholder='Why are these items linked?'

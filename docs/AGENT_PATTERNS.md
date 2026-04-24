@@ -71,10 +71,12 @@ git add .github/workflows/ci.yml
 **When to use**: Reusing shared functionality
 
 **Agent workflow**:
-```rust
-// Add to Cargo.toml
-[dependencies]
-pheno-logging = { path = "/path/to/PhenoKits/libs/rust/phenotype-logging" }
+```toml
+# Add to pyproject.toml
+[project]
+dependencies = [
+  "phenotype-logging @ file:///path/to/PhenoKits/libs/python/phenotype-logging",
+]
 ```
 
 **Pattern**: Semantic versioning; breaking changes require ADR.

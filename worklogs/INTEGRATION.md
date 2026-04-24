@@ -29,6 +29,56 @@ branch `chore/fork-attribution` (README NOTICE + this worklog entry).
 
 ---
 
+## 2026-04-24 — Cross-Repo Consolidation Analysis: phenoShared ↔ pheno
+
+**Scope**: Comparative analysis of phenoShared (13K LOC, 12 crates) and pheno (215K LOC monorepo)
+to identify duplicates, unique modules, and extraction candidates.
+
+### Key Findings
+
+**Overlap**: 4 duplicated crates (4.8K LOC total overlap, <1% of workspace)
+- phenotype-event-sourcing: 1,816 (phenoShared) vs 642 (pheno) → **keep phenoShared**
+- phenotype-cache-adapter: 812 (phenoShared) vs 78 (pheno) → **keep phenoShared**
+- phenotype-policy-engine: 1,402 (phenoShared) vs 1,823 (pheno) → **keep pheno** (more complete)
+- phenotype-state-machine: 664 (phenoShared) vs 355 (pheno) → **keep phenoShared**
+
+**Unique to phenoShared** (8 crates, 7.3K LOC, all HIGH-VALUE):
+- phenotype-nanovms-client (2,284 LOC) — NanoVM bridge; **CRITICAL**
+- phenotype-domain (1,697 LOC) — Core domain types; **CRITICAL**
+- phenotype-port-interfaces (1,257 LOC) — Hexagonal port traits; **CRITICAL**
+- phenotype-application (1,097 LOC) — App layer abstractions
+- phenotype-postgres-adapter (203 LOC)
+- phenotype-redis-adapter (204 LOC)
+- phenotype-http-adapter (127 LOC)
+- ffi_utils (9 LOC)
+
+**Top 10 Extractable from pheno** (18.5K LOC):
+1. phenotype-retry (1,656) — Pure utility, zero agileplus coupling; **TIER 1**
+2. phenotype-port-traits (1,004) — Trait definitions; **TIER 1**
+3. phenotype-policy-engine (1,823) — Consolidate with phenoShared variant; **TIER 1**
+4. phenotype-infrastructure (814) — Observability abstraction; **TIER 2**
+5. phenotype-health (788) — Health check abstraction; **TIER 2**
+6. phenotype-testing (1,063) — Split into shared fixtures; **TIER 2**
+7. phenotype-mock (754) — Test mocking utilities
+8. phenotype-cost-core (740) — Billing abstractions [DEFER on demand]
+9. phenotype-bdd (679) — BDD scaffolding [DEFER on demand]
+10. phenotype-event-bus (393) — Pub/sub event system
+
+### Consolidation Strategy
+
+**Deliverable**: `docs/migrations/pheno_extraction_plan.md` (15-section roadmap covering modules, dependencies, effort, timeline).
+
+**Execution Plan** (3 phases, 16-20h or 6-8h parallel):
+1. **Phase 1 (4-6h)**: Create canonical `phenotype-shared` from phenoShared; extract phenotype-retry, port-traits, policy-engine
+2. **Phase 2 (6-8h)**: Extract infrastructure, health, testing split
+3. **Phase 3 (2-3h)**: Transfer remaining phenoShared unique modules; mark phenoShared deprecated
+
+**Deprecation**: `phenoShared/DEPRECATION.md` created with migration guide for dependent projects.
+
+**Outcome**: Single canonical `phenotype-shared` repo consolidates 15.3K LOC of reusable infrastructure (merged phenoShared unique + best-of-both-duplicate variants + pheno tier-1 extractions), eliminating duplication and establishing clear ownership.
+
+---
+
 ## 2026-04-24 — Reusable-workflow adoption audit
 
 **Canonical reusable workflows** (hosted in separate repos on GitHub, not mirrored locally):

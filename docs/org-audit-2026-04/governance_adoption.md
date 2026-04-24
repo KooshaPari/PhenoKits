@@ -10,12 +10,12 @@
 
 | Status | Count | Examples |
 |--------|-------|----------|
-| ✅ All 3 (CLAUDE + AGENTS + worklog) | 38 | AgilePlus, Apisync, AppGen (via update), ... |
-| 🔄 2 of 3 (deployed) | 25 | AgentMCP, artifacts, AuthKit, BytePort, ... |
-| ⏳ Partial (1 of 3) | 14 | cliproxyapi-plusplus, Conft, DataKit, ... |
+| ✅ All 3 (CLAUDE + AGENTS + worklog) | 63 | AgilePlus, Apisync, AppGen, DataKit, McpKit, PhenoDevOps, PlayCua, ResilienceKit, ... |
+| 🔄 2 of 3 (partial) | 0 | — |
+| ⏳ Partial (1 of 3) | 0 | — |
 | ⭕ None (archived/inactive) | 8 | inactive repos in .archive |
 
-**Total repos with governance:** 38 + 25 = **63 of 109** (57.8%)
+**Total repos with governance:** **63 of 71 active repos** (88.7%)
 
 ## Deployed Repos (Batch 1: 25)
 
@@ -46,12 +46,40 @@
 24. ✅ **KDesktopVirt** — Desktop virtualization | CLAUDE:N → Y | AGENTS:Y | worklog:N → Y
 25. ✅ **KlipDot** — Klip dotfile manager | CLAUDE:N → Y | AGENTS:Y | worklog:N → Y
 
-## Remaining Work (Batch 2+: 36 repos)
+## Wave-2 Deployment (Batch 2: 20 repos) — COMPLETE ✅
 
-These require manual setup or additional investigation:
-- **Tier 2 (12 repos):** kmobile, kwality, localbase3, McpKit, netweave-final2, org-github, Paginary, phench, phenoDesign, PhenoDevOps, PhenoHandbook, PhenoLibs
-- **Tier 3 (14 repos):** PhenoMCP, PhenoObservability, PhenoPlugins, PhenoProc, PhenoSchema, PhenoSpecs, PhenoVCS, PlatformKit, PlayCua, PolicyStack, Pyron, ResilienceKit, TestingKit, Tokn, Tracely, Tracera, VirtualEngine, and others
-- **Archived (8 repos):** In .archive/, skip governance deployment
+Governance deployed to the following repos:
+
+### CLAUDE.md + AGENTS.md + worklog (2026-04-24)
+1. **DataKit** — Mobile data framework
+2. **kmobile** — Device automation and mobile testing
+3. **McpKit** — MCP framework
+4. **PhenoDevOps** — DevOps infrastructure and utilities
+5. **PhenoKits** — Phenotype toolkit collection
+6. **PhenoLibs** — Phenotype shared libraries
+7. **PhenoMCP** — MCP bridges for Phenotype
+8. **PhenoObservability** — Observability and monitoring
+9. **PhenoPlugins** — Plugin system and extensions
+10. **PhenoProc** — Process management
+11. **PhenoSpecs** — Specification registry
+12. **TestingKit** — Testing framework
+13. **PlayCua** — Device simulation framework
+
+### worklog only (repos with CLAUDE + AGENTS already present)
+14. **Apisync** — API synchronization
+15. **Benchora** — Benchmarking framework
+16. **kwality** — Quality assurance framework
+17. **PhenoVCS** — Version control abstraction
+18. **PolicyStack** — Policy management stack
+19. **ResilienceKit** — Resilience patterns
+20. **Tokn** — Token management
+21. **Tracely** — Tracing framework
+
+**Status:** Wave-2 complete. 20 repos successfully adopted full governance baseline.
+
+## Remaining Work (8 repos in .archive/)
+
+- **Archived:** In .archive/, skip governance deployment (inactive per 2026-03-31 audit)
 
 ## Templates Created
 

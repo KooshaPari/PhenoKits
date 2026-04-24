@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -d /Users/kooshapari/CodeProjects/Phenotype/repos/*/)",
+      "Bash(rm -rf .archive/colab/.git/worktrees/colab-docs)",
+      "Bash([ -d \".archive/$r\" ])",
+      "Bash(rm -f /Users/kooshapari/CodeProjects/Phenotype/repos/.git/index.lock)",
+      "Bash(git -C /Users/kooshapari/CodeProjects/Phenotype/repos status --short)",
+      "Bash(git -C /Users/kooshapari/CodeProjects/Phenotype/repos log --oneline -5)"
+    ]
+  }
+}

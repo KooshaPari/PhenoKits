@@ -1,0 +1,73 @@
+id: FR-001
+title: Core Infrastructure Capability
+description: The system shall provide core infrastructure functionality.
+priority: high
+status: implemented
+acceptance_criteria:
+- 'try_acquire: /// Try to acquire a permit without blocking'
+- 'acquire: /// Acquire a permit, waiting if necessary'
+- 'new: /// - `refill_rate`: Tokens added per second'
+- "refill: /// - `refill_rate`: Tokens added per second\n    pub fn new(capacity:\
+  \ usize, refill_rate: usize) -> Self {\n        if capacity == 0 {\n           \
+  \ panic!(\"Token bucket capacity must be > 0\");\n        }\n        Self { capacity,\
+  \ tokens: capacity, refill_rate, last_refill: Instant::now() }\n    }"
+- 'try_acquire: /// Try to acquire a token'
+related_entities:
+- try_acquire
+- acquire
+- new
+- refill
+- try_acquire
+- remaining
+- refill_rate
+- new
+- leak
+- try_add
+- has_capacity
+- test_token_bucket_initial_full
+- test_token_bucket_exhausted
+- test_leaky_bucket_capacity
+- validate_circuit_breaker
+- validate_rate_limiter
+- validate_bulkhead
+- validate_sentinel_config
+- test_valid_circuit_breaker
+- test_invalid_circuit_breaker_threshold
+- test_valid_rate_limiter
+- test_invalid_burst
+- test_valid_bulkhead
+- test_invalid_reserved_slots
+- test_complete_sentinel_config
+- test_rate_limiter_creation
+- fmt
+- valid
+- invalid
+- add_error
+- merge
+- new
+- integer
+- min
+- max
+- validate
+- validate_field
+- test_validation_result_valid
+- test_validation_result_invalid
+- test_validate_field_min
+- test_validate_field_max
+- test_validate_field_ok
+- new
+- state
+- is_allowed
+- record_success
+- record_failure
+- force_state
+- reset
+- test_circuit_breaker_initial_state
+- test_circuit_breaker_opens_on_threshold
+- test_circuit_breaker_success_resets
+- new
+- partition_capacity
+- total_capacity
+- drop
+user_story_id: null
+adr_id: null

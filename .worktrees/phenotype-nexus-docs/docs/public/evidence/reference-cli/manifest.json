@@ -1,0 +1,15 @@
+{
+  "bundle_id": "reference-cli",
+  "title": "CLI reference evidence bundle",
+  "updated_at": "2026-04-01T12:00:00Z",
+  "artifacts": {
+    "screenshot_gif": "/evidence/reference-cli/overview.gif",
+    "api_simulation": "/evidence/reference-cli/api-simulation.json",
+    "vhs_tape": "/evidence/reference-cli/api-simulation.vhs.tape"
+  },
+  "checks": [
+    "playwright",
+    "vhs",
+    "api simulation"
+  ]
+}

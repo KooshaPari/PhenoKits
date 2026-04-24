@@ -1,0 +1,46 @@
+package ports
+
+import (
+	"testing"
+)
+
+// Port interface tests - verify interfaces are properly defined
+
+// Mock command and result types
+type CreateEntityCommand struct {
+	Name string
+}
+
+type EntityResult struct {
+	ID   string
+	Name string
+}
+
+// Mock handler for testing
+type MockCreateHandler struct{}
+
+func (h *MockCreateHandler) Handle(cmd CreateEntityCommand) (EntityResult, error) {
+	return EntityResult{
+		ID:   "generated-id",
+		Name: cmd.Name,
+	}, nil
+}
+
+func TestMockHandler_Handle(t *testing.T) {
+	handler := &MockCreateHandler{}
+	cmd := CreateEntityCommand{Name: "Test Entity"}
+
+	result, err := handler.Handle(cmd)
+
+	if err != nil {
+		t.Fatalf("Expected no error, got: %v", err)
+	}
+
+	if result.Name != cmd.Name {
+		t.Errorf("Expected name '%s', got '%s'", cmd.Name, result.Name)
+	}
+
+	if result.ID == "" {
+		t.Error("Expected non-empty ID")
+	}
+}

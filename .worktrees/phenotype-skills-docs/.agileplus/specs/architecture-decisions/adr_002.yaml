@@ -1,0 +1,6 @@
+id: ADR-002
+title: Skill System Implementation
+context: Skill System requires 42 code entities
+decision: Use python for Skill System
+consequences: Consistent codebase in python
+status: accepted

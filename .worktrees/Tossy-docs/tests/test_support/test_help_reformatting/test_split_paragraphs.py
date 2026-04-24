@@ -1,0 +1,14 @@
+import pytest
+
+from tests.support.help.help_reformatting import split_paragraphs
+
+
+@pytest.mark.parametrize("text,expected_result", [
+    ('one line', ['one line']),
+    ('one line\n', ['one line\n']),
+    ('one\ntwo\n', ['one\ntwo\n']),
+    ('one\n\ntwo\n', ['one\n', 'two\n']),
+    ('one\n    \ntwo\n', ['one\n', 'two\n']),
+])
+def test_split_paragraphs(text, expected_result):
+    assert split_paragraphs(text) == expected_result

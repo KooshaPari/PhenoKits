@@ -1,0 +1,30 @@
+{
+  "name": "Eidolon",
+  "slug": "eidolon",
+  "tagline": "Semantic search and RAG infrastructure",
+  "accent": "eidolon",
+  "icon": "🔍",
+  "description": "Eidolon provides enterprise-grade semantic search, retrieval-augmented generation (RAG), and vector database infrastructure for AI applications.",
+  "members": [
+    {
+      "name": "Vector Storage",
+      "description": "HNSW-based vector indexing and retrieval"
+    },
+    {
+      "name": "Embedding Pipeline",
+      "description": "Document processing and embedding generation"
+    },
+    {
+      "name": "RAG Engine",
+      "description": "Context retrieval for LLM augmentation"
+    },
+    {
+      "name": "Semantic Router",
+      "description": "Intent classification and routing"
+    }
+  ],
+  "links": {
+    "github": "https://github.com/kooshapari/eidolon",
+    "docs": "https://eidolon.phenotype.dev"
+  }
+}

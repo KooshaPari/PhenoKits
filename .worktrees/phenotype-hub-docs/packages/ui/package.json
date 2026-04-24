@@ -1,0 +1,27 @@
+{
+  "name": "@phenotype/ui",
+  "version": "0.1.0",
+  "private": true,
+  "exports": {
+    "./*": ["./src/*.tsx"]
+  },
+  "scripts": {
+    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@radix-ui/react-slot": "^1.1.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.454.0",
+    "react": "^19",
+    "tailwind-merge": "^2.5.5"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "typescript": "^5.7.0"
+  },
+  "peerDependencies": {
+    "react": "^19"
+  }
+}

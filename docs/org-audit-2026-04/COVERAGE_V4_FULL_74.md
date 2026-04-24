@@ -1,9 +1,12 @@
-# Organization Coverage Audit — V4 (Full 74-Repo Set)
+# DEPRECATED: Organization Coverage Audit — V4
 
-**Date:** 2026-04-24
-**Scope:** All 74 active git repositories in `/repos`
-**Previous:** V3 (71 repos, Apr 22–23, before worktree expansion)
-**Methodology:** Filesystem scan for governance + infrastructure files
+> **⚠️ DEPRECATION NOTICE:** This document is superseded by [COVERAGE_V5_CANONICAL.md](COVERAGE_V5_CANONICAL.md). V5 clarifies that the "74 repos" in V4 included 3 repos (DevHex, GDK, 1 other) that were later found to lack governance. V5 consolidates all prior counts and introduces tier separation (Tier A: primary active, Tier B: sub-crates, Tier C: worktrees, Extended: archives/remote-only). Use V5 as authoritative.
+
+**Date:** 2026-04-24  
+**Scope:** 71 Tier A primary active repos (V4's "74" included undocumented repos; V5 corrects this)  
+**Previous:** V3 (71 repos, Apr 22–23, before worktree expansion)  
+**Methodology:** Filesystem scan for governance + infrastructure files  
+**Status:** Partially superseded; Tier A baseline (71 repos) still valid
 
 ---
 

@@ -1,0 +1,10 @@
+repo	status	notes
+agentapi-plusplus	missing	Placeholder: governance baseline files not yet detected in initial lane-c inventory.
+cliproxyapi-plusplus	drifted	Placeholder: governance assets present but differ from federation baseline; needs reconciliation.
+heliosCLI	compliant	Placeholder: governance controls appear aligned with current baseline template.
+heliosApp	drifted	Placeholder: partial policy/workflow alignment; update required to match lane-c standard.
+portage	missing	Placeholder: expected governance artifacts not yet present; adoption patch required.
+thegent	compliant	Placeholder: baseline policy and workflow controls currently match expected standard.
+phenotype-config	drifted	Placeholder: configuration policy set exists with local deltas from canonical template.
+template-commons	missing	Placeholder: lane-c governance package not yet applied in target scope.
+agentops-policy-federation	compliant	Placeholder: source lane repository baseline treated as currently aligned.

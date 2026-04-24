@@ -1,0 +1,15 @@
+{
+  "bundle_id": "site-reference-routing",
+  "title": "Site Reference Routing",
+  "updated_at": "2026-04-01T15:00:00Z",
+  "artifacts": {
+    "screenshot_gif": "/evidence/site-reference-routing/overview.gif",
+    "api_simulation": "/evidence/site-reference-routing/api-simulation.json",
+    "vhs_tape": "/evidence/site-reference-routing/api-simulation.vhs.tape"
+  },
+  "checks": [
+    "playwright",
+    "vhs",
+    "api simulation"
+  ]
+}

@@ -1,0 +1,15 @@
+id: US-001
+title: Core Infrastructure Capability Story
+description: As a user, I want the system shall provide core infrastructure functionality..
+acceptance_criteria:
+- "unstable_cacheLife: /**\n     * Cache this `\"use cache\"` for a timespan defined\
+  \ by the `\"default\"` profile"
+- "unstable_cacheLife: /**\n     * Cache this `\"use cache\"` for a timespan defined\
+  \ by the `\"seconds\"` profile"
+- "unstable_cacheLife: /**\n     * Cache this `\"use cache\"` for a timespan defined\
+  \ by the `\"minutes\"` profile"
+- "unstable_cacheLife: /**\n     * Cache this `\"use cache\"` for a timespan defined\
+  \ by the `\"hours\"` profile"
+- "unstable_cacheLife: /**\n     * Cache this `\"use cache\"` for a timespan defined\
+  \ by the `\"days\"` profile"
+fr_id: FR-001

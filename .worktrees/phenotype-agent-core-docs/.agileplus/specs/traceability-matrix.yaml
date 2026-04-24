@@ -1,0 +1,66 @@
+FR-001:
+  architecture_decision: ADR-001
+  code_entities:
+  - TestBasic
+  - TestConfiguration
+  - test_import_domain
+  - test_import_adapters
+  - test_import_ports
+  - test_package_metadata
+  - HookRegistrar
+  - __init__
+  - register
+  - RoleRenderer
+  - __init__
+  - render
+  - from_yaml
+  - _all_yaml_files
+  - render_all
+  - render_single
+  - list_roles
+  - Priority
+  - Complexity
+  - Deliverable
+  - validate_depends
+  - RunState
+  - InteractivityMode
+  - MAIFArtifact
+  - ContinuityPacket
+  - RunMeta
+  - CheckpointMeta
+  test_cases:
+  - TC-001-001
+  - TC-001-002
+  - TC-001-003
+  - TC-001-004
+  - TC-001-005
+  user_story: US-001
+FR-002:
+  architecture_decision: ADR-002
+  code_entities:
+  - AgentRoleSpec
+  - SubagentType
+  - validate_allowed_agents
+  - AgentSource
+  test_cases:
+  - TC-002-001
+  - TC-002-002
+  - TC-002-003
+  - TC-002-004
+  user_story: US-002
+FR-003:
+  architecture_decision: ADR-003
+  code_entities:
+  - TaskVisibility
+  - TaskStep
+  - TaskMetadata
+  - Task
+  - TaskOutputStatus
+  - TaskOutput
+  test_cases:
+  - TC-003-001
+  - TC-003-002
+  - TC-003-003
+  - TC-003-004
+  - TC-003-005
+  user_story: US-003

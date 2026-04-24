@@ -1,0 +1,352 @@
+[project]
+name = "portkey"
+version = "0.1.0"
+description = "LLM Gateway abstractions for multi-provider support"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT OR Apache-2.0" }
+authors = [
+    { name = "Phenotype", email = "dev@phenotype.dev" }
+]
+keywords = ["llm", "ai", "gateway", "openai", "anthropic", "multi-provider"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+
+dependencies = []
+
+[project.optional-dependencies]
+openai = ["openai>=1.0.0"]
+anthropic = ["anthropic>=0.20.0"]
+ollama = ["ollama>=0.1.0"]
+dev = [
+    "pytest>=9.0.2",
+    "pytest-asyncio>=1.3.0",
+    "pytest-cov>=7.0.0",
+    "pytest-mock>=3.15.1",
+    "pytest-xdist>=3.8.0",
+    "pytest-benchmark>=5.2.3",
+    "hypothesis>=6.151.4",
+    "faker>=40.1.2",
+    "ruff>=0.14.14",
+    "mypy>=1.14.0",
+    "bandit[toml]>=1.7.10",
+    "pip-audit>=2.7.4",
+    "vulture>=2.14",
+    "radon>=6.0.1",
+]
+test = [
+    "pytest>=9.0.2",
+    "pytest-asyncio>=1.3.0",
+    "pytest-cov>=7.0.0",
+    "pytest-mock>=3.15.1",
+    "pytest-xdist>=3.8.0",
+    "pytest-benchmark>=5.2.3",
+    "hypothesis>=6.151.4",
+    "faker>=40.1.2",
+]
+lint = [
+    "ruff>=0.14.14",
+    "mypy>=1.14.0",
+    "bandit[toml]>=1.7.10",
+    "pip-audit>=2.7.4",
+    "vulture>=2.14",
+    "radon>=6.0.1",
+]
+all = [
+    "portkey[openai,anthropic,ollama,dev]",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/portkey"]
+
+# =============================================================================
+# PYTEST CONFIGURATION
+# =============================================================================
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--tb=short",
+    "-p", "asyncio",
+]
+markers = [
+    "unit: Unit tests (fast, no external dependencies)",
+    "integration: Integration tests (provider, cache, file system)",
+    "slow: Slow tests (>1s execution time)",
+    "asyncio: Async tests (mark for async tests)",
+    "performance: Performance and load tests",
+    "property: Property-based tests using Hypothesis",
+    "benchmark: Benchmark tests for performance measurement",
+    "smoke: Minimal critical-path checks",
+]
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+    "ignore::pytest.PytestUnraisableExceptionWarning",
+    "ignore::pytest.PytestAssertRewriteWarning",
+    "ignore::RuntimeWarning",
+]
+
+[tool.pytest_asyncio]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+
+# =============================================================================
+# COVERAGE CONFIGURATION
+# =============================================================================
+[tool.coverage.run]
+source = ["src/portkey"]
+branch = true
+parallel = true
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+fail_under = 80
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+    "except ImportError:",
+    "except Exception:.*# (test )?fallback",
+]
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+[tool.coverage.json]
+output = "coverage.json"
+
+# =============================================================================
+# RUFF LINTING CONFIGURATION
+# =============================================================================
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+preview = true
+force-exclude = true
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "C4",     # comprehensions
+    "UP",     # pyupgrade
+    "N",      # pep8-naming
+    "PT",     # flake8-pytest-style
+    "SIM",    # pyupgrade
+    "RUF",    # ruff-specific rules
+    "RSE",    # raise statements
+    "PERF",   # perflint
+    "LOG",    # flake8-logging
+    "S",      # flake8-bandit
+    "ASYNC",  # flake8-async
+    "PIE",    # flake8-pie
+    "RET",    # return statements
+    "PTH",    # paths
+    "DTZ",    # datetime
+    "D",      # pydocstyle
+    "FA",     # flake8-future-annotations
+    "Q",      # flake8-quotes
+    "C90",    # mccabe complexity
+    "PLC",    # import conventions
+    "PLR",    # pylint rules
+    "PLE",    # pylint errors
+    "ANN",    # annotations
+    "TRY",    # trycer
+    "INT",    # noqa
+    "ISC",    # implicit string concatenation
+    "FURB",   # refurb
+    "G",      # logging
+    "ARG",    # unused arguments
+]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+    "B008",   # do not perform function calls in argument defaults
+    "SIM105", # use contextlib.suppress
+    "D203",   # 1 blank line required before class docstring
+    "D212",   # multi-line docstring summary should start at the first line
+    "ANN401", # dynamically typed attributes
+    "UP042",  # StrEnum inheritance
+    "D107",   # missing docstring in __init__
+    "D102",   # missing docstring in public methods
+    "D105",   # missing docstring in magic methods
+    "ARG002", # unused method arguments (ttl parameter)
+    "RUF022", # __all__ not sorted
+    "TRY003", # avoid specifying long messages outside exception class
+    "PLR6301", # method could be static - not applicable to private helpers
+]
+
+[tool.ruff.lint.per-file-ignores]
+"src/portkey/infrastructure/*.py" = [
+    "PLR6301", # methods could be static - private helpers intentionally use self
+    "PLC0415", # lazy imports for optional dependencies
+    "TRY300",  # return in try/except is intentional
+]
+"__init__.py" = ["F401", "F403", "D100", "D104"]
+"tests/**/*.py" = [
+    "PLR6301", # test methods intentionally use class scope
+    "ANN101",  # missing return type on async methods
+    "ANN201",  # missing return type on public methods
+    "S101",   # assert
+    "RUF069",  # floating point comparison - acceptable in tests
+    "TRY301",  # abstract raise - acceptable in tests
+    "TRY002",  # create your own exception - acceptable in tests
+    "S105",   # hardcoded password
+    "S106",   # hardcoded password
+    "S108",   # hardcoded
+    "S110",   # try-except-pass
+    "S311",   # symmetric cryptographic
+    "S603",   # subprocess
+    "S607",   # subprocess
+    "S404",   # file operation
+    "S608",   # hardcoded
+    "PT011",  # pytest raises
+    "PT012",  # pytest raises
+    "PT017",  # pytest assert
+    "PT018",  # pytest assert
+    "PT019",  # pytest assert
+    "D100",   # missing docstring
+    "D101",   # missing docstring
+    "D102",   # missing docstring
+    "D103",   # missing docstring
+    "D104",   # missing docstring
+    "D105",   # missing docstring
+    "D106",   # missing docstring
+    "D107",   # missing docstring
+    "D417",   # missing docstring
+    "ANN001", # typing
+    "ANN002", # typing
+    "ANN003", # typing
+    "ARG001", # typing
+    "ARG002", # typing
+    "ARG005", # typing
+    "PLR0911", # too many returns
+    "PLR0913", # too many arguments
+    "PLR0915", # too many statements
+    "PLR0912", # too many branches
+    "PLR2004", # magic value
+    "PLR6301", # method could be function
+    "E402",   # import
+    "E722",   # bare except
+    "E741",   # ambiguous variable
+    "F401",   # unused import
+    "F403",   # unused import
+    "F404",   # future import
+    "F811",   # redefinition
+    "F821",   # undefined name
+    "F841",   # unused variable
+    "FURB113", # use extend instead of append loop
+    "N801",   # naming
+    "N802",   # naming
+    "N806",   # naming
+    "N999",   # naming
+    "PLC0415", # import not at top level
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.flake8-annotations]
+allow-star-arg-any = false
+suppress-none-returning = false
+suppress-dummy-args = false
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.pylint]
+max-args = 6
+max-branches = 12
+max-returns = 6
+max-statements = 50
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = true
+
+[tool.ruff.lint.isort]
+known-first-party = ["portkey"]
+known-third-party = []
+
+# =============================================================================
+# MYPY CONFIGURATION
+# =============================================================================
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+follow_imports = "normal"
+ignore_missing_imports = false
+
+# =============================================================================
+# BANDIT SECURITY SCANNING
+# =============================================================================
+[tool.bandit]
+exclude_dirs = ["tests", "build", "dist", ".venv"]
+skips = ["B101"]  # assert statements
+severity = "medium"
+confidence = "medium"
+
+# =============================================================================
+# VULTURE - DEAD CODE DETECTION
+# =============================================================================
+[tool.vulture]
+min-confidence = 80
+reports = ["unused-classes", "unused-functions"]
+
+# =============================================================================
+# RADON - CODE METRICS
+# =============================================================================
+[tool.radon]
+exclude = ["tests/", "build/", "dist/", ".venv/"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+    "pytest-asyncio>=1.3.0",
+    "pytest-cov>=7.0.0",
+    "pytest-mock>=3.15.1",
+    "pytest-xdist>=3.8.0",
+    "pytest-benchmark>=5.2.3",
+    "hypothesis>=6.151.4",
+    "faker>=40.1.2",
+    "ruff>=0.14.14",
+    "mypy>=1.14.0",
+]

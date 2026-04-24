@@ -1,0 +1,15 @@
+{
+  "bundle_id": "api-index-zh-CN",
+  "title": "Evidence bundle for Api zh-CN",
+  "updated_at": "2026-04-01T13:00:00Z",
+  "artifacts": {
+    "screenshot_gif": "/evidence/api-index-zh-CN/overview.gif",
+    "api_simulation": "/evidence/api-index-zh-CN/api-simulation.json",
+    "vhs_tape": "/evidence/api-index-zh-CN/api-simulation.vhs.tape"
+  },
+  "checks": [
+    "playwright",
+    "vhs",
+    "api simulation"
+  ]
+}

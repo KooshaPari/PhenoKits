@@ -1,0 +1,75 @@
+[package]
+name = "{{crate_name}}"
+version = "0.1.0"
+edition = "2021"
+authors = ["Phenotype"]
+description = "A hexagonal architecture crate for {{description}}"
+license = "MIT"
+repository = "https://github.com/phenotype/{{repo_name}}"
+homepage = "https://github.com/phenotype/{{repo_name}}#readme"
+documentation = "https://docs.phenotype.dev/{{crate_name}}"
+
+[dependencies]
+# === DOMAIN LAYER DEPENDENCIES ===
+# Domain has ZERO external dependencies
+# Only use std and this crate's own modules
+
+# === APPLICATION LAYER DEPENDENCIES ===
+# Depends only on domain
+thiserror = "1.0"  # Error handling (lightweight, no ecosystem)
+serde = { version = "1.0", features = ["derive"] }
+
+# === ADAPTER LAYER DEPENDENCIES ===
+# Implementations for specific infrastructure
+
+# Persistence
+sqlx = { version = "0.7", features = ["runtime-tokio", "postgres"], optional = true }
+rusqlite = { version = "0.31", features = ["bundled"], optional = true }
+
+# Caching
+redis = { version = "0.24", optional = true }
+
+# HTTP Server
+axum = { version = "0.7", optional = true }
+tokio = { version = "1.0", features = ["full"], optional = true }
+
+# HTTP Client
+reqwest = { version = "0.11", features = ["json"], optional = true }
+
+# Logging
+tracing = { version = "0.1", features = ["attributes"] }
+tracing-subscriber = { version = "0.3", features = ["env-filter"], optional = true }
+
+[dev-dependencies]
+# Testing utilities
+tokio = { version = "1.0", features = ["test-util", "rt-multi-thread"] }
+mockall = "0.12"
+wiremock = "0.6"
+testcontainers = "1.0"
+fake = { version = "3.0", features = ["derive"] }
+proptest = "1.4"
+claims = "1.0"
+
+# Property-based testing
+quickcheck = "1.0"
+quickcheck_macros = "1.0"
+
+[features]
+default = ["std"]
+std = []
+# Feature flags for optional adapters
+persistence-sqlx = ["dep:sqlx", "dep:tokio"]
+persistence-sqlite = ["dep:rusqlite"]
+cache-redis = ["dep:redis"]
+http-axum = ["dep:axum", "dep:tokio"]
+http-client = ["dep:reqwest"]
+observability = ["dep:tracing-subscriber"]
+
+# Export all modules for internal use
+[[bin]]
+name = "{{crate_name}}-cli"
+path = "src/main.rs"
+required_features = ["http-axum"]
+
+[lints.rust]
+unsafe_code = "forbid"

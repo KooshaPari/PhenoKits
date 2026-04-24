@@ -1,0 +1,24 @@
+{
+  "name": "FocalPoint",
+  "slug": "focalpoint",
+  "description": "Production-grade AI development platform with multi-model support, fine-tuning, and deployment infrastructure",
+  "accent": "focalpoint",
+  "icon": "🎯",
+  "status": "stable",
+  "tagline": "AI development platform",
+  "details": {
+    "overview": "FocalPoint is a comprehensive AI development platform enabling teams to build, train, deploy, and monitor AI applications at scale.",
+    "features": [
+      "Multi-model inference with automatic routing",
+      "Fine-tuning and transfer learning pipelines",
+      "Production-grade API and SDKs",
+      "Real-time monitoring and observability",
+      "Team collaboration and version control"
+    ]
+  },
+  "links": {
+    "website": "https://focalpoint.app",
+    "github": "https://github.com/kooshapari/focalpoint",
+    "docs": "https://docs.focalpoint.app"
+  }
+}

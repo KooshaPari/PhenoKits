@@ -1,0 +1,59 @@
+version: "0.5"
+
+# Planify - TypeScript/Node project management
+# Native-first local development orchestration
+
+environment:
+  - NODE_ENV=development
+
+processes:
+  # ============================================================
+  # Development
+  # ============================================================
+  dev:
+    command: npm run dev
+    depends_on: {}
+    log_location: .logs/dev.log
+    readiness_probe:
+      http_get:
+        host: localhost
+        port: 3000
+        path: /health
+      initial_delay_seconds: 10
+      period_seconds: 5
+      failure_threshold: 3
+
+  build:
+    command: npm run build
+    depends_on: {}
+    log_location: .logs/build.log
+
+  test:
+    command: npm run test
+    depends_on: {}
+    log_location: .logs/test.log
+
+  lint:
+    command: npm run lint
+    depends_on: {}
+    log_location: .logs/lint.log
+
+  typecheck:
+    command: npm run typecheck
+    depends_on: {}
+    log_location: .logs/typecheck.log
+
+  # ============================================================
+  # Database migrations
+  # ============================================================
+  db:migrate:
+    command: npm run db:migrate
+    depends_on: {}
+    log_location: .logs/db-migrate.log
+
+  db:seed:
+    command: npm run db:seed
+    depends_on:
+      db:migrate:
+        condition: process_started
+    log_location: .logs/db-seed.log

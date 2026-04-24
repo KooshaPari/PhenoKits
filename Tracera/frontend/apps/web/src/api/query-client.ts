@@ -16,11 +16,12 @@ interface ApiClient {
 }
 
 const { apiClient, handleApiResponse } = client;
+
 const api: ApiClient = {
-  del: apiClient.DELETE as unknown as ApiMethod,
-  get: apiClient.GET as unknown as ApiMethod,
-  post: apiClient.POST as unknown as ApiMethod,
-  put: apiClient.PUT as unknown as ApiMethod,
+  del: apiClient.DELETE,
+  get: apiClient.GET,
+  post: apiClient.POST,
+  put: apiClient.PUT,
 };
 
 export { api, handleApiResponse, type ApiClient, type ApiResult };

@@ -35,6 +35,25 @@ export interface LayoutResult {
   size: { width: number; height: number };
 }
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const isPosition = (value: unknown): value is { x: number; y: number } =>
+  isRecord(value) && typeof value['x'] === 'number' && typeof value['y'] === 'number';
+
+const isLayoutResult = (value: unknown): value is LayoutResult => {
+  if (!isRecord(value) || !isRecord(value['positions']) || !isRecord(value['size'])) {
+    return false;
+  }
+
+  const size = value['size'];
+  return (
+    typeof size['width'] === 'number' &&
+    typeof size['height'] === 'number' &&
+    Object.values(value['positions']).every(isPosition)
+  );
+};
+
 interface PendingRequest {
   id: string;
   resolve: (value: LayoutResult) => void;
@@ -189,10 +208,10 @@ export function useGraphWorker() {
       const workerUrl = URL.createObjectURL(blob);
       const worker = new Worker(workerUrl);
 
-      worker.onmessage = (event: MessageEvent<LayoutMessage>) => {
+      const handleWorkerMessage = (event: MessageEvent<LayoutMessage>) => {
         const { id, type, data, error: errorMsg } = event.data;
 
-        if (!id) {
+        if (id === undefined || id === '') {
           return;
         }
 
@@ -204,14 +223,16 @@ export function useGraphWorker() {
         pendingRequestsRef.current.delete(id);
         clearTimeout(pending.timeout);
 
-        if (type === 'layout-response' && data) {
-          pending.resolve(data as LayoutResult);
+        if (type === 'layout-response' && isLayoutResult(data)) {
+          pending.resolve(data);
         } else if (type === 'error') {
           pending.reject(new Error(errorMsg ?? 'Layout computation failed'));
+        } else {
+          pending.reject(new Error('Invalid layout response'));
         }
       };
 
-      worker.onerror = (error: ErrorEvent) => {
+      const handleWorkerError = (error: ErrorEvent) => {
         const errorMessage = error.message || 'Unknown worker error';
         setError(new Error(`Worker error: ${errorMessage}`));
         pendingRequestsRef.current.forEach((pending) => {
@@ -220,10 +241,15 @@ export function useGraphWorker() {
         pendingRequestsRef.current.clear();
       };
 
+      worker.addEventListener('message', handleWorkerMessage);
+      worker.addEventListener('error', handleWorkerError);
+
       workerRef.current = worker;
       setIsReady(true);
 
       return () => {
+        worker.removeEventListener('message', handleWorkerMessage);
+        worker.removeEventListener('error', handleWorkerError);
         worker.terminate();
         URL.revokeObjectURL(workerUrl);
       };
@@ -270,7 +296,7 @@ export function useGraphWorker() {
           nodes: LayoutNode[];
           edges: LayoutEdge[];
           options: LayoutOptions;
-        });
+        }, []);
       }),
     [],
   );

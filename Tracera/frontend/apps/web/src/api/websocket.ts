@@ -215,18 +215,18 @@ class WebSocketManager {
       return;
     }
 
-    this.ws.onopen = (): void => {
+    this.ws.addEventListener('open', (): void => {
       this.handleOpen();
-    };
-    this.ws.onmessage = (event: MessageEvent): void => {
+    });
+    this.ws.addEventListener('message', (event: MessageEvent): void => {
       this.handleMessage(event.data);
-    };
-    this.ws.onerror = (error: Event): void => {
+    });
+    this.ws.addEventListener('error', (error: Event): void => {
       this.handleError(error);
-    };
-    this.ws.onclose = (event): void => {
+    });
+    this.ws.addEventListener('close', (event: CloseEvent): void => {
       this.handleClose(event);
-    };
+    });
   }
 
   private handleOpen(): void {

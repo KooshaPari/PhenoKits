@@ -48,7 +48,7 @@ const DEFAULT_LINK_TYPE: Link['type'] = 'related_to';
 const DEFAULT_VERSION = 1;
 const DEFAULT_TIMESTAMP = '1970-01-01T00:00:00.000Z';
 
-const VIEW_TYPES = new Set<Item['view']>([
+const VIEW_TYPES = new Set<string>([
   'FEATURE',
   'feature',
   'CODE',
@@ -77,7 +77,7 @@ const VIEW_TYPES = new Set<Item['view']>([
   'security',
 ]);
 
-const LINK_TYPES = new Set<Link['type']>([
+const LINK_TYPES = new Set<string>([
   'implements',
   'tests',
   'depends_on',
@@ -110,11 +110,23 @@ const asOptionalString = (value: unknown): string | undefined =>
 
 const asString = (value: unknown, fallback = ''): string => asOptionalString(value) ?? fallback;
 
-const toViewType = (value: string): Item['view'] =>
-  VIEW_TYPES.has(value as Item['view']) ? (value as Item['view']) : DEFAULT_ITEM_VIEW;
+const isViewType = (value: string): value is Item['view'] => VIEW_TYPES.has(value);
 
-const toLinkType = (value: string): Link['type'] =>
-  LINK_TYPES.has(value as Link['type']) ? (value as Link['type']) : DEFAULT_LINK_TYPE;
+const toViewType = (value: string): Item['view'] => {
+  if (isViewType(value)) {
+    return value;
+  }
+  return DEFAULT_ITEM_VIEW;
+};
+
+const isLinkType = (value: string): value is Link['type'] => LINK_TYPES.has(value);
+
+const toLinkType = (value: string): Link['type'] => {
+  if (isLinkType(value)) {
+    return value;
+  }
+  return DEFAULT_LINK_TYPE;
+};
 
 const normalizeGraph = (graph: SafeRecord): GraphOption => ({
   ...graph,

@@ -12,7 +12,8 @@
  * @see docs/architecture/quadtree-culling.md
  */
 
-import { quadtree, type Quadtree } from 'd3-quadtree';
+import { quadtree } from 'd3-quadtree';
+import type { Quadtree, QuadtreeInternalNode, QuadtreeLeaf } from 'd3-quadtree';
 
 /**
  * Node position in graph coordinate space
@@ -34,6 +35,20 @@ export interface Rectangle {
   y: number; // top
   width: number;
   height: number;
+}
+
+type QuadTreeBranch = QuadtreeInternalNode<QuadTreeNode> | QuadtreeLeaf<QuadTreeNode>;
+
+function forEachLeafNode(
+  leaf: QuadtreeLeaf<QuadTreeNode>,
+  callback: (node: QuadTreeNode) => void,
+): void {
+  let current: QuadtreeLeaf<QuadTreeNode> | undefined = leaf;
+
+  while (current !== undefined) {
+    callback(current.data);
+    current = current.next;
+  }
 }
 
 /**
@@ -102,16 +117,13 @@ export class QuadTreeNodeIndex {
     // Use d3-quadtree's visit for efficient rectangle query
     this.tree.visit((node, x1Node, y1Node, x2Node, y2Node) => {
       // If this is a leaf node, check its data
-      if (!node.length) {
+      if (node.length === undefined) {
         // Leaf node - check all points in this node
-        let current = node as any;
-        do {
-          const d = current.data as QuadTreeNode;
-          if (d && d.x >= x0 && d.x <= x1 && d.y >= y0 && d.y <= y1) {
+        forEachLeafNode(node, (d) => {
+          if (d.x >= x0 && d.x <= x1 && d.y >= y0 && d.y <= y1) {
             results.push(d);
           }
-          current = current.next;
-        } while (current);
+        });
       }
 
       // Return true to skip this node's children if it doesn't intersect viewport
@@ -166,21 +178,16 @@ export class QuadTreeNodeIndex {
     const radiusSquared = radius * radius;
 
     this.tree.visit((node, x1, y1, x2, y2) => {
-      if (!node.length) {
+      if (node.length === undefined) {
         // Leaf node - check all points
-        let current = node as any;
-        do {
-          const d = current.data as QuadTreeNode;
-          if (d) {
-            const dx = d.x - x;
-            const dy = d.y - y;
-            const distSquared = dx * dx + dy * dy;
-            if (distSquared <= radiusSquared) {
-              results.push(d);
-            }
+        forEachLeafNode(node, (d) => {
+          const dx = d.x - x;
+          const dy = d.y - y;
+          const distSquared = dx * dx + dy * dy;
+          if (distSquared <= radiusSquared) {
+            results.push(d);
           }
-          current = current.next;
-        } while (current);
+        });
       }
 
       // Skip this node if circle doesn't intersect bounding box
@@ -282,16 +289,14 @@ export class QuadTreeNodeIndex {
     let maxDepth = 0;
 
     // Calculate tree depth
-    const calculateDepth = (node: any, depth: number): void => {
-      if (!node) return;
+    const calculateDepth = (node: QuadTreeBranch | undefined, depth: number): void => {
+      if (node === undefined) return;
       maxDepth = Math.max(maxDepth, depth);
 
-      if (node.length) {
+      if (node.length === 4) {
         // Internal node - visit children
         for (let i = 0; i < 4; i++) {
-          if (node[i]) {
-            calculateDepth(node[i], depth + 1);
-          }
+          calculateDepth(node[i], depth + 1);
         }
       }
     };

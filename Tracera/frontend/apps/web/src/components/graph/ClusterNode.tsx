@@ -42,29 +42,28 @@ export interface ClusterNodeData {
 /**
  * Type guard for ClusterNodeData
  */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
 function isClusterNodeData(data: unknown): data is ClusterNodeData {
-  if (typeof data !== 'object' || data === null) {
+  if (!isRecord(data)) {
     return false;
   }
 
-  const obj = data as Record<string, unknown>;
-
   // Validate cluster property
-  if (
-    typeof obj['cluster'] !== 'object' ||
-    obj['cluster'] === null ||
-    typeof (obj['cluster'] as Record<string, unknown>)['id'] !== 'string'
-  ) {
+  const cluster = data['cluster'];
+  if (!isRecord(cluster) || typeof cluster['id'] !== 'string') {
     return false;
   }
 
   // Validate isExpanded boolean
-  if (typeof obj['isExpanded'] !== 'boolean') {
+  if (typeof data['isExpanded'] !== 'boolean') {
     return false;
   }
 
   // Validate onToggle function
-  if (typeof obj['onToggle'] !== 'function') {
+  if (typeof data['onToggle'] !== 'function') {
     return false;
   }
 
@@ -106,7 +105,6 @@ function CollapsedClusterView({ data, onToggle }: { data: ClusterNodeData; onTog
 
   return (
     <div
-      role='button'
       tabIndex={0}
       className={cn(
         'rounded-lg border-2 bg-background/95 backdrop-blur-sm',
@@ -314,7 +312,6 @@ function ExpandedClusterView({ data, onToggle }: { data: ClusterNodeData; onTogg
           {items.slice(0, 10).map((item) => (
             <div
               key={item.id}
-              role='button'
               tabIndex={0}
               className={cn(
                 'p-2 rounded-md border bg-card text-xs hover:bg-accent transition-colors',

@@ -13,6 +13,8 @@ import type { UICodeTraceChain } from './UICodeTracePanel';
 
 import { UICodeTracePanel } from './UICodeTracePanel';
 
+const handleCopyShareLink = () => {};
+
 // =============================================================================
 // EXAMPLE 1: Basic Integration with State Management
 // =============================================================================
@@ -21,7 +23,7 @@ import { UICodeTracePanel } from './UICodeTracePanel';
  * Basic example showing how to manage trace chain state
  * and handle user interactions
  */
-export function BasicUICodeTracePanelExample() {
+function BasicUICodeTracePanelExample() {
   const [traceChain, _setTraceChain] = useState<UICodeTraceChain | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -46,7 +48,7 @@ export function BasicUICodeTracePanelExample() {
   const handleOpenCode = useCallback((codeRef: CodeReference) => {
     // Option 1: VS Code Extension
     if (codeRef.filePath) {
-      const lineParam = codeRef.startLine ? `:${codeRef.startLine}` : '';
+      const lineParam = codeRef.startLine !== undefined ? `:${codeRef.startLine}` : '';
       window.open(`vscode://open?${codeRef.filePath}${lineParam}`);
     }
   }, []);
@@ -61,8 +63,8 @@ export function BasicUICodeTracePanelExample() {
     globalThis.location.href = `/components/${componentPath}`;
   }, []);
 
-  const handleRefreshTrace = useCallback(async () => {
-    if (traceChain) {
+  const handleRefreshTrace = useCallback(() => {
+    if (traceChain !== null) {
       setIsLoading(true);
       try {
         // Refetch the trace chain
@@ -96,7 +98,7 @@ export function BasicUICodeTracePanelExample() {
  * Example using tRPC with React Query for data fetching
  * Requires: trpc client and React Query setup
  */
-export function TRPCIntegrationExample() {
+function TRPCIntegrationExample() {
   const [selectedComponentId, setSelectedComponentId] = useState<string | null>(null);
 
   // Example tRPC query (you need to set this up in your router)
@@ -114,7 +116,7 @@ export function TRPCIntegrationExample() {
     logger.info('Open code:', codeRef);
   }, []);
 
-  const handleRefresh = useCallback(async () => {
+  const handleRefresh = useCallback(() => {
     // Refetch(); // If using tRPC
   }, []);
 
@@ -122,8 +124,11 @@ export function TRPCIntegrationExample() {
     <div className='space-y-4'>
       {/* Component selector */}
       <div>
-        <label className='mb-2 block text-sm font-medium'>Select Component:</label>
+        <label htmlFor='trace-component-id' className='mb-2 block text-sm font-medium'>
+          Select Component:
+        </label>
         <input
+          id='trace-component-id'
           type='text'
           placeholder='Enter component ID'
           value={selectedComponentId ?? ''}
@@ -153,7 +158,7 @@ export function TRPCIntegrationExample() {
  * Example using Jotai atoms for state management
  * Requires: jotai setup
  */
-export function AtomStateIntegrationExample() {
+function AtomStateIntegrationExample() {
   // In real app:
   // Const [selectedTrace, setSelectedTrace] = useAtom(selectedTraceAtom);
   // Const [traceHistory, setTraceHistory] = useAtom(traceHistoryAtom);
@@ -162,7 +167,7 @@ export function AtomStateIntegrationExample() {
   const [selectedTrace, _setSelectedTrace] = useState<UICodeTraceChain | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const handleRefreshTrace = useCallback(async () => {
+  const handleRefreshTrace = useCallback(() => {
     setIsRefreshing(true);
     try {
       // Fetch fresh trace data
@@ -190,12 +195,12 @@ export function AtomStateIntegrationExample() {
  * Example showing UICodeTracePanel in a side panel layout
  * Common pattern for detailed views
  */
-export function SidePanelLayoutExample() {
+function SidePanelLayoutExample() {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [traceChain, _setTraceChain] = useState<UICodeTraceChain | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSelectItem = useCallback(async (itemId: string) => {
+  const handleSelectItem = useCallback((itemId: string) => {
     setSelectedItemId(itemId);
     setIsLoading(true);
     try {
@@ -217,7 +222,9 @@ export function SidePanelLayoutExample() {
           {['LoginForm', 'NavBar', 'Dashboard'].map((name) => (
             <button
               key={name}
-              onClick={async () => handleSelectItem(name)}
+              onClick={() => {
+                handleSelectItem(name);
+              }}
               className={`block w-full rounded px-4 py-2 text-left ${
                 selectedItemId === name ? 'bg-blue-100 text-blue-900' : 'hover:bg-gray-100'
               }`}
@@ -236,8 +243,8 @@ export function SidePanelLayoutExample() {
           onOpenCode={(codeRef) => {
             logger.info('Open code:', codeRef);
           }}
-          onRefreshTrace={async () => {
-            if (traceChain) {
+          onRefreshTrace={() => {
+            if (traceChain !== null) {
               setIsLoading(true);
               try {
                 // Refetch trace
@@ -260,11 +267,11 @@ export function SidePanelLayoutExample() {
  * Example showing UICodeTracePanel in a modal dialog
  * Good for detailed trace inspection
  */
-export function ModalDialogExample() {
+function ModalDialogExample() {
   const [isOpen, setIsOpen] = useState(false);
   const [traceChain, _setTraceChain] = useState<UICodeTraceChain | null>(null);
 
-  const handleOpenTraceModal = useCallback(async (_componentId: string) => {
+  const handleOpenTraceModal = useCallback((_componentId: string) => {
     // Fetch trace data
     // Const trace = await api.traces.getUICodeTrace({ componentId });
     // SetTraceChain(trace);
@@ -275,7 +282,9 @@ export function ModalDialogExample() {
     <div>
       {/* Open modal button */}
       <button
-        onClick={async () => handleOpenTraceModal('component-1')}
+        onClick={() => {
+          handleOpenTraceModal('component-1');
+        }}
         className='rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700'
       >
         View Trace
@@ -333,19 +342,18 @@ export function ModalDialogExample() {
 /**
  * Example showing how to handle errors when fetching trace data
  */
-export function ErrorHandlingExample() {
+function ErrorHandlingExample() {
   const [traceChain, setTraceChain] = useState<UICodeTraceChain | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleFetchTrace = useCallback(async (componentId: string) => {
+  const handleFetchTrace = useCallback((_componentId: string) => {
     setIsLoading(true);
     setError(null);
     try {
       // tracked: https://github.com/KooshaPari/trace/issues/225
       // Const trace = await api.traces.getUICodeTrace({ componentId });
       // SetTraceChain(trace);
-      undefined;
       setTraceChain(null);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to fetch trace chain';
@@ -359,12 +367,14 @@ export function ErrorHandlingExample() {
   return (
     <div className='space-y-4'>
       {/* Error message */}
-      {error && (
+      {error !== null && (
         <div className='rounded border border-red-200 bg-red-50 p-4 text-red-800'>
           <p className='font-semibold'>Error</p>
           <p className='mt-1 text-sm'>{error}</p>
           <button
-            onClick={async () => handleFetchTrace('component-1')}
+            onClick={() => {
+              handleFetchTrace('component-1');
+            }}
             className='mt-2 text-sm text-red-700 underline hover:text-red-900'
           >
             Try again
@@ -386,7 +396,7 @@ export function ErrorHandlingExample() {
  * Example showing integration with URL query parameters
  * Good for bookmarkable trace chains
  */
-export function URLSearchParamsExample() {
+function URLSearchParamsExample() {
   const [traceChain, _setTraceChain] = useState<UICodeTraceChain | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -395,8 +405,8 @@ export function URLSearchParamsExample() {
   const componentId = searchParams.get('component');
 
   // Fetch trace when component changes
-  const fetchTrace = useCallback(async () => {
-    if (!componentId) {
+  const fetchTrace = useCallback(() => {
+    if (componentId === null || componentId === '') {
       return;
     }
 
@@ -425,7 +435,7 @@ export function URLSearchParamsExample() {
  * Example showing UICodeTracePanel with breadcrumb navigation
  * Helps users understand context in the trace hierarchy
  */
-export function BreadcrumbNavigationExample() {
+function BreadcrumbNavigationExample() {
   const [traceChain, _setTraceChain] = useState<UICodeTraceChain | null>(null);
   const [selectedLevelIndex, setSelectedLevelIndex] = useState(0);
 
@@ -434,7 +444,7 @@ export function BreadcrumbNavigationExample() {
   return (
     <div className='space-y-4'>
       {/* Breadcrumb navigation */}
-      {traceChain && (
+      {traceChain !== null && (
         <div className='flex items-center gap-2 text-sm text-gray-600'>
           {traceChain.levels.map((level, index) => (
             <React.Fragment key={level.id}>
@@ -463,7 +473,7 @@ export function BreadcrumbNavigationExample() {
       />
 
       {/* Selected level details */}
-      {selectedLevel && (
+      {selectedLevel !== undefined && (
         <div className='rounded border border-blue-200 bg-blue-50 p-4'>
           <h3 className='font-semibold text-blue-900'>{selectedLevel.title}</h3>
           <p className='mt-2 text-sm text-blue-800'>{selectedLevel.description}</p>
@@ -480,7 +490,7 @@ export function BreadcrumbNavigationExample() {
 /**
  * Example showing how to track user interactions for analytics
  */
-export function AnalyticsIntegrationExample() {
+function AnalyticsIntegrationExample() {
   const [traceChain, _setTraceChain] = useState<UICodeTraceChain | null>(null);
 
   const trackEvent = (eventName: string, data: Record<string, unknown>) => {
@@ -523,11 +533,11 @@ export function AnalyticsIntegrationExample() {
 /**
  * Example showing how to export trace chain as JSON or PDF
  */
-export function ExportShareExample() {
+function ExportShareExample() {
   const [traceChain, _setTraceChain] = useState<UICodeTraceChain | null>(null);
 
   const handleExportJSON = () => {
-    if (!traceChain) {
+    if (traceChain === null) {
       return;
     }
 
@@ -540,14 +550,12 @@ export function ExportShareExample() {
     a.click();
   };
 
-  const handleCopyShareLink = () => {};
-
   return (
     <div className='space-y-4'>
       <UICodeTracePanel traceChain={traceChain} />
 
       {/* Export controls */}
-      {traceChain && (
+      {traceChain !== null && (
         <div className='flex gap-2'>
           <button
             onClick={handleExportJSON}
@@ -566,3 +574,16 @@ export function ExportShareExample() {
     </div>
   );
 }
+
+export {
+  AnalyticsIntegrationExample,
+  AtomStateIntegrationExample,
+  BasicUICodeTracePanelExample,
+  BreadcrumbNavigationExample,
+  ErrorHandlingExample,
+  ExportShareExample,
+  ModalDialogExample,
+  SidePanelLayoutExample,
+  TRPCIntegrationExample,
+  URLSearchParamsExample,
+};

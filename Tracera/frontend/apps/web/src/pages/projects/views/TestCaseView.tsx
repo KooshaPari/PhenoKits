@@ -74,6 +74,44 @@ const automationLabels: Record<AutomationStatus, string> = {
   not_automated: 'Manual',
 };
 
+function isTestCaseStatus(value: string): value is TestCaseStatus {
+  return (
+    value === 'approved' ||
+    value === 'archived' ||
+    value === 'deprecated' ||
+    value === 'draft' ||
+    value === 'review'
+  );
+}
+
+function isTestCaseType(value: string): value is TestCaseType {
+  return (
+    value === 'accessibility' ||
+    value === 'e2e' ||
+    value === 'exploratory' ||
+    value === 'functional' ||
+    value === 'integration' ||
+    value === 'performance' ||
+    value === 'regression' ||
+    value === 'security' ||
+    value === 'smoke' ||
+    value === 'unit'
+  );
+}
+
+function isTestCasePriority(value: string): value is TestCasePriority {
+  return value === 'critical' || value === 'high' || value === 'low' || value === 'medium';
+}
+
+function isAutomationStatus(value: string): value is AutomationStatus {
+  return (
+    value === 'automated' ||
+    value === 'cannot_automate' ||
+    value === 'in_progress' ||
+    value === 'not_automated'
+  );
+}
+
 interface TestCaseViewProps {
   projectId: string;
 }
@@ -109,19 +147,23 @@ export const TestCaseView = ({ projectId }: TestCaseViewProps) => {
   };
 
   const handleStatusFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setStatusFilter(e.target.value as TestCaseStatus | '');
+    const { value } = e.target;
+    setStatusFilter(isTestCaseStatus(value) ? value : '');
   };
 
   const handleTypeFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setTypeFilter(e.target.value as TestCaseType | '');
+    const { value } = e.target;
+    setTypeFilter(isTestCaseType(value) ? value : '');
   };
 
   const handlePriorityFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setPriorityFilter(e.target.value as TestCasePriority | '');
+    const { value } = e.target;
+    setPriorityFilter(isTestCasePriority(value) ? value : '');
   };
 
   const handleAutomationFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setAutomationFilter(e.target.value as AutomationStatus | '');
+    const { value } = e.target;
+    setAutomationFilter(isAutomationStatus(value) ? value : '');
   };
 
   // Surface load failures to the user via toast

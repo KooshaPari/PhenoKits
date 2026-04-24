@@ -34,34 +34,33 @@ export interface AggregateNodeData {
 /**
  * Type guard to validate AggregateNodeData structure
  */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
 function isAggregateNodeData(data: unknown): data is AggregateNodeData {
-  if (typeof data !== 'object' || data === null) {
+  if (!isRecord(data)) {
     return false;
   }
 
-  const obj = data as Record<string, unknown>;
-
   // Validate group property
-  if (
-    typeof obj['group'] !== 'object' ||
-    obj['group'] === null ||
-    typeof (obj['group'] as Record<string, unknown>)['id'] !== 'string'
-  ) {
+  const group = data['group'];
+  if (!isRecord(group) || typeof group['id'] !== 'string') {
     return false;
   }
 
   // Validate items array
-  if (!Array.isArray(obj['items'])) {
+  if (!Array.isArray(data['items'])) {
     return false;
   }
 
   // Validate isExpanded boolean
-  if (typeof obj['isExpanded'] !== 'boolean') {
+  if (typeof data['isExpanded'] !== 'boolean') {
     return false;
   }
 
   // Validate onToggle function
-  if (typeof obj['onToggle'] !== 'function') {
+  if (typeof data['onToggle'] !== 'function') {
     return false;
   }
 
@@ -73,9 +72,19 @@ function isAggregateNodeData(data: unknown): data is AggregateNodeData {
  */
 function CollapsedGroupView({ data, onToggle }: { data: AggregateNodeData; onToggle: () => void }) {
   const typeColor = getTypeColor(data.group.type);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onToggle();
+      }
+    },
+    [onToggle],
+  );
 
   return (
     <div
+      tabIndex={0}
       className={cn(
         'px-4 py-3 rounded-lg border-2 bg-background',
         'hover:shadow-lg hover:border-primary/60 transition-all cursor-pointer',
@@ -83,6 +92,7 @@ function CollapsedGroupView({ data, onToggle }: { data: AggregateNodeData; onTog
       )}
       style={{ borderColor: `${typeColor}40` }}
       onClick={onToggle}
+      onKeyDown={handleKeyDown}
     >
       {/* Icon and type */}
       <div
@@ -176,11 +186,18 @@ function ExpandedGroupView({ data, onToggle }: { data: AggregateNodeData; onTogg
           {data.items.slice(0, 15).map((item) => (
             <div
               key={item.id}
+              tabIndex={0}
               className={cn(
                 'p-2 rounded-md border bg-card text-sm hover:bg-accent transition-colors',
                 'truncate cursor-pointer text-xs',
               )}
               onClick={() => data.onItemSelect?.(item.id)}
+              onKeyDown={(e) => {
+                if ((e.key === 'Enter' || e.key === ' ') && data.onItemSelect) {
+                  e.preventDefault();
+                  data.onItemSelect(item.id);
+                }
+              }}
               title={item.title}
             >
               <div className='text-foreground truncate font-medium'>{item.title}</div>

@@ -10,6 +10,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import type { ChangeEvent } from 'react';
 import { toast } from 'sonner';
 
 import type { Feature, FeatureStatus } from '@tracertm/types';
@@ -33,18 +34,39 @@ interface FeatureListViewProps {
 }
 
 const EMPTY_FEATURES: Feature[] = [];
+const FEATURE_STATUSES = new Set<string>(['draft', 'active', 'deprecated', 'archived']);
+
+const isFeatureStatus = (value: unknown): value is FeatureStatus =>
+  typeof value === 'string' && FEATURE_STATUSES.has(value);
+
+const isSearchParamsRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const getInitialStatusFilter = (searchParams: unknown): FeatureStatus | 'all' => {
+  if (!isSearchParamsRecord(searchParams)) {
+    return 'all';
+  }
+
+  const status = searchParams['status'];
+  if (isFeatureStatus(status)) {
+    return status;
+  }
+
+  return 'all';
+};
 
 export const FeatureListView = ({ projectId }: FeatureListViewProps) => {
   const navigate = useNavigate();
-  const searchParams = useSearch({ strict: false });
+  const searchParams: unknown = useSearch({ strict: false });
 
   const { data: featuresData, isLoading } = useFeatures({ projectId });
-  const features = featuresData?.features ?? EMPTY_FEATURES;
+  const features =
+    featuresData === undefined || featuresData === null ? EMPTY_FEATURES : featuresData.features;
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<FeatureStatus | 'all'>(
-    (searchParams?.status as FeatureStatus) || 'all',
+    getInitialStatusFilter(searchParams),
   );
 
   const [newName, setNewName] = useState('');
@@ -58,7 +80,8 @@ export const FeatureListView = ({ projectId }: FeatureListViewProps) => {
         const matchesQuery =
           feature.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           feature.featureNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (feature.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
+          (typeof feature.description === 'string' &&
+            feature.description.toLowerCase().includes(searchQuery.toLowerCase()));
 
         return matchesStatus && matchesQuery;
       }),
@@ -101,7 +124,7 @@ export const FeatureListView = ({ projectId }: FeatureListViewProps) => {
     return summary;
   }, [features]);
 
-  const handleCreate = async () => {
+  const handleCreate = () => {
     if (!newName.trim()) {
       toast.error('Feature name is required');
       return;
@@ -118,34 +141,38 @@ export const FeatureListView = ({ projectId }: FeatureListViewProps) => {
     }
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
   const handleStatusFilterChange = (v: string) => {
-    setStatusFilter(v as FeatureStatus | 'all');
+    if (v === 'all' || isFeatureStatus(v)) {
+      setStatusFilter(v);
+    }
   };
 
   const handleFeatureClick = (feature: Feature) => {
-    navigate({
+    void navigate({
       params: { featureId: feature.id, projectId },
       to: '/projects/$projectId/features/$featureId',
     });
   };
 
   const handleNewStatusChange = (v: string) => {
-    setNewStatus(v as FeatureStatus);
+    if (isFeatureStatus(v)) {
+      setNewStatus(v);
+    }
   };
 
   const handleCloseModal = () => {
     setShowCreateModal(false);
   };
 
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setNewName(e.target.value);
   };
 
-  const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setNewDescription(e.target.value);
   };
 

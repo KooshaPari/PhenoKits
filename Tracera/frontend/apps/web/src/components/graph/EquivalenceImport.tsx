@@ -43,6 +43,9 @@ import {
   validateExportPackage,
 } from './utils/equivalenceIO';
 
+type ImportMode = EquivalenceImportOptions['mode'];
+type ConflictResolution = EquivalenceImportOptions['conflictResolution'];
+
 // =============================================================================
 // TYPES
 // =============================================================================
@@ -96,6 +99,14 @@ const DEFAULT_IMPORT_OPTIONS: EquivalenceImportOptions = {
   updateProjectId: true,
   validateReferences: true,
 };
+
+function isImportMode(value: string): value is ImportMode {
+  return value === 'merge' || value === 'replace';
+}
+
+function isConflictResolution(value: string): value is ConflictResolution {
+  return value === 'skip' || value === 'overwrite' || value === 'merge_metadata';
+}
 
 // =============================================================================
 // COMPONENT
@@ -254,7 +265,10 @@ function EquivalenceImportComponent({
   }, [state, projectId, existingLinks, existingConcepts, existingProjections, onApplyImport]);
 
   const isReady =
-    state.parsedData && state.validationErrors.length === 0 && !isLoading && !isApplying;
+    state.parsedData !== undefined &&
+    state.validationErrors.length === 0 &&
+    !isLoading &&
+    !isApplying;
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -276,7 +290,7 @@ function EquivalenceImportComponent({
         <ScrollArea className='h-auto max-h-[calc(80vh-120px)]'>
           <div className='space-y-6 pr-4'>
             {/* File Selection */}
-            {!state.fileContent ? (
+            {state.fileContent === undefined || state.fileContent === '' ? (
               <Card>
                 <CardHeader>
                   <CardTitle className='text-base'>Select File</CardTitle>
@@ -293,7 +307,9 @@ function EquivalenceImportComponent({
                         type='file'
                         className='hidden'
                         accept='.json,.csv'
-                        onChange={handleFileSelect}
+                        onChange={(event) => {
+                          void handleFileSelect(event);
+                        }}
                       />
                     </label>
                   </div>
@@ -407,15 +423,18 @@ function EquivalenceImportComponent({
                   <CardContent className='space-y-4'>
                     {/* Mode Selection */}
                     <div className='space-y-2'>
-                      <label className='text-sm font-medium'>Import Mode</label>
+                      <p className='text-sm font-medium'>Import Mode</p>
                       <Select
                         value={state.options.mode}
                         onValueChange={(mode) => {
+                          if (!isImportMode(mode)) {
+                            return;
+                          }
                           setState({
                             ...state,
                             options: {
                               ...state.options,
-                              mode: mode as 'merge' | 'replace',
+                              mode,
                             },
                           });
                         }}
@@ -435,18 +454,18 @@ function EquivalenceImportComponent({
                     {/* Conflict Resolution */}
                     {state.options.mode === 'merge' && (
                       <div className='space-y-2'>
-                        <label className='text-sm font-medium'>Conflict Resolution</label>
+                        <p className='text-sm font-medium'>Conflict Resolution</p>
                         <Select
                           value={state.options.conflictResolution}
                           onValueChange={(resolution) => {
+                            if (!isConflictResolution(resolution)) {
+                              return;
+                            }
                             setState({
                               ...state,
                               options: {
                                 ...state.options,
-                                conflictResolution: resolution as
-                                  | 'skip'
-                                  | 'overwrite'
-                                  | 'merge_metadata',
+                                conflictResolution: resolution,
                               },
                             });
                           }}
@@ -596,7 +615,7 @@ function EquivalenceImportComponent({
 
         {/* Action Buttons */}
         <div className='flex items-center justify-end gap-2 border-t pt-4'>
-          {state.fileContent && (
+          {state.fileContent !== undefined && state.fileContent !== '' && (
             <>
               <Button
                 variant='outline'
@@ -617,7 +636,9 @@ function EquivalenceImportComponent({
                 size='sm'
                 disabled={!isReady}
                 className='gap-2'
-                onClick={handleApplyImport}
+                onClick={() => {
+                  void handleApplyImport();
+                }}
               >
                 {isApplying && (
                   <div className='h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent' />

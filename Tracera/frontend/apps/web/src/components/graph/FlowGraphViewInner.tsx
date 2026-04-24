@@ -25,6 +25,7 @@ import {
   ZoomIn,
   ZoomOut,
 } from 'lucide-react';
+import type { CSSProperties } from 'react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { CacheStatistics } from '@/lib/cache';
@@ -69,18 +70,38 @@ const FPS_WARN_THRESHOLD = 30;
 const CANVAS_LAYER_Z_INDEX = 5;
 const GRAPH_EMPTY_LABEL = 'Untitled';
 const MAX_ITEM_DEPTH = 10;
-const EMPTY_CONNECTIONS: Partial<Record<LinkType, number>> = {};
+const EMPTY_LINK_TYPE_COUNTS = {
+  alternative_to: 0,
+  blocks: 0,
+  calls: 0,
+  conflicts_with: 0,
+  depends_on: 0,
+  derives_from: 0,
+  documents: 0,
+  implements: 0,
+  imports: 0,
+  manifests_as: 0,
+  mentions: 0,
+  parent_of: 0,
+  related_to: 0,
+  represents: 0,
+  same_as: 0,
+  supersedes: 0,
+  tests: 0,
+  traces_to: 0,
+  validates: 0,
+} satisfies Record<LinkType, number>;
 const DEV_MODE = process.env['NODE_ENV'] === 'development';
 
 // OPTIMIZATION (Fix 1.6): Edge style caching to eliminate repeated object allocations
 // Provides 10-15% FPS improvement and 80% reduction in object allocations
-const EDGE_LABEL_BG_STYLE = { fill: 'rgba(26, 26, 46, 0.9)' };
+const EDGE_LABEL_BG_STYLE: CSSProperties = { fill: 'rgba(26, 26, 46, 0.9)' };
 
 interface EdgeStyleCacheEntry {
-  style: object;
-  labelStyle: object;
+  style: CSSProperties;
+  labelStyle: CSSProperties;
   label: string;
-  markerEnd?: object | undefined;
+  markerEnd?: Edge['markerEnd'] | undefined;
 }
 
 const edgeStyleCache = new Map<LinkType, EdgeStyleCacheEntry>();
@@ -89,6 +110,11 @@ interface StoreCacheStatsBlock {
   totalEntries: number;
   hitRatio: number;
 }
+
+const createEmptyLinkTypeCounts = (): Record<LinkType, number> => ({ ...EMPTY_LINK_TYPE_COUNTS });
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
 
 const toPerformanceCacheStats = (
   statsBlock: StoreCacheStatsBlock,
@@ -284,7 +310,7 @@ function FlowGraphViewInnerComponent({
 
       return {
         connections: {
-          byType: connectionsByType.get(item.id) ?? EMPTY_CONNECTIONS,
+          byType: connectionsByType.get(item.id) ?? createEmptyLinkTypeCounts(),
           incoming,
           outgoing,
           total: incoming + outgoing,
@@ -326,7 +352,7 @@ function FlowGraphViewInnerComponent({
       if (existing !== undefined) {
         return existing;
       }
-      const created = {} as Record<LinkType, number>;
+      const created = createEmptyLinkTypeCounts();
       connectionsByType.set(itemId, created);
       return created;
     };
@@ -627,47 +653,50 @@ function FlowGraphViewInnerComponent({
     );
 
     // OPTIMIZATION (Fix 1.6 + Task 3.3): Use cached edge styles with LOD tiers
-    return edgesForRendering
-      .map((link) => {
-        const cached = getCachedEdgeStyle(link.type);
+    const renderedEdges: Edge[] = [];
+    for (const link of edgesForRendering) {
+      const cached = getCachedEdgeStyle(link.type);
 
-        const sourcePos = nodePositions.get(link.sourceId);
-        const targetPos = nodePositions.get(link.targetId);
-        if (!sourcePos || !targetPos) {
-          return null;
-        }
+      const sourcePos = nodePositions.get(link.sourceId);
+      const targetPos = nodePositions.get(link.targetId);
+      if (!sourcePos || !targetPos) {
+        continue;
+      }
 
-        // Calculate edge midpoint for LOD calculation
-        const edgeMidpoint = calculateEdgeMidpoint(sourcePos, targetPos);
+      // Calculate edge midpoint for LOD calculation
+      const edgeMidpoint = calculateEdgeMidpoint(sourcePos, targetPos);
 
-        // Get LOD tier based on distance from viewport center
-        const lodTier = getEdgeLODTier(edgeMidpoint, viewportCenter, viewport.zoom);
-        if (lodTier.level === 'hidden') {
-          return null;
-        }
+      // Get LOD tier based on distance from viewport center
+      const lodTier = getEdgeLODTier(edgeMidpoint, viewportCenter, viewport.zoom);
+      if (lodTier.level === 'hidden') {
+        continue;
+      }
 
-        // C1: at scale hide labels to reduce paint cost
-        const showLabel = !atScale && lodTier.showLabel;
-        return {
-          id: link.id,
-          source: link.sourceId,
-          target: link.targetId,
-          type: lodTier.pathType === 'bezier' ? 'smoothstep' : 'default',
-          animated: lodTier.level === 'detailed' && animatedEdgeIds.has(link.id),
-          style: {
-            ...cached.style,
-            strokeWidth: lodTier.strokeWidth,
-            opacity: lodTier.opacity,
-          },
-          ...(showLabel && {
-            label: cached.label,
-            labelBgStyle: EDGE_LABEL_BG_STYLE,
-            labelStyle: cached.labelStyle,
-          }),
-          ...(lodTier.showArrow && cached.markerEnd && { markerEnd: cached.markerEnd }),
-        };
-      })
-      .filter(Boolean) as Edge[];
+      // C1: at scale hide labels to reduce paint cost
+      const showLabel = !atScale && lodTier.showLabel;
+      const edge: Edge = {
+        animated: lodTier.level === 'detailed' && animatedEdgeIds.has(link.id),
+        id: link.id,
+        source: link.sourceId,
+        style: {
+          ...cached.style,
+          opacity: lodTier.opacity,
+          strokeWidth: lodTier.strokeWidth,
+        },
+        target: link.targetId,
+        type: lodTier.pathType === 'bezier' ? 'smoothstep' : 'default',
+      };
+      if (showLabel) {
+        edge.label = cached.label;
+        edge.labelBgStyle = EDGE_LABEL_BG_STYLE;
+        edge.labelStyle = cached.labelStyle;
+      }
+      if (lodTier.showArrow && cached.markerEnd !== undefined) {
+        edge.markerEnd = cached.markerEnd;
+      }
+      renderedEdges.push(edge);
+    }
+    return renderedEdges;
   }, [edgesForRendering, dagreLaidoutNodes, getViewport]);
 
   // D1: When viewport window is on, only edges between nodes in viewport; D3: when canvas active only edges between dom nodes
@@ -887,7 +916,7 @@ function FlowGraphViewInnerComponent({
 
   // Stable MiniMap nodeColor (avoids new function every render — A1 perf)
   const miniMapNodeColor = useCallback((node: Node): string => {
-    const nodeType = (node.data as RichNodeData | undefined)?.type;
+    const nodeType = isRecord(node.data) ? node.data['type'] : undefined;
     if (typeof nodeType === 'string' && nodeType.length > 0) {
       return ENHANCED_TYPE_COLORS[nodeType] ?? '#64748b';
     }

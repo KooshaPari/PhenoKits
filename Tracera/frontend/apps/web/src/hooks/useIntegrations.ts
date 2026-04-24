@@ -20,6 +20,8 @@ import {
   useLinearTeams,
 } from './useIntegrationsDiscovery';
 
+type ApiRecord = Record<string, unknown>;
+
 interface CredentialsResponse {
   credentials: ReturnType<typeof transformCredential>[];
   total: number;
@@ -94,6 +96,22 @@ interface ResolveConflictInput {
   mergedValue?: unknown;
 }
 
+const isApiRecord = (value: unknown): value is ApiRecord =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const toRecordArray = (value: unknown): ApiRecord[] =>
+  Array.isArray(value) ? value.filter(isApiRecord) : [];
+
+const readJsonRecord = async (res: Response): Promise<ApiRecord> => {
+  const data: unknown = await res.json();
+  return isApiRecord(data) ? data : {};
+};
+
+const readJsonUnknown = async (res: Response): Promise<unknown> => {
+  const data: unknown = await res.json();
+  return data;
+};
+
 // ==================== Credentials ====================
 
 async function fetchCredentials(projectId: string): Promise<CredentialsResponse> {
@@ -103,8 +121,8 @@ async function fetchCredentials(projectId: string): Promise<CredentialsResponse>
   if (!res.ok) {
     throw new Error(`Failed to fetch credentials: ${res.status}`);
   }
-  const data = await res.json();
-  const credentials = (data['credentials'] as Record<string, unknown>[] | undefined) ?? [];
+  const data = await readJsonRecord(res);
+  const credentials = toRecordArray(data['credentials']);
   return {
     credentials: credentials.map((item) => transformCredential(item)),
     total: Number(data['total'] ?? 0),
@@ -132,7 +150,7 @@ function useValidateCredential(): reactQuery.UseMutationResult<unknown, Error, s
       if (!res.ok) {
         throw new Error(`Failed to validate credential: ${res.status}`);
       }
-      return res.json();
+      return readJsonUnknown(res);
     },
   });
 }
@@ -147,7 +165,7 @@ function useDeleteCredential(): reactQuery.UseMutationResult<unknown, Error, str
       if (!res.ok) {
         throw new Error(`Failed to delete credential: ${res.status}`);
       }
-      return res.json();
+      return readJsonUnknown(res);
     },
   });
 }
@@ -171,8 +189,10 @@ function useStartOAuth(): reactQuery.UseMutationResult<StartOAuthResponse, Error
       if (!res.ok) {
         throw new Error(`Failed to start OAuth: ${res.status}`);
       }
-      const result: StartOAuthResponse = await res.json();
-      return result;
+      const result = await readJsonRecord(res);
+      return {
+        auth_url: typeof result['auth_url'] === 'string' ? result['auth_url'] : '',
+      };
     },
   });
 }
@@ -192,7 +212,7 @@ function useCompleteOAuth(): reactQuery.UseMutationResult<unknown, Error, Comple
       if (!res.ok) {
         throw new Error(`Failed to complete OAuth: ${res.status}`);
       }
-      return res.json();
+      return readJsonUnknown(res);
     },
   });
 }
@@ -214,8 +234,8 @@ async function fetchMappings(
   if (!res.ok) {
     throw new Error(`Failed to fetch mappings: ${res.status}`);
   }
-  const data = await res.json();
-  const mappings = (data['mappings'] as Record<string, unknown>[] | undefined) ?? [];
+  const data = await readJsonRecord(res);
+  const mappings = toRecordArray(data['mappings']);
   return {
     mappings: mappings.map((item) => transformMapping(item)),
     total: Number(data['total'] ?? 0),
@@ -257,7 +277,7 @@ function useCreateMapping(): reactQuery.UseMutationResult<unknown, Error, Create
       if (!res.ok) {
         throw new Error(`Failed to create mapping: ${res.status}`);
       }
-      return res.json();
+      return readJsonUnknown(res);
     },
   });
 }
@@ -278,7 +298,7 @@ function useUpdateMapping(): reactQuery.UseMutationResult<unknown, Error, Update
       if (!res.ok) {
         throw new Error(`Failed to update mapping: ${res.status}`);
       }
-      return res.json();
+      return readJsonUnknown(res);
     },
   });
 }
@@ -293,7 +313,7 @@ function useDeleteMapping(): reactQuery.UseMutationResult<unknown, Error, string
       if (!res.ok) {
         throw new Error(`Failed to delete mapping: ${res.status}`);
       }
-      return res.json();
+      return readJsonUnknown(res);
     },
   });
 }
@@ -313,7 +333,7 @@ function useSyncStatus(
       if (!res.ok) {
         throw new Error(`Failed to fetch sync status: ${res.status}`);
       }
-      const data = await res.json();
+      const data = await readJsonRecord(res);
       return transformSyncStatus(data);
     },
     queryKey: ['integrations', 'sync', 'status', projectId],
@@ -343,8 +363,8 @@ function useSyncQueue(
       if (!res.ok) {
         throw new Error(`Failed to fetch sync queue: ${res.status}`);
       }
-      const data = await res.json();
-      const items = (data['items'] as Record<string, unknown>[] | undefined) ?? [];
+      const data = await readJsonRecord(res);
+      const items = toRecordArray(data['items']);
       return {
         items: items.map((item) => transformSyncQueueItem(item)),
         total: Number(data['total'] ?? 0),
@@ -370,7 +390,7 @@ function useTriggerSync(): reactQuery.UseMutationResult<unknown, Error, TriggerS
       if (!res.ok) {
         throw new Error(`Failed to trigger sync: ${res.status}`);
       }
-      return res.json();
+      return readJsonUnknown(res);
     },
   });
 }
@@ -395,8 +415,8 @@ function useConflicts(
       if (!res.ok) {
         throw new Error(`Failed to fetch conflicts: ${res.status}`);
       }
-      const data = await res.json();
-      const conflictsData = (data['conflicts'] as Record<string, unknown>[] | undefined) ?? [];
+      const data = await readJsonRecord(res);
+      const conflictsData = toRecordArray(data['conflicts']);
       return {
         conflicts: conflictsData.map((item) => transformConflict(item)),
         total: Number(data['total'] ?? 0),
@@ -420,7 +440,7 @@ function useResolveConflict(): reactQuery.UseMutationResult<unknown, Error, Reso
       if (!res.ok) {
         throw new Error(`Failed to resolve conflict: ${res.status}`);
       }
-      return res.json();
+      return readJsonUnknown(res);
     },
   });
 }
@@ -439,7 +459,7 @@ function useIntegrationStats(
       if (!res.ok) {
         throw new Error(`Failed to fetch integration stats: ${res.status}`);
       }
-      const data = await res.json();
+      const data = await readJsonRecord(res);
       return transformStats(data);
     },
     queryKey: ['integrations', 'stats', projectId],

@@ -31,6 +31,13 @@ export interface RetryPolicyConfig {
   onRetry?: ((attempt: number, delay: number, error: Error) => void) | undefined;
 }
 
+const toError = (error: unknown): Error => {
+  if (error instanceof Error) {
+    return error;
+  }
+  return new Error('Unknown retryable operation failure', { cause: error });
+};
+
 export class RetryPolicy {
   private config: RetryPolicyConfig;
 
@@ -57,14 +64,15 @@ export class RetryPolicy {
       try {
         return await fn();
       } catch (error) {
-        lastError = error as Error;
+        const caughtError = toError(error);
+        lastError = caughtError;
 
         // Check if we should retry
         if (attempt >= this.config.maxRetries) {
           break; // No more retries left
         }
 
-        if (!this.shouldRetry(error as Error)) {
+        if (!this.shouldRetry(caughtError)) {
           throw error; // Not retryable, throw immediately
         }
 
@@ -72,11 +80,11 @@ export class RetryPolicy {
         const delay = this.calculateDelay(attempt);
 
         // Call retry callback
-        this.config.onRetry?.(attempt + 1, delay, error as Error);
+        this.config.onRetry?.(attempt + 1, delay, caughtError);
 
         console.warn(
           `🔄 Retry attempt ${attempt + 1}/${this.config.maxRetries} in ${delay}ms`,
-          error,
+          caughtError,
         );
 
         // Wait before retrying
@@ -283,11 +291,11 @@ export function generateIdempotencyKey(requestId: string, attempt: number): stri
  * Add idempotency key to request headers
  */
 export function withIdempotencyKey(options: RequestInit, key: string): RequestInit {
+  const headers = new Headers(options.headers);
+  headers.set('Idempotency-Key', key);
+
   return {
     ...options,
-    headers: {
-      ...options.headers,
-      'Idempotency-Key': key,
-    },
+    headers,
   };
 }

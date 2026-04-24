@@ -175,6 +175,11 @@ interface AuthStateActions {
 
 type AuthState = AuthStateData & AuthStateActions;
 
+type PersistedAuthState = Pick<
+  AuthStateData,
+  'account' | 'authKitRefreshToken' | 'isAuthenticated' | 'token' | 'user'
+>;
+
 type StoreSetter = (
   partial: Partial<AuthState> | ((state: AuthState) => Partial<AuthState> | AuthState),
 ) => void;
@@ -289,7 +294,7 @@ const createAuthKitActions = (
       }
       // Store AuthKit refresh token
       if (isRecordObject(data)) {
-        const refreshToken = readStringField(data as Record<string, unknown>, 'refresh_token');
+        const refreshToken = readStringField(data, 'refresh_token');
         if (refreshToken) {
           set({ authKitRefreshToken: refreshToken });
         }
@@ -341,16 +346,13 @@ const createAuthKitActions = (
         );
       }
 
-      const authorizationUrl = readStringField(
-        data as Record<string, unknown>,
-        'authorization_url',
-      );
+      const authorizationUrl = readStringField(data, 'authorization_url');
       if (!authorizationUrl) {
         throw new Error('No authorization URL in response');
       }
 
       // Store state for CSRF verification on callback
-      const authState = readStringField(data as Record<string, unknown>, 'state');
+      const authState = readStringField(data, 'state');
       if (authState) {
         sessionStorage.setItem('authkit_state', authState);
       }
@@ -557,7 +559,7 @@ const buildAuthStore = (set: StoreSetter, get: StoreGetter): AuthState => ({
 });
 
 export const useAuthStore = create<AuthState>()(
-  persist<AuthState>((set, get) => buildAuthStore(set, get), {
+  persist<AuthState, [], [], PersistedAuthState>((set, get) => buildAuthStore(set, get), {
     name: 'tracertm-auth-store',
     partialize: (state: AuthState) =>
       ({
@@ -566,7 +568,7 @@ export const useAuthStore = create<AuthState>()(
         isAuthenticated: state.isAuthenticated,
         token: state.token,
         user: state.user,
-      }) as unknown as AuthState,
+      }),
     storage: createJSONStorage(() => getStorage()),
   }),
 );

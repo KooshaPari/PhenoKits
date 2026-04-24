@@ -84,10 +84,20 @@ interface ADRDetailViewProps {
 // Save delay in milliseconds
 const API_SAVE_DELAY_MS = 500;
 
+const isRecordObject = (value: unknown): value is Record<string, unknown> =>
+  Object.prototype.toString.call(value) === '[object Object]';
+
+const getRouteAdrId = (params: unknown): string | undefined => {
+  if (isRecordObject(params) && typeof params['adrId'] === 'string') {
+    return params['adrId'];
+  }
+  return undefined;
+};
+
 export const ADRDetailView = ({ adrId }: ADRDetailViewProps) => {
-  const params = useParams({ strict: false });
+  const params: unknown = useParams({ strict: false });
   const navigate = useNavigate();
-  const effectiveAdrId = adrId ?? params?.adrId ?? '';
+  const effectiveAdrId = adrId ?? getRouteAdrId(params) ?? '';
   const { data: adrData, isLoading: adrLoading } = useADR(effectiveAdrId);
   const { data: activityData } = useADRActivities(effectiveAdrId);
   const activities = activityData ?? [];
@@ -127,7 +137,7 @@ export const ADRDetailView = ({ adrId }: ADRDetailViewProps) => {
       // API call would go here
       await new Promise((resolve) => setTimeout(resolve, API_SAVE_DELAY_MS));
       toast.success('ADR deleted');
-      navigate({ to: '/adrs' as any });
+      void navigate({ to: '/adrs' });
     } catch {
       toast.error('Failed to delete ADR');
     }
@@ -169,7 +179,7 @@ export const ADRDetailView = ({ adrId }: ADRDetailViewProps) => {
   };
 
   const handleBackClick = () => {
-    navigate({ to: '/adrs' as any });
+    void navigate({ to: '/adrs' });
   };
 
   const statusColors = {
@@ -180,7 +190,7 @@ export const ADRDetailView = ({ adrId }: ADRDetailViewProps) => {
     superseded: 'bg-orange-500/10 text-orange-600',
   };
 
-  if (adrLoading && !adrData) {
+  if (adrLoading && adrData === undefined) {
     return (
       <div className='space-y-6 p-6'>
         <div className='bg-muted/40 h-8 w-40 rounded' />

@@ -55,6 +55,33 @@ export interface GPUForceLayoutResult {
 
 let cachedBackend: GPUBackend | null = null;
 
+interface WebGPUProvider {
+  requestAdapter: () => Promise<object | null>;
+}
+
+function getWebGPUProvider(): WebGPUProvider | null {
+  if (!('gpu' in navigator)) {
+    return null;
+  }
+
+  const candidate = navigator.gpu;
+  if (
+    typeof candidate === 'object' &&
+    candidate !== null &&
+    'requestAdapter' in candidate &&
+    typeof candidate.requestAdapter === 'function'
+  ) {
+    return {
+      requestAdapter: async () => {
+        const adapter = await candidate.requestAdapter();
+        return typeof adapter === 'object' && adapter !== null ? adapter : null;
+      },
+    };
+  }
+
+  return null;
+}
+
 /**
  * Detect best available GPU backend
  */
@@ -68,10 +95,11 @@ export async function detectGPUBackend(): Promise<GPUBackend> {
   }
 
   // Check WebGPU (preferred)
-  if ('gpu' in navigator) {
+  const gpuProvider = getWebGPUProvider();
+  if (gpuProvider !== null) {
     try {
-      const adapter = await (navigator as any).gpu.requestAdapter();
-      if (adapter) {
+      const adapter = await gpuProvider.requestAdapter();
+      if (adapter !== null) {
         cachedBackend = 'webgpu';
         return 'webgpu';
       }
@@ -222,7 +250,7 @@ function cpuForceLayout<T extends Record<string, unknown>>(
  *
  * @see docs/architecture/gpu-force-layout.md for implementation guide
  */
-async function webgpuForceLayout<T extends Record<string, unknown>>(
+function webgpuForceLayout<T extends Record<string, unknown>>(
   nodes: Node<T>[],
   edges: Edge[],
   options: Required<Omit<GPUForceLayoutOptions, 'onProgress' | 'forceBackend'>> & {
@@ -232,7 +260,7 @@ async function webgpuForceLayout<T extends Record<string, unknown>>(
   // tracked: https://github.com/KooshaPari/trace/issues/226
   // For now, fall back to CPU
   logger.warn('WebGPU implementation not yet available, falling back to CPU');
-  return cpuForceLayout(nodes, edges, options);
+  return Promise.resolve(cpuForceLayout(nodes, edges, options));
 }
 
 // ============================================================================
@@ -245,7 +273,7 @@ async function webgpuForceLayout<T extends Record<string, unknown>>(
  *
  * @see docs/architecture/gpu-force-layout.md for implementation guide
  */
-async function webglForceLayout<T extends Record<string, unknown>>(
+function webglForceLayout<T extends Record<string, unknown>>(
   nodes: Node<T>[],
   edges: Edge[],
   options: Required<Omit<GPUForceLayoutOptions, 'onProgress' | 'forceBackend'>> & {
@@ -255,7 +283,7 @@ async function webglForceLayout<T extends Record<string, unknown>>(
   // tracked: https://github.com/KooshaPari/trace/issues/226
   // For now, fall back to CPU
   logger.warn('WebGL implementation not yet available, falling back to CPU');
-  return cpuForceLayout(nodes, edges, options);
+  return Promise.resolve(cpuForceLayout(nodes, edges, options));
 }
 
 // ============================================================================
@@ -404,11 +432,12 @@ export async function getGPUBackendInfo(): Promise<{
 
   // Only check GPU backends in browser environment
   if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-    if ('gpu' in navigator) {
+    const gpuProvider = getWebGPUProvider();
+    if (gpuProvider !== null) {
       try {
-        const adapter = await (navigator as any).gpu.requestAdapter();
-        available.webgpu = !!adapter;
-      } catch (error) {
+        const adapter = await gpuProvider.requestAdapter();
+        available.webgpu = adapter !== null;
+      } catch {
         // Not available
       }
     }
@@ -417,7 +446,7 @@ export async function getGPUBackendInfo(): Promise<{
       const canvas = document.createElement('canvas');
       const gl = canvas.getContext('webgl2');
       available.webgl = !!gl;
-    } catch (error) {
+    } catch {
       // Not available
     }
   }

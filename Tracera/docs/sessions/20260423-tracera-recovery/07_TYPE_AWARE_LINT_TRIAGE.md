@@ -135,7 +135,7 @@ The first production patch tranche is complete for targeted strict errors:
   type-aware oxlint with warning-only output.
 - `bun run typecheck:web` passes after integrating the tranche.
 - Full `lint:type-aware:web:strict` still fails, with total strict errors reduced from
-  2,503 to 2,035 after the seventh production tranche.
+  2,503 to 1,939 after the ninth production tranche.
 
 Additional completed production tranche:
 
@@ -197,15 +197,40 @@ The seventh production tranche is complete:
   repaired.
 - `bun run typecheck:web` passes after the tranche.
 
+The eighth production tranche is complete:
+
+- `GraphView.tsx` and `FeatureListView.tsx` pass targeted strict type-aware oxlint.
+- `ADRDetailView.tsx` and `auth-store.ts` pass targeted strict type-aware oxlint.
+- `TestSuiteView.tsx` and `TestCaseView.tsx` pass targeted strict type-aware oxlint.
+- `api/websocket.ts`, `lib/websocket.ts`, `api/query-client.ts`, and
+  `lib/resilience/RetryPolicy.ts` pass targeted strict type-aware oxlint.
+- `EquivalenceImport.tsx`, `EquivalenceExport.tsx`, and `equivalenceIO.ts` pass
+  targeted strict type-aware oxlint. The worker lane disconnected after writing changes,
+  so this result was verified locally before documenting.
+- `bun run typecheck:web` passes after the tranche.
+
+The ninth production tranche is complete:
+
+- `quadTreeIndex.ts`, `gpuForceLayout.ts`, and `CacheManager.ts` pass targeted strict
+  type-aware oxlint.
+- `useViewportGraph.example.tsx`, `useIntegrations.ts`, and `useGraphWorker.ts` pass
+  targeted strict type-aware oxlint.
+- `FlowGraphViewInner.tsx`, `ClusterNode.tsx`, and `AggregateGroupNode.tsx` pass
+  targeted strict type-aware oxlint.
+- `UICodeTracePanel.integration.tsx` and `WorkerExample.tsx` pass targeted strict
+  type-aware oxlint.
+- `bun run typecheck:web` passes after the tranche.
+
 ## Next Production Patch Tranche
 
 | Order | File(s) | Why Next |
 | ---: | --- | --- |
-| 1 | `apps/web/src/views/GraphView.tsx`, `apps/web/src/views/FeatureListView.tsx`, `apps/web/src/views/ADRDetailView.tsx` | App-facing view clusters at four errors each |
-| 2 | `apps/web/src/stores/auth-store.ts`, `apps/web/src/lib/cache/CacheManager.ts`, `apps/web/src/lib/resilience/RetryPolicy.ts` | State/cache/resilience correctness clusters |
-| 3 | `apps/web/src/pages/projects/views/TestSuiteView.tsx`, `apps/web/src/pages/projects/views/TestCaseView.tsx` | Project test management view clusters |
-| 4 | `apps/web/src/lib/websocket.ts`, `apps/web/src/api/websocket.ts`, `apps/web/src/api/query-client.ts` | Runtime/API client strict errors |
-| 5 | `apps/web/src/components/graph/EquivalenceImport.tsx`, `apps/web/src/components/graph/EquivalenceExport.tsx`, `apps/web/src/components/graph/utils/equivalenceIO.ts` | Graph equivalence import/export typing and a11y |
+| 1 | `apps/web/src/views/ScenarioActivityView.tsx`, `apps/web/src/views/ImportView.tsx`, `apps/web/src/views/adr-list-view.tsx` | App-facing view clusters at three errors each |
+| 2 | `apps/web/src/stores/sync-store.ts`, `apps/web/src/routes/auth.logout.tsx`, `apps/web/src/routes/auth.callback.tsx` | Store/auth route runtime clusters |
+| 3 | `apps/web/src/routes/projects.$projectId.views.integrations.tsx`, `apps/web/src/pages/projects/views/WorkflowRunsView.tsx`, `apps/web/src/pages/projects/views/ApiView.tsx` | Project integration/API view clusters |
+| 4 | `apps/web/src/lib/sse-client.ts`, `apps/web/src/lib/graphClustering.ts`, `apps/web/src/lib/focus-management.ts`, `apps/web/src/lib/edgeBenchmark.ts`, `apps/web/src/lib/api-error-handler.ts` | Runtime helper clusters |
+| 5 | `apps/web/src/components/graph/UnifiedGraphView.tsx`, `ThumbnailPreview.tsx`, `PageDecompositionView.tsx`, `GraphSearch.tsx`, `CrossPerspectiveSearch.tsx`, `ComponentUsageMatrix.tsx` | Remaining graph component clusters |
+| 6 | `apps/web/src/lib/websocket.test.ts`, `apps/web/src/lib/csrf.test.ts` | Larger colocated test files outside `__tests__/`; handle after production source |
 
 ## Recommended Sequence
 

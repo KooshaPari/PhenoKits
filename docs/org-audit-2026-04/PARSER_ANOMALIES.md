@@ -2,7 +2,7 @@
 
 Audits where >=7 dimensions could not be parsed (suspected format drift).
 
-## Affected Audits (48)
+## Affected Audits (53)
 
 - **KlipDot**: Could not parse 10 dimensions; attempted formats: numbered-sections, table-rows, text-search
 - **phenotype-tooling**: Could not parse 10 dimensions; attempted formats: numbered-sections, table-rows, text-search
@@ -19,6 +19,7 @@ Audits where >=7 dimensions could not be parsed (suspected format drift).
 - **ResilienceKit**: Could not parse 10 dimensions; attempted formats: numbered-sections, table-rows, text-search
 - **PhenoPlugins**: Could not parse 7 dimensions; attempted formats: numbered-sections, table-rows, text-search
 - **Conft**: Could not parse 7 dimensions; attempted formats: numbered-sections, table-rows, text-search
+- **tooling_adoption**: Could not parse 7 dimensions; attempted formats: numbered-sections, table-rows, text-search
 - **agslag-docs**: Could not parse 10 dimensions; attempted formats: numbered-sections, table-rows, text-search
 - **netweave-final2**: Could not parse 7 dimensions; attempted formats: numbered-sections, table-rows, text-search
 - **phench**: Could not parse 10 dimensions; attempted formats: numbered-sections, table-rows, text-search
@@ -31,10 +32,12 @@ Audits where >=7 dimensions could not be parsed (suspected format drift).
 - **Dino**: Could not parse 7 dimensions; attempted formats: numbered-sections, table-rows, text-search
 - **Tracely**: Could not parse 10 dimensions; attempted formats: numbered-sections, table-rows, text-search
 - **TestingKit**: Could not parse 10 dimensions; attempted formats: numbered-sections, table-rows, text-search
+- **fr_scaffolding**: Could not parse 9 dimensions; attempted formats: numbered-sections, table-rows, text-search
 - **chatta**: Could not parse 7 dimensions; attempted formats: numbered-sections, table-rows, text-search
 - **atoms.tech**: Could not parse 10 dimensions; attempted formats: numbered-sections, table-rows, text-search
 - **AuthKit**: Could not parse 7 dimensions; attempted formats: numbered-sections, table-rows, text-search
 - **hwLedger**: Could not parse 10 dimensions; attempted formats: numbered-sections, table-rows, text-search
+- **test_scaffolding**: Could not parse 8 dimensions; attempted formats: numbered-sections, table-rows, text-search
 - **PhenoSpecs**: Could not parse 10 dimensions; attempted formats: numbered-sections, table-rows, text-search
 - **agent-user-status**: Could not parse 10 dimensions; attempted formats: numbered-sections, table-rows, text-search
 - **CONSOLIDATION_MAPPING**: Could not parse 10 dimensions; attempted formats: numbered-sections, table-rows, text-search
@@ -49,6 +52,8 @@ Audits where >=7 dimensions could not be parsed (suspected format drift).
 - **DevHex**: Could not parse 7 dimensions; attempted formats: numbered-sections, table-rows, text-search
 - **portage**: Could not parse 10 dimensions; attempted formats: numbered-sections, table-rows, text-search
 - **phenoSDK**: Could not parse 10 dimensions; attempted formats: numbered-sections, table-rows, text-search
+- **governance_adoption**: Could not parse 10 dimensions; attempted formats: numbered-sections, table-rows, text-search
+- **dep_alignment**: Could not parse 10 dimensions; attempted formats: numbered-sections, table-rows, text-search
 - **phenoXdd**: Could not parse 10 dimensions; attempted formats: numbered-sections, table-rows, text-search
 - **DataKit**: Could not parse 7 dimensions; attempted formats: numbered-sections, table-rows, text-search
 - **kwality**: Could not parse 10 dimensions; attempted formats: numbered-sections, table-rows, text-search

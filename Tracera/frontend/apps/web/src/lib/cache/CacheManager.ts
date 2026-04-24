@@ -14,7 +14,6 @@
 import { logger } from '@/lib/logger';
 
 import type {
-  ICache,
   CacheOptions,
   InvalidateOptions,
   CacheStatistics,
@@ -172,7 +171,7 @@ export class CacheManager {
       if (value !== null) {
         this.stats.indexedDBHits++;
         // Promote to memory cache if small enough
-        this.promoteToMemory(key, value);
+        void this.promoteToMemory(key, value);
         return value;
       }
     }
@@ -416,7 +415,7 @@ export class CacheManager {
     // Rough estimate for objects
     try {
       return JSON.stringify(obj).length * 2;
-    } catch (error) {
+    } catch {
       return 1024; // Default 1KB
     }
   }
@@ -466,7 +465,7 @@ export function getCacheManager(config?: CacheManagerConfig): CacheManager {
  */
 export function resetCacheManager(): void {
   if (globalCacheManager) {
-    globalCacheManager.close();
+    void globalCacheManager.close();
     globalCacheManager = null;
   }
 }

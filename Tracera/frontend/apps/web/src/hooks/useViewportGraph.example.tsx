@@ -4,7 +4,7 @@
  * This demonstrates progressive graph loading for large datasets.
  */
 
-import type { Edge, Node, Viewport } from '@xyflow/react';
+import type { Viewport } from '@xyflow/react';
 import type { ComponentProps, ComponentType } from 'react';
 
 import { ReactFlow, ReactFlowProvider, useReactFlow } from '@xyflow/react';
@@ -17,6 +17,30 @@ import { useViewportGraph } from './useViewportGraph';
 
 /** ReactFlow as JSX component (type assertion for @xyflow/react typings) */
 const ReactFlowComponent = ReactFlow as ComponentType<ComponentProps<typeof ReactFlow>>;
+
+const DEFAULT_FLOW_SIZE = { height: 600, width: 1200 };
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const isFlowSize = (value: unknown): value is { width: number; height: number } =>
+  isRecord(value) && typeof value['width'] === 'number' && typeof value['height'] === 'number';
+
+const isGetSize = (value: unknown): value is () => unknown => typeof value === 'function';
+
+const getReactFlowSize = (reactFlowInstance: unknown): { width: number; height: number } => {
+  if (!isRecord(reactFlowInstance)) {
+    return DEFAULT_FLOW_SIZE;
+  }
+
+  const getSize: unknown = reactFlowInstance['getSize'];
+  if (!isGetSize(getSize)) {
+    return DEFAULT_FLOW_SIZE;
+  }
+
+  const size = getSize();
+  return isFlowSize(size) ? size : DEFAULT_FLOW_SIZE;
+};
 
 /**
  * Example 1: Basic viewport-based loading
@@ -33,10 +57,7 @@ export function BasicViewportGraphExample({ projectId }: { projectId: string }) 
   const handleViewportChange = useCallback(
     (viewport: Viewport) => {
       const { x, y, zoom } = viewport;
-      const rf = reactFlowInstance as unknown as {
-        getSize?: () => { width: number; height: number };
-      };
-      const { width, height } = rf.getSize?.() ?? { width: 1200, height: 600 };
+      const { width, height } = getReactFlowSize(reactFlowInstance);
 
       const minX = -x / zoom;
       const minY = -y / zoom;
@@ -153,8 +174,7 @@ export function ManualViewportLoadExample({ projectId }: { projectId: string }) 
 
   const handleLoadMore = (direction: 'north' | 'south' | 'east' | 'west') => {
     const viewport = reactFlow.getViewport();
-    const rf = reactFlow as unknown as { getSize?: () => { width: number; height: number } };
-    const { width, height } = rf.getSize?.() ?? { width: 1200, height: 600 };
+    const { width, height } = getReactFlowSize(reactFlow);
 
     const { x, y, zoom } = viewport;
     let minX = -x / zoom;

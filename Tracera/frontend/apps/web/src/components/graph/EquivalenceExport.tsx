@@ -34,7 +34,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@tracertm/ui/components/Dialog';
-import { Input } from '@tracertm/ui/components/Input';
 import { ScrollArea } from '@tracertm/ui/components/ScrollArea';
 import { Separator } from '@tracertm/ui/components/Separator';
 
@@ -199,17 +198,17 @@ function EquivalenceExportComponent({
   const handleCopyJSON = useCallback(() => {
     const data = createExportPackage();
     const json = serializeToJSON(data);
-    navigator.clipboard
-      .writeText(json)
-      .then(() => {
+    void (async () => {
+      try {
+        await navigator.clipboard.writeText(json);
         setCopied(true);
         setTimeout(() => {
           setCopied(false);
         }, 2000);
-      })
-      .catch((error) => {
+      } catch (error: unknown) {
         logger.error('Failed to copy:', error);
-      });
+      }
+    })();
   }, [createExportPackage]);
 
   return (
@@ -427,7 +426,7 @@ function EquivalenceExportComponent({
 
                   {/* Status Filter */}
                   <div className='space-y-2'>
-                    <label className='text-sm font-medium'>Link Status</label>
+                    <p className='text-sm font-medium'>Link Status</p>
                     {(['confirmed', 'auto_confirmed', 'suggested', 'rejected'] as const).map(
                       (status) => (
                         <div key={status} className='flex items-center gap-2'>
@@ -464,7 +463,7 @@ function EquivalenceExportComponent({
 
                       {/* Domain Filter */}
                       <div className='space-y-2'>
-                        <label className='text-sm font-medium'>Domains</label>
+                        <p className='text-sm font-medium'>Domains</p>
                         {uniqueDomains.map((domain) => (
                           <div key={domain} className='flex items-center gap-2'>
                             <Checkbox

@@ -188,6 +188,10 @@ export interface EquivalenceExportPackage {
 // SERIALIZATION / DESERIALIZATION
 // =============================================================================
 
+function parseJSONUnknown(json: string): unknown {
+  return JSON.parse(json) as unknown;
+}
+
 /**
  * Serialize equivalence data to JSON string
  */
@@ -199,7 +203,7 @@ export function serializeToJSON(data: EquivalenceExportPackage): string {
  * Deserialize JSON string to equivalence data
  */
 export function deserializeFromJSON(json: string): EquivalenceExportPackage {
-  const parsed = JSON.parse(json);
+  const parsed = parseJSONUnknown(json);
   return EquivalenceExportPackageSchema.parse(parsed);
 }
 
@@ -233,7 +237,7 @@ export function deserializeLinksFromCSV(csv: string): EquivalenceLink[] {
   }
 
   const headerLine = lines[0];
-  if (!headerLine) return [];
+  if (headerLine === undefined || headerLine === '') return [];
   const header = headerLine.split(',');
   const links: EquivalenceLink[] = [];
 
@@ -253,23 +257,22 @@ export function deserializeLinksFromCSV(csv: string): EquivalenceLink[] {
     });
 
     try {
-      const link: EquivalenceLink = {
+      const link = EquivalenceLinkSchema.parse({
         canonicalId: record['canonicalId'] ?? '',
         confidence: Number.parseFloat(record['confidence'] ?? '0'),
         confirmedAt: record['confirmedAt'] ?? '',
         confirmedBy: record['confirmedBy'] ?? '',
         createdAt: record['createdAt'] ?? '',
-        equivalenceType: record['equivalenceType'] as EquivalenceLinkType,
+        equivalenceType: record['equivalenceType'] ?? '',
         id: record['id'] ?? '',
         projectId: record['projectId'] ?? '',
         rejectedReason: record['rejectedReason'] ?? '',
         sourceItemId: record['sourceItemId'] ?? '',
-        status: record['status'] as 'suggested' | 'confirmed' | 'rejected' | 'auto_confirmed',
-        strategies: JSON.parse(record['strategies'] ?? '[]'),
+        status: record['status'] ?? '',
+        strategies: parseJSONUnknown(record['strategies'] ?? '[]'),
         targetItemId: record['targetItemId'] ?? '',
         updatedAt: record['updatedAt'] ?? '',
-      };
-      EquivalenceLinkSchema.parse(link);
+      });
       links.push(link);
     } catch (error) {
       logger.warn(`Failed to parse CSV line ${i}:`, error);
@@ -289,7 +292,7 @@ export function deserializeConceptsFromCSV(csv: string): CanonicalConcept[] {
   }
 
   const headerLine = lines[0];
-  if (!headerLine) return [];
+  if (headerLine === undefined || headerLine === '') return [];
   const header = headerLine.split(',');
   const concepts: CanonicalConcept[] = [];
 
@@ -309,17 +312,24 @@ export function deserializeConceptsFromCSV(csv: string): CanonicalConcept[] {
     });
 
     try {
-      const concept: CanonicalConcept = {
+      const childConceptIds = record['childConceptIds'];
+      const embedding = record['embedding'];
+      const projectionIds = record['projectionIds'];
+      const relatedConceptIds = record['relatedConceptIds'];
+      const tags = record['tags'];
+      const concept = CanonicalConceptSchema.parse({
         category: record['category'],
-        childConceptIds: record['childConceptIds']
-          ? record['childConceptIds'].split('|')
-          : undefined,
+        childConceptIds:
+          childConceptIds !== undefined && childConceptIds !== ''
+            ? childConceptIds.split('|')
+            : undefined,
         confidence: Number.parseFloat(record['confidence'] ?? '0'),
         createdAt: record['createdAt'] ?? '',
         createdBy: record['createdBy'],
         description: record['description'],
         domain: record['domain'] ?? '',
-        embedding: record['embedding'] ? JSON.parse(record['embedding']) : undefined,
+        embedding:
+          embedding !== undefined && embedding !== '' ? parseJSONUnknown(embedding) : undefined,
         embeddingModel: record['embeddingModel'],
         embeddingUpdatedAt: record['embeddingUpdatedAt'],
         id: record['id'] ?? '',
@@ -327,17 +337,18 @@ export function deserializeConceptsFromCSV(csv: string): CanonicalConcept[] {
         parentConceptId: record['parentConceptId'],
         projectId: record['projectId'] ?? '',
         projectionCount: Number.parseInt(record['projectionCount'] ?? '0', 10),
-        projectionIds: record['projectionIds'] ? record['projectionIds'].split('|') : undefined,
-        relatedConceptIds: record['relatedConceptIds']
-          ? record['relatedConceptIds'].split('|')
-          : undefined,
+        projectionIds:
+          projectionIds !== undefined && projectionIds !== '' ? projectionIds.split('|') : undefined,
+        relatedConceptIds:
+          relatedConceptIds !== undefined && relatedConceptIds !== ''
+            ? relatedConceptIds.split('|')
+            : undefined,
         slug: record['slug'] ?? '',
-        source: record['source'] as 'manual' | 'inferred' | 'imported',
-        tags: record['tags'] ? record['tags'].split('|') : undefined,
+        source: record['source'] ?? '',
+        tags: tags !== undefined && tags !== '' ? tags.split('|') : undefined,
         updatedAt: record['updatedAt'] ?? '',
         version: Number.parseInt(record['version'] ?? '0', 10),
-      };
-      CanonicalConceptSchema.parse(concept);
+      });
       concepts.push(concept);
     } catch (error) {
       logger.warn(`Failed to parse CSV line ${i}:`, error);
@@ -357,7 +368,7 @@ export function deserializeProjectionsFromCSV(csv: string): CanonicalProjection[
   }
 
   const headerLine = lines[0];
-  if (!headerLine) return [];
+  if (headerLine === undefined || headerLine === '') return [];
   const header = headerLine.split(',');
   const projections: CanonicalProjection[] = [];
 
@@ -377,7 +388,8 @@ export function deserializeProjectionsFromCSV(csv: string): CanonicalProjection[
     });
 
     try {
-      const projection: CanonicalProjection = {
+      const metadata = record['metadata'];
+      const projection = CanonicalProjectionSchema.parse({
         canonicalId: record['canonicalId'] ?? '',
         confidence: Number.parseFloat(record['confidence'] ?? '0'),
         confirmedAt: record['confirmedAt'],
@@ -387,13 +399,13 @@ export function deserializeProjectionsFromCSV(csv: string): CanonicalProjection[
         isConfirmed: record['isConfirmed'] === 'true',
         isRejected: record['isRejected'] === 'true',
         itemId: record['itemId'] ?? '',
-        metadata: record['metadata'] ? JSON.parse(record['metadata']) : undefined,
+        metadata:
+          metadata !== undefined && metadata !== '' ? parseJSONUnknown(metadata) : undefined,
         perspective: record['perspective'] ?? '',
         projectId: record['projectId'] ?? '',
-        strategy: record['strategy'] as EquivalenceStrategy,
+        strategy: record['strategy'] ?? '',
         updatedAt: record['updatedAt'] ?? '',
-      };
-      CanonicalProjectionSchema.parse(projection);
+      });
       projections.push(projection);
     } catch (error) {
       logger.warn(`Failed to parse CSV line ${i}:`, error);
@@ -616,9 +628,7 @@ export function validateExportPackage(data: unknown): {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return {
-        errors: error.issues.map(
-          (issue: z.ZodIssue) => `${issue.path.join('.')}: ${issue.message}`,
-        ),
+        errors: error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`),
         valid: false,
       };
     }
@@ -639,9 +649,7 @@ export function validateImportOptions(options: unknown): {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return {
-        errors: error.issues.map(
-          (issue: z.ZodIssue) => `${issue.path.join('.')}: ${issue.message}`,
-        ),
+        errors: error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`),
         valid: false,
       };
     }
@@ -716,15 +724,20 @@ export function mergeExportPackages(
   }
 
   // Update project ID if needed
-  if (options.updateProjectId && options.targetProjectId) {
+  if (
+    options.updateProjectId &&
+    options.targetProjectId !== undefined &&
+    options.targetProjectId !== ''
+  ) {
+    const targetProjectId = options.targetProjectId;
     merged.equivalenceLinks.forEach((l) => {
-      l.projectId = options.targetProjectId!;
+      l.projectId = targetProjectId;
     });
     merged.canonicalConcepts.forEach((c) => {
-      c.projectId = options.targetProjectId!;
+      c.projectId = targetProjectId;
     });
     merged.canonicalProjections.forEach((p) => {
-      p.projectId = options.targetProjectId!;
+      p.projectId = targetProjectId;
     });
   }
 

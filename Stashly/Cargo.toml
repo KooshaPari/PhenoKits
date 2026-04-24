@@ -3,7 +3,8 @@ members = [
     "crates/stashly-cache",
     "crates/stashly-eventstore",
     "crates/stashly-statemachine",
-]
+    "crates/stashly-migrations",
+  ]
 resolver = "2"
 
 [workspace.package]

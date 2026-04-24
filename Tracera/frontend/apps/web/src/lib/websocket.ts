@@ -34,6 +34,53 @@ export type WebSocketMessage =
 
 export type EventListener = (data: NATSEventMessage['data']) => void;
 
+const isRecordObject = (value: unknown): value is Record<string, unknown> =>
+  Object.prototype.toString.call(value) === '[object Object]';
+
+const isNatsEventData = (value: unknown): value is NATSEventMessage['data'] => {
+  if (!isRecordObject(value)) {
+    return false;
+  }
+  return (
+    typeof value['event_type'] === 'string' &&
+    typeof value['project_id'] === 'string' &&
+    typeof value['entity_id'] === 'string' &&
+    typeof value['entity_type'] === 'string' &&
+    isRecordObject(value['data']) &&
+    typeof value['timestamp'] === 'string' &&
+    typeof value['source'] === 'string'
+  );
+};
+
+const isWebSocketMessage = (value: unknown): value is WebSocketMessage => {
+  if (!isRecordObject(value) || typeof value['type'] !== 'string') {
+    return false;
+  }
+
+  if (value['type'] === 'nats_event') {
+    return isNatsEventData(value['data']) && typeof value['timestamp'] === 'string';
+  }
+
+  if (value['type'] === 'subscription_confirmed') {
+    const data = value['data'];
+    return (
+      isRecordObject(data) &&
+      typeof data['project_id'] === 'string' &&
+      typeof value['timestamp'] === 'string'
+    );
+  }
+
+  if (value['type'] === 'error') {
+    return typeof value['message'] === 'string';
+  }
+
+  if (value['type'] === 'pong') {
+    return typeof value['timestamp'] === 'string';
+  }
+
+  return value['type'] === 'auth_success' || value['type'] === 'auth_failed';
+};
+
 export class RealtimeClient {
   private ws: WebSocket | null = null;
   private reconnectTimer: NodeJS.Timeout | null = null;
@@ -99,24 +146,27 @@ export class RealtimeClient {
 
     this.ws = new WebSocket(url);
 
-    this.ws.onopen = () => {
+    this.ws.addEventListener('open', () => {
       logger.info('✅ WebSocket connected');
       this.reconnectAttempts = 0;
 
       // Send authentication message (REQUIRED - token NOT in URL)
       this.sendAuth();
-    };
+    });
 
-    this.ws.onmessage = (event) => {
+    this.ws.addEventListener('message', (event: MessageEvent) => {
       try {
-        const message: WebSocketMessage = JSON.parse(event.data);
-        this.handleMessage(message);
+        const rawData = typeof event.data === 'string' ? event.data : String(event.data);
+        const parsed = JSON.parse(rawData) as unknown;
+        if (isWebSocketMessage(parsed)) {
+          this.handleMessage(parsed);
+        }
       } catch (error) {
         logger.error('Failed to parse WebSocket message:', error);
       }
-    };
+    });
 
-    this.ws.onclose = () => {
+    this.ws.addEventListener('close', () => {
       logger.info('❌ WebSocket disconnected');
       this.isAuthenticated = false;
       this.cleanup();
@@ -135,11 +185,11 @@ export class RealtimeClient {
       } else {
         logger.error('❌ Max reconnection attempts reached');
       }
-    };
+    });
 
-    this.ws.onerror = (error) => {
+    this.ws.addEventListener('error', (error: Event) => {
       logger.error('❌ WebSocket error:', error);
-    };
+    });
   }
 
   private sendAuth() {

@@ -1,5 +1,5 @@
 import { CheckCircle, Clock, Filter, FolderKanban, Layers, Plus, Search } from 'lucide-react';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 
 import type { TestSuite, TestSuiteStatus } from '@tracertm/types';
 
@@ -19,11 +19,20 @@ const statusLabels: Record<TestSuiteStatus, string> = {
   draft: 'Draft',
 };
 
+function isTestSuiteStatus(value: string): value is TestSuiteStatus {
+  return (
+    value === 'active' || value === 'archived' || value === 'deprecated' || value === 'draft'
+  );
+}
+
 interface TestSuiteViewProps {
   projectId: string;
 }
 
 export function TestSuiteView({ projectId }: TestSuiteViewProps) {
+  const suiteNameInputId = useId();
+  const suiteDescriptionInputId = useId();
+  const suiteTypeInputId = useId();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [statusFilter, setStatusFilter] = useState<TestSuiteStatus | ''>('');
   const [categoryFilter, setCategoryFilter] = useState('');
@@ -126,7 +135,8 @@ export function TestSuiteView({ projectId }: TestSuiteViewProps) {
           <select
             value={statusFilter}
             onChange={(e) => {
-              setStatusFilter(e.target.value as TestSuiteStatus | '');
+              const { value } = e.target;
+              setStatusFilter(isTestSuiteStatus(value) ? value : '');
             }}
             className='bg-background rounded-lg border px-3 py-2'
           >
@@ -224,8 +234,11 @@ export function TestSuiteView({ projectId }: TestSuiteViewProps) {
             </div>
             <div className='space-y-3'>
               <div>
-                <label className='text-xs font-semibold uppercase'>Suite Name</label>
+                <label className='text-xs font-semibold uppercase' htmlFor={suiteNameInputId}>
+                  Suite Name
+                </label>
                 <input
+                  id={suiteNameInputId}
                   type='text'
                   placeholder='e.g. Unit Tests, Integration Tests'
                   className='bg-muted/50 mt-1 w-full rounded-lg border px-3 py-2 text-sm'
@@ -233,16 +246,27 @@ export function TestSuiteView({ projectId }: TestSuiteViewProps) {
                 />
               </div>
               <div>
-                <label className='text-xs font-semibold uppercase'>Description</label>
+                <label
+                  className='text-xs font-semibold uppercase'
+                  htmlFor={suiteDescriptionInputId}
+                >
+                  Description
+                </label>
                 <textarea
+                  id={suiteDescriptionInputId}
                   placeholder='Test suite description and scope...'
                   className='bg-muted/50 mt-1 min-h-[60px] w-full rounded-lg border px-3 py-2 text-sm'
                   defaultValue=''
                 />
               </div>
               <div>
-                <label className='text-xs font-semibold uppercase'>Test Type</label>
-                <select className='bg-muted/50 mt-1 w-full rounded-lg border px-3 py-2 text-sm'>
+                <label className='text-xs font-semibold uppercase' htmlFor={suiteTypeInputId}>
+                  Test Type
+                </label>
+                <select
+                  id={suiteTypeInputId}
+                  className='bg-muted/50 mt-1 w-full rounded-lg border px-3 py-2 text-sm'
+                >
                   <option>Unit Tests</option>
                   <option>Integration Tests</option>
                   <option>E2E Tests</option>

@@ -14,9 +14,12 @@ import {
   useWorkerSupport,
 } from '@/hooks/useWorker';
 
-export function GraphLayoutExample() {
+import type { LayoutResult } from '@/workers/graph-layout.worker';
+import type { SearchIndex, SearchResult } from '@/workers/search-index.worker';
+
+function GraphLayoutExample() {
   const { worker, status, createProgressCallback } = useGraphLayoutWorker();
-  const [layoutResult, setLayoutResult] = useState<Record<string, unknown> | null>(null);
+  const [layoutResult, setLayoutResult] = useState<LayoutResult | null>(null);
 
   const handleComputeLayout = async () => {
     if (!worker) {
@@ -42,7 +45,7 @@ export function GraphLayoutExample() {
         type: 'dagre',
         onProgress,
       });
-      setLayoutResult(result as unknown as Record<string, unknown>);
+      setLayoutResult(result);
     } catch {
       // Error handling is managed through status.error
     }
@@ -54,7 +57,9 @@ export function GraphLayoutExample() {
 
       <div className='mb-4'>
         <div>Status: {status.isReady ? '✅ Ready' : '⏳ Loading...'}</div>
-        {status.error && <div className='text-red-500'>Error: {status.error.message}</div>}
+        {status.error !== null && (
+          <div className='text-red-500'>Error: {status.error.message}</div>
+        )}
         {status.progress > 0 && (
           <div className='mt-2'>
             <div className='mb-1 text-sm'>Progress: {status.progress.toFixed(0)}%</div>
@@ -69,14 +74,16 @@ export function GraphLayoutExample() {
       </div>
 
       <button
-        onClick={handleComputeLayout}
+        onClick={() => {
+          void handleComputeLayout();
+        }}
         disabled={!status.isReady}
         className='rounded bg-blue-500 px-4 py-2 text-white disabled:opacity-50'
       >
         Compute Layout
       </button>
 
-      {layoutResult && (
+      {layoutResult !== null && (
         <div className='mt-4'>
           <h3 className='font-semibold'>Result:</h3>
           <pre className='mt-2 overflow-auto rounded bg-gray-100 p-2 text-xs'>
@@ -94,7 +101,12 @@ interface TransformResult {
   stats: unknown;
 }
 
-export function DataTransformExample() {
+type SortedPreviewItem = Record<string, unknown> & { id: number; value: number };
+
+const isSortedPreviewItem = (item: Record<string, unknown>): item is SortedPreviewItem =>
+  typeof item['id'] === 'number' && typeof item['value'] === 'number';
+
+function DataTransformExample() {
   const { worker, status } = useDataTransformWorker();
   const [result, setResult] = useState<TransformResult | null>(null);
 
@@ -128,7 +140,7 @@ export function DataTransformExample() {
 
       setResult({
         aggregated,
-        sorted: sorted.slice(0, 10) as { id: number; value: number }[],
+        sorted: sorted.slice(0, 10).filter(isSortedPreviewItem),
         stats,
       });
     } catch {
@@ -141,14 +153,16 @@ export function DataTransformExample() {
       <h2 className='mb-4 text-lg font-bold'>Data Transform Worker</h2>
 
       <button
-        onClick={handleTransform}
+        onClick={() => {
+          void handleTransform();
+        }}
         disabled={!status.isReady}
         className='rounded bg-green-500 px-4 py-2 text-white disabled:opacity-50'
       >
         Transform 1000 Items
       </button>
 
-      {result && (
+      {result !== null && (
         <div className='mt-4 space-y-2'>
           <div>
             <h3 className='font-semibold'>Statistics:</h3>
@@ -178,7 +192,7 @@ export function DataTransformExample() {
   );
 }
 
-export function ExportImportExample() {
+function ExportImportExample() {
   const { worker, status } = useExportImportWorker();
   const [exported, setExported] = useState('');
 
@@ -202,7 +216,7 @@ export function ExportImportExample() {
   };
 
   const handleImport = async () => {
-    if (!worker || !exported) {
+    if (!worker || exported === '') {
       return;
     }
 
@@ -221,22 +235,26 @@ export function ExportImportExample() {
 
       <div className='mb-4 space-x-2'>
         <button
-          onClick={handleExport}
+          onClick={() => {
+            void handleExport();
+          }}
           disabled={!status.isReady}
           className='rounded bg-purple-500 px-4 py-2 text-white disabled:opacity-50'
         >
           Export to NDJSON
         </button>
         <button
-          onClick={handleImport}
-          disabled={!status.isReady || !exported}
+          onClick={() => {
+            void handleImport();
+          }}
+          disabled={!status.isReady || exported === ''}
           className='rounded bg-purple-700 px-4 py-2 text-white disabled:opacity-50'
         >
           Import from NDJSON
         </button>
       </div>
 
-      {exported && (
+      {exported !== '' && (
         <div className='mt-4'>
           <h3 className='font-semibold'>Exported NDJSON:</h3>
           <pre className='mt-2 overflow-auto rounded bg-gray-100 p-2 text-xs'>{exported}</pre>
@@ -246,11 +264,11 @@ export function ExportImportExample() {
   );
 }
 
-export function SearchIndexExample() {
+function SearchIndexExample() {
   const { worker, status } = useSearchIndexWorker();
-  const [index, setIndex] = useState<Record<string, unknown> | null>(null);
+  const [index, setIndex] = useState<SearchIndex | null>(null);
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<{ id: string; score: number }[]>([]);
+  const [results, setResults] = useState<SearchResult[]>([]);
 
   const handleBuildIndex = async () => {
     if (!worker) {
@@ -286,24 +304,20 @@ export function SearchIndexExample() {
         title: 2, // Title has 2x weight
         content: 1, // Content has default weight
       });
-      setIndex(newIndex as unknown as Record<string, unknown>);
+      setIndex(newIndex);
     } catch {
       // Error handling is managed through status.error
     }
   };
 
   const handleSearch = async () => {
-    if (!worker || !index || !query) {
+    if (!worker || index === null || query === '') {
       return;
     }
 
     try {
       const searchResults = await worker.search(
-        index as unknown as {
-          documents: Map<string, { id: string; fields: Record<string, string | number | boolean> }>;
-          invertedIndex: Map<string, Set<string>>;
-          fieldWeights: Record<string, number>;
-        },
+        index,
         query,
         {
           fuzzy: true,
@@ -322,14 +336,16 @@ export function SearchIndexExample() {
 
       <div className='space-y-4'>
         <button
-          onClick={handleBuildIndex}
+          onClick={() => {
+            void handleBuildIndex();
+          }}
           disabled={!status.isReady}
           className='rounded bg-orange-500 px-4 py-2 text-white disabled:opacity-50'
         >
           Build Index
         </button>
 
-        {index && (
+        {index !== null && (
           <>
             <div className='flex gap-2'>
               <input
@@ -341,7 +357,12 @@ export function SearchIndexExample() {
                 placeholder='Search query...'
                 className='flex-1 rounded border px-3 py-2'
               />
-              <button onClick={handleSearch} className='rounded bg-orange-700 px-4 py-2 text-white'>
+              <button
+                onClick={() => {
+                  void handleSearch();
+                }}
+                className='rounded bg-orange-700 px-4 py-2 text-white'
+              >
                 Search
               </button>
             </div>
@@ -366,7 +387,7 @@ export function SearchIndexExample() {
   );
 }
 
-export function WorkerSupportCheck() {
+function WorkerSupportCheck() {
   const { supported, checked } = useWorkerSupport();
 
   if (!checked) {
@@ -390,7 +411,7 @@ export function WorkerSupportCheck() {
 /**
  * Main demo component showing all worker examples
  */
-export function WebWorkersDemo() {
+function WebWorkersDemo() {
   return (
     <div className='mx-auto max-w-6xl p-8'>
       <h1 className='mb-8 text-3xl font-bold'>Web Workers Demo</h1>
@@ -405,3 +426,12 @@ export function WebWorkersDemo() {
     </div>
   );
 }
+
+export {
+  DataTransformExample,
+  ExportImportExample,
+  GraphLayoutExample,
+  SearchIndexExample,
+  WebWorkersDemo,
+  WorkerSupportCheck,
+};

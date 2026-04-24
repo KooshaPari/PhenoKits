@@ -265,13 +265,39 @@ pheno (consumer)
 
 ---
 
-## Footer
+## Phase 2 Execution Notes (2026-04-24)
 
-**Status**: ✅ ANALYSIS COMPLETE  
-**Next Action**: User approval for Phase 1 execution  
-**Execution Owner**: Agent (phenotype-shared consolidation squad)  
-**Completion Target**: 2026-04-25 (after Phase 1-2) or User-Scheduled
+**DISCOVERY**: The Phase 2 crates (phenotype-testing, phenotype-mock, phenotype-cost-core, phenotype-bdd, phenotype-event-bus) are **modules within the pheno monorepo**, not standalone Cargo crates.
+
+### Status by Crate
+- phenotype-testing: No Cargo.toml; modules depend on monorepo dependencies
+- phenotype-mock: No Cargo.toml; heavy internal coupling
+- phenotype-cost-core: No Cargo.toml; requires pheno workspace resolution
+- phenotype-bdd: No Cargo.toml; depends on cache-adapter, config-core, compliance-scanner
+- phenotype-event-bus: No Cargo.toml; depends on health, http-client-core, infrastructure
+
+### Extraction Strategy
+**Phase 2 DEFERRED** — requires:
+1. Convert each module to standalone Cargo crate (add Cargo.toml)
+2. Break internal monorepo dependencies (phenotype-bdd, phenotype-event-bus especially)
+3. Create lightweight test shims for pheno consumers
+4. Validate no regressions in agileplus or bifrost services
+
+**Estimated Effort**: +4-6h (monorepo module extraction is harder than standalone crate copy)
+
+**Recommended Alternative for User**:
+- Execute Phase 1 first (phenotype-retry, phenotype-port-traits, phenotype-policy-engine) — all have Cargo.toml already
+- Then plan Phase 2 with explicit decoupling sprints for each module
 
 ---
 
-*This plan was auto-generated during cross-repo analysis session 2026-04-24. No code was modified. Ready for selective execution.*
+## Footer
+
+**Status**: ⏸️ ANALYSIS COMPLETE, PHASE 2 BLOCKED ON MODULE STRUCTURE  
+**Next Action**: Phase 1 execution OR explicit Phase 2 scope reduction  
+**Execution Owner**: User decision required  
+**Completion Target**: 2026-04-25 Phase 1 only, or 2026-04-26+ Phase 2 with refactoring
+
+---
+
+*This plan was auto-generated during cross-repo analysis session 2026-04-24. Phase 2 discovery logged 2026-04-24.*

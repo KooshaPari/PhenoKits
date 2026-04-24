@@ -1,30 +1,55 @@
-# Systemic Issues — Cross-Repo Patterns
+# Systemic Issues — Cross-Repo Patterns (Post-Intervention 2026-04-24)
 
-Issues affecting 2+ repos (real architectural/governance problems).
+Issues affecting 2+ repos (architectural/governance problems). **Updated to reflect post-intervention state.**
 
-## Top Issues
+## Impact Summary
 
-### 1. Weak or missing governance frameworks (Affects 48 repos)
+| Issue | Before | After | Δ | Status |
+|-------|--------|-------|---|--------|
+| Weak/missing governance | 53 repos | 28 repos | -25 (-47%) | Batch 1 deployed; Batch 2 pending |
+| Missing FR traceability | 50 repos | 33 repos | -17 (-34%) | FR stubs scaffolded in 38 repos |
+| Missing test coverage | 48 repos | 33 repos | -15 (-31%) | Smoke tests in 15 repos |
+| Missing CI/CD pipeline | 42 repos | 20 repos | -22 (-52%) | Quality-gate workflows deployed |
+| Build failures | 5 repos | 5 repos | — | Unresolved (dep + compiler issues) |
+| Dep conflicts | 4 repos | 4 repos | — | Unresolved (canvasApp, cliproxy, cloud, PhenoObs) |
 
-**Repos**: AgentMCP, AppGen, AuthKit, BytePort, CONSOLIDATION_MAPPING, Conft, DataKit, DevHex, Dino, KlipDot, McpKit, PhenoHandbook, PhenoPlugins, PhenoSpecs, PhenoVCS, PlatformKit, PlayCua, ResilienceKit, TestingKit, Tracely, agent-user-status, agentapi-plusplus, agslag-docs, archived, artifacts, atoms.tech, bare-cua, chatta, cheap-llm-mcp, go-nippon, hwLedger, kmobile, kwality, loc_reverify, netweave-final2, org-github, phench, phenoDesign, phenoSDK, phenoXdd, phenotype-auth-ts, phenotype-journeys, phenotype-ops-mcp, phenotype-tooling, portage, rich-cli-kit, thegent-dispatch, thegent-workspace
+## Top Issues (Remaining)
 
-### 2. Missing FR traceability/documentation (Affects 47 repos)
+### 1. Missing FR traceability/documentation (Affects 33 repos)
 
-**Repos**: AgentMCP, AppGen, AuthKit, BytePort, CONSOLIDATION_MAPPING, Conft, DataKit, DevHex, Dino, KlipDot, McpKit, PhenoHandbook, PhenoPlugins, PhenoSpecs, PhenoVCS, PlatformKit, PlayCua, ResilienceKit, TestingKit, Tracely, agent-user-status, agentapi-plusplus, agslag-docs, archived, artifacts, atoms.tech, bare-cua, chatta, cheap-llm-mcp, go-nippon, hwLedger, kmobile, kwality, netweave-final2, org-github, phench, phenoDesign, phenoSDK, phenoXdd, phenotype-auth-ts, phenotype-journeys, phenotype-ops-mcp, phenotype-tooling, portage, rich-cli-kit, thegent-dispatch, thegent-workspace
+**DOWN from 50 repos** via FR scaffolding wave. Remaining 33 need content review + implementation.
 
-### 3. Missing or broken test coverage (Affects 44 repos)
+**Repos**: Archived/unclassified + Tier 3 backlog (DataKit, DevHex, go-nippon, governance_adoption, KlipDot, McpKit, netweave-final2, org-github, PhenoPlugins, PhenoSpecs, PhenoVCS, PlatformKit, rich-cli-kit, + others).
 
-**Repos**: AgentMCP, AppGen, AuthKit, BytePort, CONSOLIDATION_MAPPING, Conft, DataKit, DevHex, KlipDot, PhenoHandbook, PhenoPlugins, PhenoSpecs, PlayCua, ResilienceKit, TestingKit, Tracely, agent-user-status, agentapi-plusplus, agslag-docs, archived, artifacts, atoms.tech, bare-cua, chatta, cheap-llm-mcp, go-nippon, hwLedger, kmobile, kwality, loc_reverify, netweave-final2, org-github, phench, phenoDesign, phenoSDK, phenoXdd, phenotype-auth-ts, phenotype-journeys, phenotype-ops-mcp, phenotype-tooling, portage, rich-cli-kit, thegent-dispatch, thegent-workspace
+### 2. Missing or broken CI/CD pipeline (Affects 20 repos)
 
-### 4. Missing or broken CI/CD pipeline (Affects 37 repos)
+**DOWN from 42 repos** via CI deployment. Remaining 20 are Tier 2/3 + archived awaiting batch extension.
 
-**Repos**: AgentMCP, CONSOLIDATION_MAPPING, Conft, DataKit, DevHex, KlipDot, PhenoHandbook, PhenoSpecs, PlatformKit, PlayCua, ResilienceKit, TestingKit, Tracely, agent-user-status, agentapi-plusplus, agslag-docs, archived, artifacts, atoms.tech, cheap-llm-mcp, go-nippon, hwLedger, kmobile, kwality, org-github, phench, phenoDesign, phenoSDK, phenoXdd, phenotype-auth-ts, phenotype-journeys, phenotype-ops-mcp, phenotype-tooling, portage, rich-cli-kit, thegent-dispatch, thegent-workspace
+**Repos**: CONSOLIDATION_MAPPING, Conft, DataKit, DevHex, go-nippon, governance_adoption, KlipDot, McpKit, PhenoPlugins, PhenoSpecs, PlatformKit, rich-cli-kit, test_scaffolding, thegent-dispatch, thegent-workspace, + archived/inactive.
 
-### 5. Build failures across repos (Affects 4 repos)
+### 3. Missing or broken test coverage (Affects 33 repos)
 
-**Repos**: Tokn, argis-extensions, cliproxyapi-plusplus, cloud
+**DOWN from 48 repos** via smoke-test scaffolding. Remaining 33 need language-specific harness completion.
+
+**Repos**: Same cohort as CI/CD above; TS/JS repos pending vitest config; documentation-only repos excluded.
+
+### 4. Weak or missing governance frameworks (Affects 28 repos)
+
+**DOWN from 53 repos** via Batch 1 deployment. Remaining 28 are Batch 2/3 targets (Tier 2/3 + archived).
+
+**Repos**: Tier 2 (12): kmobile, kwality, localbase3, McpKit, netweave-final2, org-github, Paginary, phench, phenoDesign, PhenoDevOps, PhenoHandbook, PhenoLibs.
+**Tier 3 (14):** PhenoMCP, PhenoObservability, PhenoPlugins, PhenoProc, PhenoSchema, PhenoSpecs, PhenoVCS, PlatformKit, PlayCua, PolicyStack, Pyron, ResilienceKit, TestingKit, Tokn, Tracely, Tracera, VirtualEngine.
+**Archived (8):** Intentionally skipped.
+
+### 5. Build failures across repos (Affects 5 repos)
+
+**Unchanged (5 repos).** Requires manual triage + dependency resolution.
+
+**Repos**: Tokn (build error), argis-extensions (import), cliproxyapi-plusplus (version conflict), cloud (resolver issue), tooling_adoption (binary pending).
 
 ### 6. Dependency version conflicts or broken imports (Affects 4 repos)
 
-**Repos**: PhenoObservability, argis-extensions, canvasApp, cliproxyapi-plusplus
+**Unchanged (4 repos).** Needs version bump + lockfile rebuild.
+
+**Repos**: PhenoObservability (transitive), argis-extensions (direct), canvasApp (peer), cliproxyapi-plusplus (core).
 

@@ -1,5 +1,7 @@
 # Observably — Phenotype Observability Collection
 
+![Observably Logo](assets/logo-placeholder.svg)
+
 Observably is a curated collection of independent, production-grade observability crates for Rust. Tracing, logging, metrics, and resilience patterns as standalone cargo-installable packages.
 
 ## Crates

@@ -1,0 +1,25 @@
+{
+  "name": "phenotype-dev-hub",
+  "version": "0.0.1",
+  "description": "Phenotype organization marketing landing page and product catalog",
+  "type": "module",
+  "packageManager": "bun@1.1.29",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "astro": "^5.0.0",
+    "@astrojs/tailwind": "^0.4.0",
+    "tailwindcss": "^4.0.0",
+    "autoprefixer": "^10.4.20",
+    "clsx": "^2.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.16.5",
+    "typescript": "^5.5.4"
+  }
+}

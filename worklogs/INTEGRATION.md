@@ -29,6 +29,46 @@ branch `chore/fork-attribution` (README NOTICE + this worklog entry).
 
 ---
 
+## 2026-04-24 — Release-Cut Org-Wide Adoption
+
+Deployed `phenotype-tooling::release-cut` pattern across 8 Tier-A repos.
+
+**Repos onboarded** (7 new + 1 reference):
+- **FocalPoint** (Rust, reference): shipped 2026-04-22
+- **AgilePlus** (Rust, 24-crate workspace): `.github/workflows/release-dry-run.yml` + docs
+- **PhenoObservability** (Rust): minimal single-crate variant
+- **Tracely** (Rust, deprecated per audit): adopted with deprecation notice
+- **PhenoPlugins** (Rust, single crate): adopted
+- **Tracera** (Node, monorepo): adapted for `package.json` triggers + CHANGELOG stub
+- **heliosApp** (Node, CalVer): adapted with CalVer version extraction
+- **PhenoSpecs** (Markdown docs): adapted for markdown triggers + git tag versioning
+
+**Artifacts delivered**:
+- `.github/workflows/release-dry-run.yml` (7 repos): PR-triggered dry-run validation
+- `docs/release/tag_command.md` (8 repos): manual tag + recovery procedures
+- `CHANGELOG.md` seeded (Tracera, PhenoSpecs + existing repos updated): "Unreleased" sections
+- `docs/governance/release_cut_adoption.md`: comprehensive tracker + per-repo worklog breakdown
+- `phenotype-tooling/crates/release-cut/README.md`: updated with org-wide adoption guide + customization patterns
+
+**Pattern standardized**:
+1. PR-triggered dry-run validates release plan on version/manifest changes
+2. Manual execution: `release-cut v<VERSION> --execute` (Rust) or language-specific equivalent (Node/Docs)
+3. Recovery: rollback commands for each language variant
+4. CHANGELOG: all repos maintain "Unreleased" section
+
+**Worklog commits**:
+- `feat(release): adopt phenotype-tooling release-cut workflow` (7 per-repo commits)
+- `docs(release-cut): update README with org-wide adoption guide` (phenotype-tooling)
+- `docs(org): release-cut adoption tracker — 8 repos onboarded` (repos root)
+
+**Key design decisions**:
+- Rust projects: Direct `release-cut` binary (fully automated)
+- Node projects: Custom dry-run via version extraction + validation script
+- Docs projects: Git tags + CHANGELOG as source of truth (no version bump automation)
+- All repos share `.github/workflows/` location + `docs/release/` documentation pattern
+
+---
+
 ## 2026-04-24 — Cross-Repo Consolidation Analysis: phenoShared ↔ pheno
 
 **Scope**: Comparative analysis of phenoShared (13K LOC, 12 crates) and pheno (215K LOC monorepo)

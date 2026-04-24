@@ -1,9 +1,14 @@
 ---
-import type { InferGetStaticPropsType } from 'astro';
 import Layout from '../../../layouts/Layout.astro';
 
-// Define all product docsite mappings
-const docSites = {
+interface DocSite {
+  name: string;
+  docsUrl: string;
+  searchUrl: string;
+  status: 'stable' | 'beta' | 'alpha';
+}
+
+const docSites: Record<string, DocSite> = {
   focalpoint: {
     name: 'FocalPoint',
     docsUrl: 'https://focalpoint.phenotype.dev/docs',
@@ -37,15 +42,16 @@ const docSites = {
 };
 
 export function getStaticPaths() {
-  // Generate routes for all product docs
-  return Object.entries(docSites).map(([slug]) => ({
-    params: { product: slug, slug: undefined }
-  }));
+  return [
+    { params: { product: 'focalpoint', slug: undefined } },
+    { params: { product: 'agileplus', slug: undefined } },
+    { params: { product: 'tracera', slug: undefined } },
+    { params: { product: 'paginary', slug: undefined } },
+    { params: { product: 'sidekick', slug: undefined } }
+  ];
 }
 
-type Props = InferGetStaticPropsType<typeof getStaticPaths>;
-
-const { product, slug } = Astro.params as { product: keyof typeof docSites; slug?: string };
+const { product, slug } = Astro.params;
 const docSite = docSites[product];
 
 if (!docSite) {
@@ -120,19 +126,26 @@ const targetUrl = `${docSite.docsUrl}${path}`;
       <div class="mt-12">
         <h2 class="text-2xl font-bold text-white mb-6">Documentation Index</h2>
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {Object.entries(docSites).map(([key, site]) => (
-            <a
-              href={`/docs/${key}`}
-              class={`rounded-lg border p-6 transition-all ${
-                key === product
-                  ? 'border-blue-500 bg-blue-500/10'
-                  : 'border-slate-700 bg-slate-800 hover:border-slate-600'
-              }`}
-            >
-              <h3 class="text-lg font-semibold text-white">{site.name}</h3>
-              <p class="mt-2 text-sm text-slate-400">{site.status}</p>
-            </a>
-          ))}
+          <a href="/docs/focalpoint" class={`rounded-lg border p-6 transition-all ${product === 'focalpoint' ? 'border-blue-500 bg-blue-500/10' : 'border-slate-700 bg-slate-800 hover:border-slate-600'}`}>
+            <h3 class="text-lg font-semibold text-white">FocalPoint</h3>
+            <p class="mt-2 text-sm text-slate-400">stable</p>
+          </a>
+          <a href="/docs/agileplus" class={`rounded-lg border p-6 transition-all ${product === 'agileplus' ? 'border-blue-500 bg-blue-500/10' : 'border-slate-700 bg-slate-800 hover:border-slate-600'}`}>
+            <h3 class="text-lg font-semibold text-white">AgilePlus</h3>
+            <p class="mt-2 text-sm text-slate-400">stable</p>
+          </a>
+          <a href="/docs/tracera" class={`rounded-lg border p-6 transition-all ${product === 'tracera' ? 'border-blue-500 bg-blue-500/10' : 'border-slate-700 bg-slate-800 hover:border-slate-600'}`}>
+            <h3 class="text-lg font-semibold text-white">Tracera</h3>
+            <p class="mt-2 text-sm text-slate-400">beta</p>
+          </a>
+          <a href="/docs/paginary" class={`rounded-lg border p-6 transition-all ${product === 'paginary' ? 'border-blue-500 bg-blue-500/10' : 'border-slate-700 bg-slate-800 hover:border-slate-600'}`}>
+            <h3 class="text-lg font-semibold text-white">Paginary</h3>
+            <p class="mt-2 text-sm text-slate-400">stable</p>
+          </a>
+          <a href="/docs/sidekick" class={`rounded-lg border p-6 transition-all ${product === 'sidekick' ? 'border-blue-500 bg-blue-500/10' : 'border-slate-700 bg-slate-800 hover:border-slate-600'}`}>
+            <h3 class="text-lg font-semibold text-white">Sidekick</h3>
+            <p class="mt-2 text-sm text-slate-400">beta</p>
+          </a>
         </div>
       </div>
     </div>

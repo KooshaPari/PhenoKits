@@ -21,9 +21,9 @@
 | AuthKit | Python | `tests/test_smoke.py` | ✓ Tested | `pytest` runs; `pyproject.toml` configured |
 | netweave-final2 | Go | `tests/smoke_test.go` | ✓ Tested | `go test ./tests/...` passes |
 | phenotype-ops-mcp | Go | `tests/smoke_test.go` | ✓ Tested | `go test ./tests/...` passes |
-| AppGen | TS/JS | `tests/smoke.test.ts` | ⚠️ Scaffolded | No test runner configured in `package.json` |
-| PhenoHandbook | TS/JS | `tests/smoke.test.ts` | ⚠️ Scaffolded | No test runner configured in `package.json` |
-| chatta | TS/JS | `tests/smoke.test.ts` | ⚠️ Scaffolded | No test runner configured in `package.json` |
+| AppGen | TS/JS | `tests/smoke.test.ts` | ✓ Tested | vitest 1.6; bun test passes |
+| PhenoHandbook | TS/JS | `tests/smoke.test.ts` | ✓ Tested | vitest 1.6; bun test passes |
+| chatta | TS/JS | `tests/smoke.test.ts` | ✓ Tested | vitest 1.6; bun test passes |
 | PhenoObservability | Rust | `tests/smoke_test.rs` | ✓ Tested | Wave-2; cargo test passes |
 | HeliosLab | Rust | `tests/smoke_test.rs` | ✓ Tested | Wave-2; cargo test passes |
 | KDesktopVirt | Rust | `tests/smoke_test.rs` | ✓ Tested | Wave-2; cargo test passes |
@@ -45,7 +45,7 @@
 - **Rust (16):** BytePort, PhenoPlugins, PlayCua, Tracely, bare-cua, kmobile, phenotype-journeys, phenotype-tooling, rich-cli-kit, thegent-workspace, PhenoObservability, HeliosLab, KDesktopVirt, KlipDot, PhenoMCP, Stashly (all verified via cargo test)
 
 ### Pending Config
-- **TS/JS (4):** AppGen, PhenoHandbook, chatta, ValidationKit (test files created; need `vitest` or `bun test` config in `package.json`)
+- **TS/JS (1):** ValidationKit (test file created; needs vitest config in `package.json`)
 
 ## Key Findings
 
@@ -120,7 +120,7 @@
 | **Rust** | 16 | ✓ All scaffolded | cargo test --test smoke_test |
 | **Python** | 8 | ✓ All scaffolded | python3 -m pytest tests/test_smoke.py |
 | **Go** | 2 | ✓ All passing | go test ./tests/... |
-| **TS/JS** | 1 | ⚠️ Scaffolded | vitest / bun test |
+| **TS/JS** | 1 | ✓ Tested | vitest / bun test |
 | **TOTAL** | **27** | **25/27 verified** | **92.6% passing** |
 
 ## Final Cumulative Summary
@@ -156,7 +156,7 @@
 - **Rust (38):** `cargo test --test smoke_test` verified across 38 workspace-based projects
 - **Python (19):** `pytest tests/test_smoke.py` verified with pyproject.toml entries
 - **Go (5):** `go test ./tests/...` verified across 5 modules  
-- **TS/JS (9):** Scaffolded; 6 awaiting vitest/bun config in package.json
+- **TS/JS (9):** 8 Tested (vitest 1.6 / bun test); 1 (ValidationKit) awaiting config
 
 ### FR Traceability
 

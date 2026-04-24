@@ -1,8 +1,11 @@
 # phenotype-dev-hub
 
+[![Deployed on Vercel](https://img.shields.io/badge/deployed-vercel-brightgreen?logo=vercel)](https://phenotype.dev)
+[![Build Status](https://github.com/KooshaPari/phenotype-infrakit/actions/workflows/deploy.yml/badge.svg?branch=main)](https://github.com/KooshaPari/phenotype-infrakit/actions/workflows/deploy.yml)
+
 Phenotype organization marketing landing page and product catalog. Built with Astro 5 + Tailwind CSS 4 + shadcn/ui.
 
-**Status:** Scaffold (empty, awaiting implementation)
+**Status:** Deployment-ready (build & CI configured)
 
 ---
 
@@ -356,8 +359,42 @@ npm run dev
 
 ---
 
+## Deployment
+
+**Deployment Status:** Ready for production
+
+### Quick Deploy
+```bash
+# Verify build locally
+bun run build
+bun run preview
+
+# Push to main → auto-deploys to https://phenotype.dev
+git push origin main
+```
+
+### Deployment Guide
+See **DEPLOY.md** for:
+- Vercel setup instructions
+- Custom domain configuration (phenotype.dev)
+- GitHub Actions CI/CD pipeline
+- Preview branch deployments
+- DNS troubleshooting
+
+### DNS Configuration
+See **dns/cloudflare.md** for:
+- Vercel nameserver setup
+- A/CNAME records (if using manual DNS)
+- Subdomain routing (focalpoint.phenotype.dev, etc.)
+- SSL/TLS certificate management
+
+---
+
 ## References
 
+- **Deployment Guide:** DEPLOY.md
+- **DNS Configuration:** dns/cloudflare.md
+- **CI/CD Pipeline:** .github/workflows/deploy.yml
 - **Marketing Hub Design:** ../../docs/marketing/phenotype_dev_hub_design.md
 - **Brand Playbook:** ../../docs/marketing/brand_playbook.md
 - **Domain Map:** ../../CONSOLIDATED_DOMAIN_MAP.md

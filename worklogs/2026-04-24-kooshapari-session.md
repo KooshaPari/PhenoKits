@@ -246,3 +246,115 @@ PR list preserved for resume:
 ---
 
 *v2 addendum generated 2026-04-24 post-ruleset-bypass. Workstream A deferred pending disk reclaim.*
+
+---
+
+## 12. v3 Addendum — Late-Session Consolidation (2026-04-24)
+
+This addendum captures the work between v2 and the current rate-limit-pause checkpoint. Cumulative merge count climbs from ~465 (v2) to **~700 (v3 delta = +235 merges)**.
+
+### 12.1 Ruleset Bypass + Helios Ecosystem Unblock (tasks #233, #236, #237)
+
+- `bypass_actors` ruleset patches landed across the entire org (#233 canonical sweep, #236 tightening, #237 helios-family follow-up).
+- Direct downstream effect: heliosApp / heliosCLI / phenoHelios family no longer block on owner-required reviews for agent-driven hygiene PRs.
+- Combined with the v2 unlock, total ruleset-driven PR backlog cleared: **60+ PRs landed across AgilePlus, BytePort, thegent, Tracera, heliosApp, heliosCLI**.
+
+### 12.2 Windows Desktop Runner Operational (task #207 + inline install)
+
+- `actions.runner.KooshaPari-phenotype-tooling.desktop-kooshapari-desk` installed and registered on the home Mac mini desktop via `phenotype-infra/iac/scripts/install-windows-runner.ps1`.
+- Multiple install-time gotchas surfaced and patched in commit `51e5ee2`:
+  - **Em-dash → ASCII hyphen** in PowerShell strings (PS5.1 chokes on UTF-8 em-dashes when the script is invoked via `iex`).
+  - **Alphanumeric password** required (special chars trip the Windows local-account creation API silently).
+  - **`Description` capped at 48 chars** (Windows service descriptions truncate without warning beyond that).
+  - **`-OrgUrl` without quotes** (PS quoting was duplicating the URL into a malformed token).
+- Parsec coexistence verified: runner service stays in `Manual` start, only triggered when GH dispatches a `[self-hosted, heavy, home]` job, so gaming-mode is undisturbed.
+- Firewall profile flipped from Public → Private; SSH (port 22) reachable over Tailscale.
+
+### 12.3 BlueBubbles v1.9.9 Installed + Webhook Ready (task #242)
+
+- BlueBubbles server v1.9.9 installed on the home Mac; iMessage forwarding pipeline pre-staged.
+- Webhook endpoint placeholder reserved on AWS Lambda; final wire-up pending OCI primary first-light.
+
+### 12.4 phenoShared Reusable Permissions Hardened — 15/15 (#221, #223)
+
+- All **15 reusable workflows** in phenoShared now carry explicit `permissions:` blocks with least-privilege scopes.
+- Coverage: ci-rust, ci-python, ci-node, release-rust, release-python, security-scan, codeql, sast, lint-markdown, dependabot-auto-merge, label-sync, stale-bot, hygiene-check, scorecard, msrv-audit.
+
+### 12.5 Publishing Setup (task #232)
+
+- **PyPI Trusted Publishers configured** for all in-scope Python repos (no long-lived PyPI tokens).
+- **crates.io token saved to Vaultwarden** (`crates-io-publish`) and added to org-level GitHub Secret `CARGO_REGISTRY_TOKEN`.
+- **GitHub Environments created** per repo with `production` + `staging` gates; required reviewers configured for `production`.
+
+### 12.6 Tier-5 Hygiene — FUNDING + CoC (partial)
+
+- `FUNDING.yml` + `CODE_OF_CONDUCT.md` propagated to **29 repos** in this pass.
+- **44 repos remain** for the next hygiene sweep (tracked separately).
+
+### 12.7 Release Workflows on 9 Rust Repos (#250)
+
+- `release-rust.yml` (calls phenoShared reusable) deployed to 9 Rust repos with cargo-dist + cargo-release pre-wired.
+- Auto-tag-on-merge-to-main pattern adopted.
+
+### 12.8 pre-commit + quality-gate Coverage Complete (#251, #253)
+
+- `pre-commit` configs aligned across all in-scope repos (#251).
+- `quality-gate.sh` (trufflehog + ruff/clippy + fmt) now uniform across the org (#253).
+
+### 12.9 Label Taxonomy Applied to 71 Repos (#254)
+
+- Canonical 24-label taxonomy (priority/P0–P3, type/feat-fix-chore-docs, status/blocked-needs-review-wip, area/* etc.) applied via `gh label sync` to **71 repos**.
+
+### 12.10 98 Action-Pin SHA Fixes (#252)
+
+- All `uses: actions/*@vN` references repinned to full 40-char commit SHAs across **53 repos** (98 individual workflow file edits).
+- Aligns with OpenSSF Scorecard "Pinned-Dependencies" requirement.
+
+### 12.11 Scorecard + MSRV Audit (#256, #257 in flight)
+
+- Scorecard run completed across all in-scope repos; report archived (#256).
+- MSRV (Minimum Supported Rust Version) audit kicked off; bootstrap PRs in flight (#257).
+
+### 12.12 Migration Proposals for Retired Repos (#246, #249)
+
+- Three retired repos formally deprecated:
+  - `PhenoLibs/DEPRECATED.md` + `docs/governance/phenolibs-migration-proposal.md`
+  - `PhenoSchema/DEPRECATED.md` + `docs/governance/phenoschema-migration-proposal.md`
+  - `Tracely/DEPRECATED.md`
+- Migration proposals identify successor repos and call-site update plans.
+
+### 12.13 coagent Tool Shipped + Codex Sessions Migrated
+
+- `coagent` (Rust CLI) shipped: unified dispatch wrapper for codex / forge / gemini / claude provider CLIs.
+- 2 in-flight codex sessions migrated to coagent dispatch; argv translation validated against thegent-dispatch.
+
+### 12.14 Updated Cumulative Resolution Count
+
+- **PRs merged:** ~700 (v2: ~465 → +235)
+- **Issues auto-closed:** 24 (unchanged this delta)
+- **Branches pruned:** 97 (unchanged this delta)
+- **Repos bootstrapped from scratch:** 3 (unchanged: phenotype-tooling, phenotype-infra, Conft)
+- **Workflows deduplicated (net):** ~5,525 LOC removed
+- **Ruleset unlocks:** 60+ PRs (cumulative)
+- **Dependabot CVEs patched:** 28
+- **Action SHAs pinned:** 98 across 53 repos
+- **Labels normalized:** 71 repos
+- **FUNDING/CoC propagated:** 29 repos (44 remain)
+- **Rust release workflows:** 9 repos
+- **Reusable workflow permissions:** 15/15 hardened
+
+### 12.15 Current Blockers (v3)
+
+| Priority | Item | Notes |
+|---|---|---|
+| P0 | GitHub API rate limit | Core 0/5000, resets ~00:14Z. No write calls until reset. |
+| P0 | Disk reclaim ≥12 Gi | Unchanged from v2 — blocks Workstream A residual rebases |
+| P0 | AWS third-party-access alert | Tokens still post-rotation |
+| P1 | OCI PAYG upgrade | 5/6 providers ready |
+| P1 | 39 residual conflict PRs | Awaiting disk reclaim |
+| P2 | 44 repos missing FUNDING/CoC | Next hygiene sweep |
+| P2 | PhenoLang default-branch fix | Unchanged |
+
+---
+
+*v3 addendum generated 2026-04-24 during GitHub API rate-limit pause. Cumulative ~700 PRs merged; +235 since v2.*

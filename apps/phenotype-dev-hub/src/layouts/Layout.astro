@@ -2,9 +2,14 @@
 export interface Props {
   title?: string;
   description?: string;
+  canonical?: string;
 }
 
-const { title = 'Phenotype', description = 'Developer hub for Phenotype organization' } = Astro.props;
+const {
+  title = 'Phenotype',
+  description = 'Developer hub for Phenotype organization',
+  canonical
+} = Astro.props;
 ---
 
 <!doctype html>
@@ -16,6 +21,9 @@ const { title = 'Phenotype', description = 'Developer hub for Phenotype organiza
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     <meta name="description" content={description} />
+
+    <!-- Canonical URL -->
+    {canonical && <link rel="canonical" href={canonical} />}
 
     <!-- Open Graph -->
     <meta property="og:title" content={title} />

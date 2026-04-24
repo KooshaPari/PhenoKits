@@ -48,6 +48,31 @@
       "source": "/hwledger",
       "destination": "/products/hwledger",
       "permanent": false
+    },
+    {
+      "source": "/docs/focalpoint/:path*",
+      "destination": "https://focalpoint.phenotype.dev/docs/:path*",
+      "permanent": false
+    },
+    {
+      "source": "/docs/agileplus/:path*",
+      "destination": "https://agileplus.phenotype.dev/docs/:path*",
+      "permanent": false
+    },
+    {
+      "source": "/docs/tracera/:path*",
+      "destination": "https://tracera.phenotype.dev/docs/:path*",
+      "permanent": false
+    },
+    {
+      "source": "/docs/paginary/:path*",
+      "destination": "https://paginary.phenotype.dev/docs/:path*",
+      "permanent": false
+    },
+    {
+      "source": "/docs/sidekick/:path*",
+      "destination": "https://sidekick.phenotype.dev/docs/:path*",
+      "permanent": false
     }
   ]
 }

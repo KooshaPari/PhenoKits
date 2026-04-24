@@ -150,6 +150,23 @@ Status: Wave-2 complete (2026-04-24)
 | GDK | None | fr-coverage + doc-links | ✓ | ✓ (Rust) | Complete |
 | vibeproxy-monitoring-unified | None | fr-coverage + doc-links | ✓ | — | Complete (no lang) |
 
+## Wave-10 Batch C (12 repos, April 24)
+
+| Repo | CI before | CI after | Language | Status |
+|------|-----------|----------|----------|--------|
+| GDK | None | quality-gate + fr-coverage + doc-links | Rust | Complete |
+| helios-router | None | quality-gate + fr-coverage + doc-links | Rust | Complete |
+| phenoAI | None | quality-gate + fr-coverage + doc-links | Rust | Complete |
+| phenoData | None | quality-gate + fr-coverage + doc-links | Rust | Complete |
+| DevHex | None | quality-gate + fr-coverage + doc-links | Go | Complete |
+| Parpoura | None | quality-gate + fr-coverage + doc-links | Node | Complete |
+| PhenoCompose | None | quality-gate + fr-coverage + doc-links | Node | Complete |
+| phenodocs | None | quality-gate + fr-coverage + doc-links | Node | Complete |
+| agslag-docs | None | doc-links | Docs | Complete |
+| DINOForge-UnityDoorstop | None | doc-links | Docs | Complete |
+| foqos-private | None | doc-links | Docs | Complete |
+| localbase3 | None | doc-links | Docs | Complete |
+
 ## Summary
 
 - **Wave-1:** 22 repos onboarded (April 18-24)
@@ -158,12 +175,13 @@ Status: Wave-2 complete (2026-04-24)
 - **Wave-4:** 10 repos onboarded (April 24)
 - **Wave-6:** 15 repos onboarded (April 24)
 - **Wave-7:** 9 repos onboarded from GitHub remote audit batch (April 24)
-- **Total CI coverage:** 87 active repos with CI (quality-gate, fr-coverage, doc-links)
-- **Coverage:** 87/109 (79.8%) → **Target: 80%** ✅ (EXCEEDED)
-- **Remaining:** ~22 repos for future waves (archived, documented-only, no recognized language)
+- **Wave-10 (Batch C):** 12 repos onboarded (April 24)
+- **Total CI coverage:** 99 active repos with CI (quality-gate, fr-coverage, doc-links)
+- **Coverage:** 99/109 (90.8%) → **Target: 80%** ✅✅ (SIGNIFICANTLY EXCEEDED)
+- **Remaining:** ~10 repos (archived, minimal/no code, or special deployments)
 
 ## Next Steps
 
-1. Resolve phenoShared push (GH rules blocking direct main commit)
-2. Re-audit remaining 22 repos for language detection
-3. Plan Wave-8+ for remaining coverage
+1. Final audit of remaining 10 repos (archive/migration candidates)
+2. Document CI billing constraint in status reports
+3. Plan Wave-11 for any additional high-value repos

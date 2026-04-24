@@ -115,3 +115,15 @@ All scripts and tools (CI, hooks, sync, codegen, dev-env) follow the Phenotype-o
 
 - Canonical long-form: `docs/governance/scripting_policy.md` (relative to `repos/`)
 - Canonical wording (global): `~/.claude/CLAUDE.md` → "Scripting Language Hierarchy"
+
+## Session-Learned Governance
+
+Four playbooks codified from multi-agent-session incidents (ENOSPC rounds, port conflicts, long-push timeouts, cross-session coordination):
+
+- `docs/governance/disk_budget_policy.md` — pre-dispatch disk checks + purge order.
+- `docs/governance/long_push_pattern.md` — nohup+disown for ≥3min pushes.
+- `docs/governance/multi_session_coordination.md` — Argis↔Helios bus protocol.
+- `docs/governance/enospc_playbook.md` — 3-level ENOSPC response.
+- `docs/governance/shared_process_policy.md` — first-to-need process reuse across agents.
+- `docs/governance/port_conflict_resolution.md` — :5432 / :6379 / :9000 double-bind decision tree.
+- `docs/governance/always_on_agent_design.md` — 5-module always-on agent pipeline design (usage trackers, habit predictor, always-on daemon, self-simulation, self-prompting).

@@ -1,0 +1,39 @@
+[collection]
+name = "Stashly"
+version = "0.0.1"
+repo = "https://github.com/KooshaPari/phenotype-storage"
+description = "Independent storage crates for caching, event sourcing, and state machines"
+authors = ["Phenotype"]
+license = "Apache-2.0"
+theme = "storage & persistence"
+
+[[crate]]
+name = "stashly-cache"
+version = "0.0.1"
+status = "alpha"
+stability = "0.x"
+description = "Two-tier LRU + DashMap cache with TTL support"
+source = "phenotype-cache-adapter"
+
+[[crate]]
+name = "stashly-eventstore"
+version = "0.0.1"
+status = "alpha"
+stability = "0.x"
+description = "Append-only event store with SHA-256 hash chains"
+source = "phenotype-event-sourcing"
+
+[[crate]]
+name = "stashly-statemachine"
+version = "0.0.1"
+status = "alpha"
+stability = "0.x"
+description = "Generic finite state machine with transition guards"
+source = "phenotype-state-machine"
+
+[[crate]]
+name = "stashly-migrations"
+version = "0.0.1"
+status = "stub"
+stability = "0.x"
+description = "Schema migration and versioning framework"

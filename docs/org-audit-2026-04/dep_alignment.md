@@ -158,6 +158,30 @@ For exhaustive version-by-version mapping and remediation details, see:
 
 ---
 
+## Wave-4: Clap + Reqwest Standalone Repos Alignment (2026-04-24)
+
+**Repos Processed:** 4 (KDesktopVirt, KlipDot, kmobile, pheno-agileplus-cli)
+
+| Dependency | Conflicts Before | Conflicts After | Delta |
+|------------|-----------------|-----------------|-------|
+| clap | 4 versions (4.0/4.4/4/4.5) | 1 version (4.5) | -3 |
+| reqwest | 2 versions (0.11/0.12) | 1 version (0.12) | -1 |
+
+**Repos Aligned:**
+1. **KDesktopVirt**: clap 4.0→4.5, reqwest 0.11→0.12 ✓
+2. **KlipDot**: clap 4.0→4.5 ✓
+3. **kmobile**: clap 4.4→4.5, reqwest 0.11→0.12 ✓
+4. **pheno (agileplus-cli+subcmds)**: clap 4→4.5 ✓
+
+**Total Conflict Matrix Reduction (Org-Wide):**
+- **Before Wave-4:** ~45 conflicts (per wave2/3 status)
+- **After Wave-4:** ~40 conflicts
+- **Overall Progress:** 339→40 conflicts (88% reduction across 4 waves)
+
+**Unresolved Conflicts:** AgilePlus axum 0.8 (newer than baseline 0.7) — deferred pending middleware compatibility audit.
+
+---
+
 **Last Updated:** 2026-04-24
 **By:** Dependency Alignment Agent
-**Status:** 3 repos bumped (Phase 1), full org audit complete, 339 conflicts identified, advisory baselines published
+**Status:** 4 repos bumped (Wave-4), ~88% org-wide conflict reduction, 40 remaining conflicts (clap legacy pins, reqwest 0.11 in 3 repos, axum baseline mismatch)

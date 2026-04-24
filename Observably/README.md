@@ -17,6 +17,12 @@ observably-tracing = { path = "crates/observably-tracing" }
 
 Each crate is independently importable and has no inter-crate dependencies.
 
+## Release Registry
+
+See `release-registry.toml` for version metadata, stability information, and sub-crate status. The master index of all Phenotype collections is at `../phenotype-collections.toml`.
+
+Schema documentation: `../docs/governance/release_registry_schema.md`
+
 ## Workspace
 
 ```bash

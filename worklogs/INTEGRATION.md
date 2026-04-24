@@ -6,6 +6,31 @@ for category conventions and `worklogs/AGENT_ONBOARDING.md` for writing guidance
 
 ---
 
+## [phenoSDK→AuthKit] 2026-04-24 — Auth Primitives Consolidation (Design Complete)
+
+**Wave**: 10 (backlog item #9)  
+**Scope**: Design SDK auth consolidation  
+**Status**: DESIGN COMPLETE (no code migration needed)  
+
+**Finding**: Consolidation **already complete** as of 2026-04-05.
+
+**Details**:
+- phenoSDK: Decomposed, all 305K LOC extracted (PhenoLang 31 packages, PhenoProc 17 packages)
+- AuthKit: Canonical auth SDK (Rust 2.9K + Python 14.7K + Go 508 + TS LOC)
+- Consumers: **Zero** phenoSDK auth imports found across 71 repos (verified 2026-04-24)
+- Decision: Accept complete consolidation (no action needed)
+
+**Deliverables**:
+1. Migration design doc: `docs/migrations/phenoSDK_to_AuthKit.md` (217 LOC; state analysis, consumer audit, Phase-2 options)
+2. phenoSDK DEPRECATION.md: Clarifies archived status, points to AuthKit + PhenoLang
+3. AuthKit README update: Added deprecation notice in Related Projects
+
+**Commits**: phenoSDK `dc84453`, AuthKit `5e6b6e0`, repos `e5c3933`
+
+**Optional Phase-2 (Wave-11+)**: MFA unification in AuthKit (wrap PhenoLang MFA). Effort: 6–8h. Value: 100% auth consolidation end-to-end. Priority: Low (acceptable split).
+
+---
+
 ## [phenotype-dev-hub] 2026-04-24 — Docs Federation Across 5 Product Docsites
 
 **Scope**: Wire documentation federation to FocalPoint, AgilePlus, Tracera, Paginary,

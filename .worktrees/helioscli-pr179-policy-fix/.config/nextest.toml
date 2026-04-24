@@ -1,3 +1,0 @@
-[tool.nextest]
-# Nextest configuration
-threads = 4

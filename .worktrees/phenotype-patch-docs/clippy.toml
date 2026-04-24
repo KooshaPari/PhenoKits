@@ -1,3 +1,0 @@
-# Clippy configuration for phenotype-patch
-
-avoid-breaking-exported-api = false

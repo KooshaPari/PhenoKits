@@ -1,3 +1,0 @@
-# Clippy configuration for Metron
-
-avoid-breaking-exported-api = false

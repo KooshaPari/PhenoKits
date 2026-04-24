@@ -1,3 +1,0 @@
-npx lint-staged
-node scripts/check-docs-sync.mjs
-npm run test:unit

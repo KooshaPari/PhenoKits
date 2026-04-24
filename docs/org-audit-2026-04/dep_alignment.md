@@ -107,6 +107,57 @@ done
 
 ---
 
+## Full Cross-Repo Dependency Matrix (2026-04-24)
+
+**Comprehensive Audit:** 1,203 unique dependencies across all 1,992 manifest files (1,587 Cargo.toml + 405 package.json)
+
+### Summary Statistics
+- **Total unique dependencies:** 1,203
+- **Cargo ecosystem:** 444 deps with 135 version conflicts (30.4% conflict rate)
+- **NPM ecosystem:** 759 deps with 204 version conflicts (26.9% conflict rate)
+
+### Top 5 Systemic Outliers (by impact × frequency)
+
+#### Cargo
+1. **tokio** — 12 versions across 1,042 uses (async runtime fragmentation)
+2. **tempfile** — 11 versions across 475 uses (test utility versioning)
+3. **clap** — 9 versions across 368 uses (CLI argument parsing)
+4. **serde** — 6 versions across 1,256 uses (serialization baseline drift)
+5. **serde_json** — 6 versions across 1,177 uses (JSON handling misalignment)
+
+#### NPM
+1. **typescript** — 21 versions across 204 uses (language tool fragmentation)
+2. **@types/node** — 22 versions across 124 uses (type definitions drift)
+3. **@playwright/test** — 17 versions across 144 uses (test framework inconsistency)
+4. **vitest** — 17 versions across 101 uses (alternate test runner fragmentation)
+5. **vitepress** — 9 versions across 143 uses (documentation site builder variance)
+
+### Detailed Matrix Resources
+
+For exhaustive version-by-version mapping and remediation details, see:
+- **Full Matrix Overview:** [full_dep_matrix.md](./full_dep_matrix.md)
+- **Detailed Cargo Listing:** [cargo_matrix_detailed.md](./cargo_matrix_detailed.md)
+- **Detailed NPM Listing:** [npm_matrix_detailed.md](./npm_matrix_detailed.md)
+- **Advisory Baseline:** [phenotype-versions.toml](./phenotype-versions.toml) (also at `/repos/phenotype-versions.toml`)
+
+### Recommended Advisory Versions
+
+**Cargo (High-Impact):**
+- tokio: **1.39** (latest stable, widely adopted)
+- serde: **1.0** (avoid 2.0 breakage)
+- serde_json: **1.0** (paired with serde 1.0)
+- thiserror: **1.0** (stable error handling)
+- chrono: **0.4** (time handling standard)
+
+**NPM (High-Impact):**
+- typescript: **5.9** (LTS before 6.0 adoption)
+- vitest: **1.6** (stable test framework)
+- @playwright/test: **1.47** (latest E2E testing)
+- vitepress: **1.8** (documentation baseline)
+- react: **18.2** (latest React 18 stable)
+
+---
+
 **Last Updated:** 2026-04-24
 **By:** Dependency Alignment Agent
-**Status:** 3 repos bumped, 1 preexisting breakage flagged (bare-cua xcap), 6 repos deferred for audit
+**Status:** 3 repos bumped (Phase 1), full org audit complete, 339 conflicts identified, advisory baselines published

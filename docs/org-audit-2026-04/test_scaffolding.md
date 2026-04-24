@@ -131,10 +131,25 @@
 | Wave-2 | 12 | Rust/Py/TS | 6 | 5 | — | 1 | 28 | 25.7% |
 | Wave-3 | 10 | Rust/Py | 6 | 3 | — | 1 | 38 | 34.9% |
 | Wave-4 | 10 | Rust/Py | 6 | 3 | — | 1 | 48 | 44.0% |
-| **Wave-5** | **23** | **All** | **10** | **7** | **3** | **3** | **71** | **65.1%** |
-| **GRAND TOTAL** | **71** | **All** | **38** | **19** | **5** | **9** | **71** | **65.1% ✓** |
+| Wave-5A | 23 | All | 10 | 7 | 3 | 3 | 71 | 65.1% |
+| Wave-5B | 9 | All | 1 | 5 | 2 | 1 | 71 | 65.1% |
+| **GRAND TOTAL** | **71 unique** | **All** | **38** | **22** | **5** | **6** | **71** | **65.1% ✓** |
 
 **Status:** Coverage target (65%) **REACHED**. Test harness infrastructure deployed across 71 active-tier repos.
+
+### Wave-5B Final Batch (9 repos, closes gap)
+
+| Repo | Language | Test File | Status |
+|------|----------|-----------|--------|
+| AgilePlus | Rust | `tests/smoke_test.rs` | ✓ Seeded |
+| Apisync | Go | `tests/smoke_test.go` | ✓ Seeded |
+| PlatformKit | Python | `tests/test_smoke.py` | ✓ Seeded |
+| Planify | Python | `tests/test_smoke.py` | ✓ Seeded |
+| thegent-jsonl | TS/JS | `tests/smoke.test.ts` | ✓ Seeded |
+| thegent-utils | Go | `tests/smoke_test.go` | ✓ Seeded |
+| phenotype-packs | Python | `tests/test_smoke.py` | ✓ Seeded |
+| phenotype-skills | Python | `tests/test_smoke.py` | ✓ Seeded |
+| PhenoSpec | Python | `tests/test_smoke.py` | ✓ Seeded |
 
 ### Test Infrastructure Verification
 

@@ -137,3 +137,28 @@ V3 denominator of **71** is authoritative:
 ## Conclusion
 
 **Coverage is high (88–98% across all dimensions).** Discrepancy between earlier waves stems from denominator drift (inclusion of wtree dirs, support dirs, or submodule double-counting) rather than regression. V3 is canonical; earlier waves overstated FR coverage due to counting non-repos.
+
+---
+
+## Extended Perimeter Scan (Related Audit)
+
+**See:** `extended_perimeter_scan.md` (same directory)
+
+Extended audit expanded scope beyond COVERAGE_V3's "active repos only" to include:
+- **HexaKit subprojects** (1 monorepo, 175+ subdirs, ~500K LOC est.)
+- **Embedded submodules** (5 repos: PhenoDevOps, PhenoObservability, AuthKit, crates)
+- **Git worktrees** (126 feature branches in `.worktrees/`)
+- **Archived repos** (17 legacy/reference repos in `.archive/`)
+
+**Total extended perimeter:** 256 entities (~10.5M LOC in active repos)
+
+**Key findings:**
+- No submodule formalization (missing `.gitmodules`)
+- HexaKit not yet decomposed into subproject catalog
+- Worktree naming inconsistent (some use `repo/category/branch`, others flat)
+- Archive repos (17) are safe cleanup candidates
+
+**Recommendations for COVERAGE_V4:**
+- Include HexaKit subprojects once cataloged from Cargo.toml
+- Formalize submodule declarations or migrate to workspace members
+- Exclude worktrees from active repo count (transient feature branches)

@@ -1489,3 +1489,39 @@ gh pr merge KooshaPari/tracera#342 --admin --squash
 - Cascade-root verification: confirmed #367, BytePort#27, pheno#60 are all still OPEN (not merged) as of 2026-04-24.
 - Read-only audit. No clones, no edits.
 
+
+## 2026-04-24 | GOVERNANCE | Phenotype Governance Baseline Deployment
+
+**Context:** 61/109 repos lacked minimal governance (CLAUDE.md, AGENTS.md, worklog). Identified systemic gap in org-wide governance adoption.
+
+**Decision:** Implement three-file baseline template system for efficient deployment across active tier repos.
+
+**Deliverables:**
+- 3 templates created: `docs/templates/CLAUDE.template.md`, `AGENTS.template.md`, `worklog.template.md`
+- 25 active-tier repos adopted full governance in Batch 1
+- Governance adoption tracker: `docs/org-audit-2026-04/governance_adoption.md`
+- Reusable deployment playbook documented
+
+**Execution:**
+- Templates: 50 minutes, 314 LOC across 4 files
+- Batch 1 deployment: Automated sed templating + parallel git commits
+- 25 repos deployed successfully: all CLAUDE.md + AGENTS.md + worklog created/updated
+
+**Impact:**
+- CLAUDE.md coverage: 38→63 repos (+25, +23%)
+- Total governance complete: 25/25 deployed repos (100% success rate)
+- Remaining work clearly scoped (36 repos in Tiers 2-3; 8 archived skipped)
+
+**Remaining Work (Batch 2-3):**
+- 12 tier-2 repos: kmobile, kwality, McpKit, org-github, Paginary, phench, etc.
+- 14 tier-3 repos: PhenoMCP, PhenoObservability, phenotype-*, etc.
+- 8 archived repos: skip governance deployment
+
+**Key Artifacts:**
+- `/repos/docs/templates/CLAUDE.template.md` — 90 LOC, 8 sections (Project Overview, AgilePlus Mandate, Quality Checks, Worktree Discipline, Cross-Project Reuse, Related Docs)
+- `/repos/docs/templates/AGENTS.template.md` — 110 LOC, 8 sections (Identity, Operating Loop, Canonical Surfaces, Quality Rules, Governance References, Worktree Pattern, Integration, Parent Contract)
+- `/repos/docs/templates/worklog.template.md` — 80 LOC, 7-category taxonomy (ARCHITECTURE, DUPLICATION, DEPENDENCIES, INTEGRATION, PERFORMANCE, RESEARCH, GOVERNANCE)
+- `/repos/docs/org-audit-2026-04/governance_adoption.md` — Comprehensive tracker with status summary, deployed repos list, templates doc, deployment playbook
+
+**Tags:** `[cross-repo]` `[GOVERNANCE]` `[Phenotype-org]`
+

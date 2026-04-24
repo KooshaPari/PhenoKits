@@ -1,5 +1,7 @@
 # Stashly — Phenotype Storage & Persistence Collection
 
+![Stashly Logo](assets/logo-placeholder.svg)
+
 Stashly is a curated collection of independent, battle-tested storage crates for Rust. Caching, event sourcing, state machines, and persistence patterns as standalone cargo-installable packages.
 
 ## Crates

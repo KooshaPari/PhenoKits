@@ -1,6 +1,6 @@
-# Phenotype Tooling Adoption — Phase 1
+# Phenotype Tooling Adoption — Wave 1 & 2
 
-Status: In progress (2026-04-24)
+Status: Wave-2 complete (2026-04-24)
 
 ## Target Repos (22 active)
 
@@ -49,10 +49,40 @@ Status: In progress (2026-04-24)
 | sbom-gen | Software bill of materials | Available in tooling/ symlinks |
 | fuzz-setup | Fuzzing harness setup (optional) | Available in tooling/ symlinks |
 
+## Wave-2 Repos (20 additional)
+
+| Repo | CI before | CI after | Status |
+|------|-----------|----------|--------|
+| AppGen | None | quality-gate + fr-coverage + doc-links | Complete |
+| AtomsBot | None | quality-gate + fr-coverage + doc-links | Complete |
+| AuthKit | None | quality-gate + fr-coverage + doc-links | Complete |
+| BytePort | None | quality-gate + fr-coverage + doc-links | Complete |
+| Dino | None | quality-gate + fr-coverage + doc-links | Complete |
+| Eidolon | None | quality-gate + fr-coverage + doc-links | Complete |
+| HeliosLab | None | quality-gate + fr-coverage + doc-links | Complete |
+| KDesktopVirt | None | quality-gate + fr-coverage + doc-links | Complete |
+| McpKit | None | quality-gate + fr-coverage + doc-links | Complete |
+| Paginary | None | quality-gate + fr-coverage + doc-links | Complete |
+| PhenoDevOps | None | quality-gate + fr-coverage + doc-links | Complete |
+| PhenoMCP | None | quality-gate + fr-coverage + doc-links | Complete |
+| PhenoPlugins | None | quality-gate + fr-coverage + doc-links | Complete |
+| PhenoProc | None | quality-gate + fr-coverage + doc-links | Complete |
+| PhenoVCS | None | quality-gate + fr-coverage + doc-links | Complete |
+| Sidekick | None | quality-gate + fr-coverage + doc-links | Complete |
+| Tracera-recovered | None | quality-gate + fr-coverage + doc-links | Complete |
+| chatta | None | quality-gate + fr-coverage + doc-links | Complete |
+| netweave-final2 | None | quality-gate + fr-coverage + doc-links | Complete |
+| Conft | None | quality-gate + fr-coverage + doc-links | Complete |
+
+## Summary
+
+- **Wave-1:** 22 repos onboarded (April 18-24)
+- **Wave-2:** 20 repos onboarded (April 24)
+- **Total CI coverage:** 42 active repos (quality-gate, fr-coverage, doc-links)
+- **Remaining:** ~65 repos flagged in UPLIFT_REPORT (wave-3+ pending)
+
 ## Next Steps
 
-1. Build phenotype-tooling binaries (in progress)
-2. Deploy workflows to all 22 repos
-3. Create per-repo commits (`chore(ci): adopt phenotype-tooling...`)
-4. Parent commit to canonical repos root
-5. Monitor CI execution (note: GitHub Actions billing constraints apply)
+1. Monitor Wave-2 CI execution (note: GitHub Actions billing constraints apply)
+2. Plan Wave-3+ for remaining 65 repos (prioritize by LOC + project tier)
+3. Aggregate CI metrics across waves

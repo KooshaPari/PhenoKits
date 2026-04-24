@@ -7,29 +7,59 @@
 
 | Repos Indexed | Categories | Empty Templates | Last Updated |
 |---|---|---|---|
-| 57 | 8 | 0 | unknown |
+| 84 | 8 | 0 | unknown |
 
 ## All Worklogs (Most Recent First)
 
 | Repo | File | Date | Category | Status | Snippet |
 |------|------|------|----------|--------|----------|
+| `BytePort` | `worklog.md` | unknown | **ARCHITECTURE** | ✓ Active | **chore(ci): adopt phenotype-tooling workflows (wave-2)** |
+| `AuthKit` | `worklog.md` | unknown | **ARCHITECTURE** | ✓ Active | **docs(readme): expand README.md with purpose, stack, quick-start, related proje… |
+| `artifacts` | `worklog.md` | unknown | **ARCHITECTURE** | ✓ Active | **docs(loc): drift report — 14.3M LOC (post-archive), top-10 repos +4.4M net**… |
 | `heliosApp` | `worklog.md` | unknown | **GOVERNANCE** | ✓ Active | **Category: GOVERNANCE** |
+| `Tokn` | `worklog.md` | unknown | **ARCHITECTURE** | ✓ Active | **ci(workflows): add quality-gate + fr-coverage CI pipeline** |
+| `AtomsBot` | `worklog.md` | unknown | **ARCHITECTURE** | ✓ Active | **docs(fr): scaffold FUNCTIONAL_REQUIREMENTS.md with stubs (wave-2)** |
+| `cheap-llm-mcp` | `worklog.md` | unknown | **ARCHITECTURE** | ✓ Active | **docs(fr): scaffold FUNCTIONAL_REQUIREMENTS.md** |
+| `bifrost-extensions` | `worklog.md` | unknown | **ARCHITECTURE** | ✓ Active | **docs(loc): drift report — 14.3M LOC (post-archive), top-10 repos +4.4M net**… |
+| `Apisync` | `worklog.md` | unknown | **ARCHITECTURE** | ✓ Active | **docs(loc): drift report — 14.3M LOC (post-archive), top-10 repos +4.4M net**… |
+| `HeliosLab` | `worklog.md` | unknown | **ARCHITECTURE** | ✓ Active | **docs(readme): expand README.md with purpose, stack, quick-start, related proje… |
 | `phenoDesign` | `worklog.md` | unknown | **GOVERNANCE** | ✓ Active | **Category: GOVERNANCE** |
+| `PhenoLibs` | `worklog.md` | unknown | **ARCHITECTURE** | ✓ Active | **chore: rename PhenoKit to PhenoLibs, extract focused workspaces** |
 | `HexaKit` | `ARCHITECTURE_INFRAKIT.md` | unknown | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
 | `HexaKit` | `PHASE4_CONSOLIDATION_STRATEGY.md` | unknown | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
 | `HexaKit` | `PHASE2_COMPLETE_REPORT.md` | unknown | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `PhenoAgent` | `worklog.md` | unknown | **ARCHITECTURE** | ✓ Active | **docs(loc): drift report — 14.3M LOC (post-archive), top-10 repos +4.4M net**… |
+| `Eidolon` | `worklog.md` | unknown | **ARCHITECTURE** | ✓ Active | **docs: add getting-started guide with desktop, mobile, sandbox automation** |
+| `Dino` | `worklog.md` | unknown | **ARCHITECTURE** | ✓ Active | **docs(fr): scaffold FUNCTIONAL_REQUIREMENTS.md** |
+| `PlatformKit` | `worklog.md` | unknown | **ARCHITECTURE** | ✓ Active | **docs(loc): drift report — 14.3M LOC (post-archive), top-10 repos +4.4M net**… |
+| `bare-cua` | `worklog.md` | unknown | **ARCHITECTURE** | ✓ Active | **docs(wave-4): scaffold FUNCTIONAL_REQUIREMENTS.md with 6 stubs** |
+| `phench` | `worklog.md` | unknown | **ARCHITECTURE** | ✓ Active | **docs(loc): drift report — 14.3M LOC (post-archive), top-10 repos +4.4M net**… |
+| `Civis` | `worklog.md` | unknown | **ARCHITECTURE** | ✓ Active | **docs(readme): expand README.md with purpose, stack, quick-start, related proje… |
+| `PlayCua` | `worklog.md` | unknown | **ARCHITECTURE** | ✓ Active | **chore(governance): adopt standard CLAUDE.md + AGENTS.md + worklog (wave-2)** |
+| `cliproxyapi-plusplus` | `worklog.md` | unknown | **ARCHITECTURE** | ✓ Active | **chore(ci): adopt phenotype-tooling workflows (wave-3)** |
 | `worklogs` | `AGENTS.md` | unknown | **ARCHITECTURE** | ✓ Active | **Category:** GOVERNANCE |
+| `Tracera` | `worklog.md` | unknown | **ARCHITECTURE** | ✓ Active | **docs(loc): drift report — 14.3M LOC (post-archive), top-10 repos +4.4M net**… |
 | `PhenoKits` | `PHASE2_COMPLETE_REPORT.md` | unknown | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `PhenoKits` | `worklog.md` | unknown | **ARCHITECTURE** | ✓ Active | **docs(readme): create comprehensive README.md with toolkit overview and depende… |
+| `TestingKit` | `worklog.md` | unknown | **ARCHITECTURE** | ✓ Active | **test(smoke): seed minimal smoke test (wave-2)** |
+| `Conft` | `worklog.md` | unknown | **ARCHITECTURE** | ✓ Active | **docs(fr): scaffold FUNCTIONAL_REQUIREMENTS.md** |
 | `pheno-wtrees` | `PHASE2_COMPLETE_REPORT.md` | unknown | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
 | `pheno-wtrees` | `PHASE2_COMPLETE_REPORT.md` | unknown | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
 | `pheno-wtrees` | `PHASE2_COMPLETE_REPORT.md` | unknown | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `ResilienceKit` | `worklog.md` | unknown | **ARCHITECTURE** | ✓ Active | **docs(readme): create comprehensive README.md with resilience patterns and stac… |
 | `PhenoProc` | `worklog.md` | unknown | **GENERAL** | ✓ Active | **This project is managed through AgilePlus.** |
 | `PhenoProc` | `worklog.md` | unknown | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `Tracely` | `worklog.md` | unknown | **ARCHITECTURE** | ✓ Active | **docs(readme): expand README.md with purpose, stack, quick-start, related proje… |
+| `ValidationKit` | `worklog.md` | unknown | **ARCHITECTURE** | ✓ Active | **docs(loc): drift report — 14.3M LOC (post-archive), top-10 repos +4.4M net**… |
 | `portage` | `worklog.md` | unknown | **GOVERNANCE** | ✓ Active | **Category: GOVERNANCE** |
 | `repos-wtrees` | `AGENTS.md` | unknown | **ARCHITECTURE** | ✓ Active | **Category: RESEARCH** |
+| `DataKit` | `worklog.md` | unknown | **ARCHITECTURE** | ✓ Active | **docs(fr): scaffold FUNCTIONAL_REQUIREMENTS.md** |
 | `BytePort` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
 | `AuthKit` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `Sidekick` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
 | `PhenoMCP` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `PhenoMCP` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
+| `phenoXdd` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
 | `artifacts` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
 | `heliosApp` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
 | `Tokn` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
@@ -37,48 +67,90 @@
 | `cheap-llm-mcp` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
 | `agentapi-plusplus` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
 | `agslag-docs` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `agslag-docs` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
 | `PolicyStack` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `PolicyStack` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
+| `thegent-dispatch` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
 | `hwLedger` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `hwLedger` | `worklog.md` | 2026-04-24 | **GOVERNANCE** | ✓ Active | Category: GOVERNANCE |
+| `Tracera-recovered` | `worklog.md` | 2026-04-24 | **GOVERNANCE** | ✓ Active | Category: GOVERNANCE |
 | `FocalPoint` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `FocalPoint` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
+| `phenotype-auth-ts` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
 | `PhenoSpecs` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `PhenoSpecs` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
 | `KlipDot` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `KlipDot` | `worklog.md` | 2026-04-24 | **GOVERNANCE** | ✓ Active | Category: GOVERNANCE |
 | `HeliosLab` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `thegent-workspace` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
 | `PhenoLibs` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
 | `PhenoObservability` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `PhenoObservability` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
+| `org-github` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
 | `PhenoDevOps` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `PhenoDevOps` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
 | `Eidolon` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
 | `Dino` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
 | `McpKit` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `McpKit` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
+| `rich-cli-kit` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
 | `AppGen` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `AppGen` | `worklog.md` | 2026-04-24 | **GOVERNANCE** | ✓ Active | Category: GOVERNANCE |
 | `cloud` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `cloud` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
 | `kwality` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `kwality` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
 | `bare-cua` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
 | `Civis` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
 | `PlayCua` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `PhenoHandbook` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
 | `AgentMCP` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `AgentMCP` | `worklog.md` | 2026-04-24 | **GOVERNANCE** | ✓ Active | Category: GOVERNANCE |
+| `phenotype-journeys` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
 | `argis-extensions` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `argis-extensions` | `worklog.md` | 2026-04-24 | **GOVERNANCE** | ✓ Active | Category: GOVERNANCE |
 | `cliproxyapi-plusplus` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
 | `worklogs` | `ARCHITECTURE.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
 | `worklogs` | `SESSION_2026_04_24_ARGIS_SUMMARY.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
 | `worklogs` | `2026-04-24-kooshapari-session.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category:** ARCHITECTURE |
 | `worklogs` | `GOVERNANCE.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: GOVERNANCE** |
 | `worklogs` | `DEPENDENCIES.md` | 2026-04-24 | **DEPENDENCIES** | ✓ Active | **Category: DEPENDENCIES** |
+| `worklogs` | `PERFORMANCE.md` | 2026-04-24 | **GENERAL** | ✓ Active | **Task:** Establish performance baselines across top-5 Rust repos by LOC; integr |
 | `worklogs` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: GOVERNANCE** |
 | `worklogs` | `INDEX.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | | Repos Indexed | Categories | Empty Templates | Last Updated | |
+| `worklogs` | `ORG_HEALTH_AUTOMATION.md` | 2026-04-24 | **GOVERNANCE** | ✓ Active | **Date:** 2026-04-24 |
 | `worklogs` | `DUPLICATION.md` | 2026-04-24 | **DUPLICATION** | ✓ Active | **Category: DUPLICATION** |
+| `phenoSDK` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
 | `kmobile` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `kmobile` | `worklog.md` | 2026-04-24 | **GOVERNANCE** | ✓ Active | Category: GOVERNANCE |
 | `PhenoPlugins` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `PhenoPlugins` | `worklog.md` | 2026-04-24 | **GOVERNANCE** | ✓ Active | Category: GOVERNANCE |
 | `atoms.tech` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `atoms.tech` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
+| `phenotype-org-audits` | `worklog.md` | 2026-04-24 | **GOVERNANCE** | ✓ Active | Category: GOVERNANCE |
+| `phenotype-ops-mcp` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
+| `QuadSGM` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
 | `PhenoKits` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
 | `TestingKit` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
 | `Conft` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `netweave-final2` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
+| `agent-user-status` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
 | `ResilienceKit` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `phenotype-bus` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
+| `Paginary` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
+| `phenotype-infra` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
 | `PhenoProc` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `PhenoProc` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
+| `phenotype-tooling` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
 | `Tracely` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `localbase3` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
 | `chatta` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `chatta` | `worklog.md` | 2026-04-24 | **GOVERNANCE** | ✓ Active | Category: GOVERNANCE |
 | `DataKit` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
 | `KDesktopVirt` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `KDesktopVirt` | `worklog.md` | 2026-04-24 | **GOVERNANCE** | ✓ Active | Category: GOVERNANCE |
 | `PhenoVCS` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `PhenoVCS` | `worklog.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Category: ARCHITECTURE |
 | `worklogs` | `INTEGRATION.md` | 2026-04-23 | **INTEGRATION** | ✓ Active | **Category: INTEGRATION** |
 | `worklogs` | `REPO_CONSOLIDATION_ANALYSIS_2026-04-06.md` | 2026-04-06 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
 | `repos-wtrees` | `REPO_CONSOLIDATION_ANALYSIS_2026-04-06.md` | 2026-04-06 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
@@ -245,21 +317,51 @@
 
 ## By Category
 
-### ARCHITECTURE (126)
+### ARCHITECTURE (185)
 
+- [`BytePort`](BytePort/worklog.md) — unknown — *active*
+- [`AuthKit`](AuthKit/worklog.md) — unknown — *active*
+- [`artifacts`](artifacts/worklog.md) — unknown — *active*
+- [`Tokn`](Tokn/worklog.md) — unknown — *active*
+- [`AtomsBot`](AtomsBot/worklog.md) — unknown — *active*
+- [`cheap-llm-mcp`](cheap-llm-mcp/worklog.md) — unknown — *active*
+- [`bifrost-extensions`](bifrost-extensions/worklog.md) — unknown — *active*
+- [`Apisync`](Apisync/worklog.md) — unknown — *active*
+- [`HeliosLab`](HeliosLab/worklog.md) — unknown — *active*
+- [`PhenoLibs`](PhenoLibs/worklog.md) — unknown — *active*
 - [`HexaKit`](HexaKit/docs/worklogs/ARCHITECTURE_INFRAKIT.md) — unknown — *active*
 - [`HexaKit`](HexaKit/docs/worklogs/PHASE4_CONSOLIDATION_STRATEGY.md) — unknown — *active*
 - [`HexaKit`](HexaKit/worklogs/PHASE2_COMPLETE_REPORT.md) — unknown — *active*
+- [`PhenoAgent`](PhenoAgent/worklog.md) — unknown — *active*
+- [`Eidolon`](Eidolon/worklog.md) — unknown — *active*
+- [`Dino`](Dino/worklog.md) — unknown — *active*
+- [`PlatformKit`](PlatformKit/worklog.md) — unknown — *active*
+- [`bare-cua`](bare-cua/worklog.md) — unknown — *active*
+- [`phench`](phench/worklog.md) — unknown — *active*
+- [`Civis`](Civis/worklog.md) — unknown — *active*
+- [`PlayCua`](PlayCua/worklog.md) — unknown — *active*
+- [`cliproxyapi-plusplus`](cliproxyapi-plusplus/worklog.md) — unknown — *active*
 - [`worklogs`](worklogs/AGENTS.md) — unknown — *active*
+- [`Tracera`](Tracera/worklog.md) — unknown — *active*
 - [`PhenoKits`](PhenoKits/HexaKit/worklogs/PHASE2_COMPLETE_REPORT.md) — unknown — *active*
+- [`PhenoKits`](PhenoKits/worklog.md) — unknown — *active*
+- [`TestingKit`](TestingKit/worklog.md) — unknown — *active*
+- [`Conft`](Conft/worklog.md) — unknown — *active*
 - [`pheno-wtrees`](pheno-wtrees/rust-sweep/worklogs/PHASE2_COMPLETE_REPORT.md) — unknown — *active*
 - [`pheno-wtrees`](pheno-wtrees/py-sweep/worklogs/PHASE2_COMPLETE_REPORT.md) — unknown — *active*
 - [`pheno-wtrees`](pheno-wtrees/npm-sweep/worklogs/PHASE2_COMPLETE_REPORT.md) — unknown — *active*
+- [`ResilienceKit`](ResilienceKit/worklog.md) — unknown — *active*
 - [`PhenoProc`](PhenoProc/phenotype-config-ts/worklog.md) — unknown — *active*
+- [`Tracely`](Tracely/worklog.md) — unknown — *active*
+- [`ValidationKit`](ValidationKit/worklog.md) — unknown — *active*
 - [`repos-wtrees`](repos-wtrees/dep-nkeys/worklogs/AGENTS.md) — unknown — *active*
+- [`DataKit`](DataKit/worklog.md) — unknown — *active*
 - [`BytePort`](BytePort/docs/worklogs/README.md) — 2026-04-24 — *active*
 - [`AuthKit`](AuthKit/docs/worklogs/README.md) — 2026-04-24 — *active*
+- [`Sidekick`](Sidekick/worklog.md) — 2026-04-24 — *active*
 - [`PhenoMCP`](PhenoMCP/docs/worklogs/README.md) — 2026-04-24 — *active*
+- [`PhenoMCP`](PhenoMCP/worklog.md) — 2026-04-24 — *active*
+- [`phenoXdd`](phenoXdd/worklog.md) — 2026-04-24 — *active*
 - [`artifacts`](artifacts/docs/worklogs/README.md) — 2026-04-24 — *active*
 - [`heliosApp`](heliosApp/docs/worklogs/README.md) — 2026-04-24 — *active*
 - [`Tokn`](Tokn/docs/worklogs/README.md) — 2026-04-24 — *active*
@@ -267,25 +369,41 @@
 - [`cheap-llm-mcp`](cheap-llm-mcp/docs/worklogs/README.md) — 2026-04-24 — *active*
 - [`agentapi-plusplus`](agentapi-plusplus/docs/worklogs/README.md) — 2026-04-24 — *active*
 - [`agslag-docs`](agslag-docs/docs/worklogs/README.md) — 2026-04-24 — *active*
+- [`agslag-docs`](agslag-docs/worklog.md) — 2026-04-24 — *active*
 - [`PolicyStack`](PolicyStack/docs/worklogs/README.md) — 2026-04-24 — *active*
+- [`PolicyStack`](PolicyStack/worklog.md) — 2026-04-24 — *active*
+- [`thegent-dispatch`](thegent-dispatch/worklog.md) — 2026-04-24 — *active*
 - [`hwLedger`](hwLedger/docs/worklogs/README.md) — 2026-04-24 — *active*
 - [`FocalPoint`](FocalPoint/docs/worklogs/README.md) — 2026-04-24 — *active*
+- [`FocalPoint`](FocalPoint/worklog.md) — 2026-04-24 — *active*
+- [`phenotype-auth-ts`](phenotype-auth-ts/worklog.md) — 2026-04-24 — *active*
 - [`PhenoSpecs`](PhenoSpecs/docs/worklogs/README.md) — 2026-04-24 — *active*
+- [`PhenoSpecs`](PhenoSpecs/worklog.md) — 2026-04-24 — *active*
 - [`KlipDot`](KlipDot/docs/worklogs/README.md) — 2026-04-24 — *active*
 - [`HeliosLab`](HeliosLab/docs/worklogs/README.md) — 2026-04-24 — *active*
+- [`thegent-workspace`](thegent-workspace/worklog.md) — 2026-04-24 — *active*
 - [`PhenoLibs`](PhenoLibs/docs/worklogs/README.md) — 2026-04-24 — *active*
 - [`PhenoObservability`](PhenoObservability/docs/worklogs/README.md) — 2026-04-24 — *active*
+- [`PhenoObservability`](PhenoObservability/worklog.md) — 2026-04-24 — *active*
+- [`org-github`](org-github/worklog.md) — 2026-04-24 — *active*
 - [`PhenoDevOps`](PhenoDevOps/docs/worklogs/README.md) — 2026-04-24 — *active*
+- [`PhenoDevOps`](PhenoDevOps/worklog.md) — 2026-04-24 — *active*
 - [`Eidolon`](Eidolon/docs/worklogs/README.md) — 2026-04-24 — *active*
 - [`Dino`](Dino/docs/worklogs/README.md) — 2026-04-24 — *active*
 - [`McpKit`](McpKit/docs/worklogs/README.md) — 2026-04-24 — *active*
+- [`McpKit`](McpKit/worklog.md) — 2026-04-24 — *active*
+- [`rich-cli-kit`](rich-cli-kit/worklog.md) — 2026-04-24 — *active*
 - [`AppGen`](AppGen/docs/worklogs/README.md) — 2026-04-24 — *active*
 - [`cloud`](cloud/docs/worklogs/README.md) — 2026-04-24 — *active*
+- [`cloud`](cloud/worklog.md) — 2026-04-24 — *active*
 - [`kwality`](kwality/docs/worklogs/README.md) — 2026-04-24 — *active*
+- [`kwality`](kwality/worklog.md) — 2026-04-24 — *active*
 - [`bare-cua`](bare-cua/docs/worklogs/README.md) — 2026-04-24 — *active*
 - [`Civis`](Civis/docs/worklogs/README.md) — 2026-04-24 — *active*
 - [`PlayCua`](PlayCua/docs/worklogs/README.md) — 2026-04-24 — *active*
+- [`PhenoHandbook`](PhenoHandbook/worklog.md) — 2026-04-24 — *active*
 - [`AgentMCP`](AgentMCP/docs/worklogs/README.md) — 2026-04-24 — *active*
+- [`phenotype-journeys`](phenotype-journeys/worklog.md) — 2026-04-24 — *active*
 - [`argis-extensions`](argis-extensions/docs/worklogs/README.md) — 2026-04-24 — *active*
 - [`cliproxyapi-plusplus`](cliproxyapi-plusplus/docs/worklogs/README.md) — 2026-04-24 — *active*
 - [`worklogs`](worklogs/ARCHITECTURE.md) — 2026-04-24 — *active*
@@ -294,19 +412,32 @@
 - [`worklogs`](worklogs/GOVERNANCE.md) — 2026-04-24 — *active*
 - [`worklogs`](worklogs/README.md) — 2026-04-24 — *active*
 - [`worklogs`](worklogs/INDEX.md) — 2026-04-24 — *active*
+- [`phenoSDK`](phenoSDK/worklog.md) — 2026-04-24 — *active*
 - [`kmobile`](kmobile/docs/worklogs/README.md) — 2026-04-24 — *active*
 - [`PhenoPlugins`](PhenoPlugins/docs/worklogs/README.md) — 2026-04-24 — *active*
 - [`atoms.tech`](atoms.tech/docs/worklogs/README.md) — 2026-04-24 — *active*
+- [`atoms.tech`](atoms.tech/worklog.md) — 2026-04-24 — *active*
+- [`phenotype-ops-mcp`](phenotype-ops-mcp/worklog.md) — 2026-04-24 — *active*
+- [`QuadSGM`](QuadSGM/worklog.md) — 2026-04-24 — *active*
 - [`PhenoKits`](PhenoKits/docs/worklogs/README.md) — 2026-04-24 — *active*
 - [`TestingKit`](TestingKit/docs/worklogs/README.md) — 2026-04-24 — *active*
 - [`Conft`](Conft/docs/worklogs/README.md) — 2026-04-24 — *active*
+- [`netweave-final2`](netweave-final2/worklog.md) — 2026-04-24 — *active*
+- [`agent-user-status`](agent-user-status/worklog.md) — 2026-04-24 — *active*
 - [`ResilienceKit`](ResilienceKit/docs/worklogs/README.md) — 2026-04-24 — *active*
+- [`phenotype-bus`](phenotype-bus/worklog.md) — 2026-04-24 — *active*
+- [`Paginary`](Paginary/worklog.md) — 2026-04-24 — *active*
+- [`phenotype-infra`](phenotype-infra/worklog.md) — 2026-04-24 — *active*
 - [`PhenoProc`](PhenoProc/docs/worklogs/README.md) — 2026-04-24 — *active*
+- [`PhenoProc`](PhenoProc/worklog.md) — 2026-04-24 — *active*
+- [`phenotype-tooling`](phenotype-tooling/worklog.md) — 2026-04-24 — *active*
 - [`Tracely`](Tracely/docs/worklogs/README.md) — 2026-04-24 — *active*
+- [`localbase3`](localbase3/worklog.md) — 2026-04-24 — *active*
 - [`chatta`](chatta/docs/worklogs/README.md) — 2026-04-24 — *active*
 - [`DataKit`](DataKit/docs/worklogs/README.md) — 2026-04-24 — *active*
 - [`KDesktopVirt`](KDesktopVirt/docs/worklogs/README.md) — 2026-04-24 — *active*
 - [`PhenoVCS`](PhenoVCS/docs/worklogs/README.md) — 2026-04-24 — *active*
+- [`PhenoVCS`](PhenoVCS/worklog.md) — 2026-04-24 — *active*
 - [`worklogs`](worklogs/REPO_CONSOLIDATION_ANALYSIS_2026-04-06.md) — 2026-04-06 — *active*
 - [`repos-wtrees`](repos-wtrees/dep-nkeys/worklogs/REPO_CONSOLIDATION_ANALYSIS_2026-04-06.md) — 2026-04-06 — *active*
 - [`worklogs`](worklogs/CHARTER.md) — 2026-04-05 — *active*
@@ -416,9 +547,10 @@
 - [`pheno-wtrees`](pheno-wtrees/npm-sweep/agileplus/worklog.md) — 2026-03-29 — *active*
 - [`repos-wtrees`](repos-wtrees/agileplus-high-npm/worklog.md) — 2026-03-29 — *active*
 
-### GENERAL (7)
+### GENERAL (8)
 
 - [`PhenoProc`](PhenoProc/crates/phenotype-shared/worklog.md) — unknown — *active*
+- [`worklogs`](worklogs/PERFORMANCE.md) — 2026-04-24 — *active*
 - [`worklog.md`](worklog.md) — 2026-04-05 — *active*
 - [`repos-wtrees`](repos-wtrees/dep-nkeys/worklog.md) — 2026-04-05 — *active*
 - [`HexaKit`](HexaKit/docs/worklogs/CODE_AUDIT_LOC_REDUCTION.md) — 2026-03-30 — *active*
@@ -426,11 +558,23 @@
 - [`PhenoProc`](PhenoProc/crates/phenotype-dep-guard/worklog.md) — 2026-03-26 — *active*
 - [`HexaKit`](HexaKit/docs/worklogs/LOC_REDUCTION_INITIATIVE_FINAL_STATUS.md) — 2026-03-25 — *active*
 
-### GOVERNANCE (21)
+### GOVERNANCE (33)
 
 - [`heliosApp`](heliosApp/worklog.md) — unknown — *active*
 - [`phenoDesign`](phenoDesign/worklog.md) — unknown — *active*
 - [`portage`](portage/worklog.md) — unknown — *active*
+- [`hwLedger`](hwLedger/worklog.md) — 2026-04-24 — *active*
+- [`Tracera-recovered`](Tracera-recovered/worklog.md) — 2026-04-24 — *active*
+- [`KlipDot`](KlipDot/worklog.md) — 2026-04-24 — *active*
+- [`AppGen`](AppGen/worklog.md) — 2026-04-24 — *active*
+- [`AgentMCP`](AgentMCP/worklog.md) — 2026-04-24 — *active*
+- [`argis-extensions`](argis-extensions/worklog.md) — 2026-04-24 — *active*
+- [`worklogs`](worklogs/ORG_HEALTH_AUTOMATION.md) — 2026-04-24 — *active*
+- [`kmobile`](kmobile/worklog.md) — 2026-04-24 — *active*
+- [`PhenoPlugins`](PhenoPlugins/worklog.md) — 2026-04-24 — *active*
+- [`phenotype-org-audits`](phenotype-org-audits/worklog.md) — 2026-04-24 — *active*
+- [`chatta`](chatta/worklog.md) — 2026-04-24 — *active*
+- [`KDesktopVirt`](KDesktopVirt/worklog.md) — 2026-04-24 — *active*
 - [`worklogs`](worklogs/PRD.md) — 2026-04-05 — *active*
 - [`worklogs`](worklogs/WORKFLOW_ROLLOUT_PRs.md) — 2026-04-05 — *active*
 - [`worklogs`](worklogs/RECOVERY_VERIFICATION.md) — 2026-04-05 — *active*

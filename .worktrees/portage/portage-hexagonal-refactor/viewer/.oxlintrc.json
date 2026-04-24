@@ -1,7 +1,0 @@
-{
-  "ignorePatterns": [
-    "node_modules/**",
-    ".react-router/**",
-    "build/**"
-  ]
-}

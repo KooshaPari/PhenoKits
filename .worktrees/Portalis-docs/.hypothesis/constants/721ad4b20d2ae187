@@ -1,4 +1,0 @@
-# file: /Users/kooshapari/CodeProjects/Phenotype/repos/Portalis/src/portkey/infrastructure/ollama_provider.py
-# hypothesis_version: 6.151.10
-
-[0.7, 10.0, 60.0, 120.0, 256, '/', 'codellama', 'content', 'embedding', 'eval_count', 'gemma2', 'llama3', 'llama3.1', 'llama3.2', 'message', 'messages', 'mistral', 'mixtral', 'model', 'models', 'name', 'nomic-embed-text', 'num_predict', 'ollama', 'options', 'phi3', 'prompt', 'prompt_eval_count', 'qwen2', 'role', 'stream', 'temperature', 'usage', '|']

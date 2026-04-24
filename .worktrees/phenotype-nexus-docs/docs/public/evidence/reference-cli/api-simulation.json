@@ -1,8 +1,0 @@
-{
-  "bundle": "reference-cli",
-  "steps": [
-    "navigate guide",
-    "inspect reference"
-  ],
-  "duration_ms": 42
-}

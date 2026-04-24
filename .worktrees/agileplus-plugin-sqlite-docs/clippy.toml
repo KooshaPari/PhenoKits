@@ -1,3 +1,0 @@
-# Clippy configuration for agileplus-plugin-sqlite
-
-avoid-breaking-exported-api = false

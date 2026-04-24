@@ -1,5 +1,0 @@
-config:
-  byteport:environment: dev
-  byteport:computeTier: local
-  byteport:providers:
-    - local

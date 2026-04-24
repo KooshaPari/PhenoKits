@@ -1,3 +1,0 @@
-"""
-Pheno-SDK source package.
-"""

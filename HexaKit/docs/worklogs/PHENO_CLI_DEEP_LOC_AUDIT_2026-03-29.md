@@ -1,5 +1,7 @@
 # Pheno-CLI Deep LOC Audit
 
+
+**Category: RESEARCH**
 **Date**: 2026-03-29  
 **Project**: pheno-cli (KooshaPari/pheno-cli)  
 **Codebase**: Go CLI tool for orchestrating multi-language package releases  

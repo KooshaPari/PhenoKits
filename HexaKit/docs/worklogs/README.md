@@ -1,6 +1,8 @@
 <<<<<<< HEAD
 # Phenotype Worklogs & Analysis Reports
 
+
+**Category: RESEARCH**
 This directory contains detailed worklog reports, performance analysis, and implementation guides for the Phenotype ecosystem.
 =======
 # Phenotype Worklogs (2026)

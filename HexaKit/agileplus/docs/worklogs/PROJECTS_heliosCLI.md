@@ -1,5 +1,7 @@
 # Project-Level Worklog: heliosCLI
 
+
+**Category: DEPENDENCIES**
 **Project:** heliosCLI | **Updated:** 2026-03-29
 
 ---

@@ -1,5 +1,7 @@
 # Parallel Task Batch: phenotype-infrakit Integration (2026-03-30)
 
+
+**Category: INTEGRATION**
 **Total Tasks:** 20 independent haiku subagents
 **Parallel Safe:** 90%+ (only T7.1→T7.2 sequential)
 **Estimated Duration:** 10-15 min wall-clock (50 min if sequential)

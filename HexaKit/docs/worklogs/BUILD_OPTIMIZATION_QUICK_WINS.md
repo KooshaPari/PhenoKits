@@ -1,5 +1,7 @@
 # Phenotype-Infrakit: Build Optimization Quick Wins
 
+
+**Category: PERFORMANCE**
 **Date**: 2026-03-30
 **Purpose**: Three actionable optimizations for 20-30% build speedup
 **Effort**: ~10 minutes total

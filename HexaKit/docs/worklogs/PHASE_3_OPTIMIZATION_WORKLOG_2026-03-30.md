@@ -1,4 +1,6 @@
 # Phase 3 Optimization Worklog — 2026-03-30
+
+**Category: ARCHITECTURE**
 ## Remaining Gaps & Haiku Agent Task Assignments
 
 **Status:** Ready for cheaper agent execution

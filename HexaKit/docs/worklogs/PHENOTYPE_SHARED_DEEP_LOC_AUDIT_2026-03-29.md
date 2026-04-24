@@ -1,4 +1,6 @@
 # Phenotype-Shared Deep LOC Audit (2026-03-29)
+
+**Category: RESEARCH**
 ## Executive Summary
 **Audit Date**: 2026-03-29  
 **Total Rust LOC**: 5,110 (src) + 306 (tests)  

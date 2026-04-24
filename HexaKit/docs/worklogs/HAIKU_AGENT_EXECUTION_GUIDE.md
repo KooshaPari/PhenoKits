@@ -1,4 +1,6 @@
 # Haiku Agent Execution Guide — Phase 3 Optimization
+
+**Category: RESEARCH**
 ## Quick-Reference for Cheaper Agent Execution (15-minute onboarding)
 
 ---

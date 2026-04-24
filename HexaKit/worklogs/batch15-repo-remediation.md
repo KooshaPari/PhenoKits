@@ -1,5 +1,7 @@
 # Batch 15 Repo Remediation — Audit & Remediation Report
 
+
+**Category: INTEGRATION**
 **Date**: 2026-04-02
 **Agent**: audit-agent
 **Spec**: `kitty-specs/024-batch15-repo-remediation/`

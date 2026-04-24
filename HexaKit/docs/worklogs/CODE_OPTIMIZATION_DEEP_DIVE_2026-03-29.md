@@ -1,4 +1,6 @@
 # Code Optimization Deep-Dive Report
+
+**Category: PERFORMANCE**
 **Date**: 2026-03-29  
 **Scope**: Phenotype Ecosystem (Rust, Python, TypeScript)  
 **Focus**: Hot paths, memory allocations, performance anti-patterns, caching opportunities

@@ -1,5 +1,7 @@
 # Phase 2 Decomposition Work Items
 
+
+**Category: ARCHITECTURE**
 **Date:** 2026-03-30
 **Status:** PLANNED
 **Scope:** High-impact file splitting and config consolidation

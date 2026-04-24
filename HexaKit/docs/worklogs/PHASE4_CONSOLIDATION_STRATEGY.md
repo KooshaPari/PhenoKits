@@ -1,5 +1,7 @@
 # Phase 4 Test Consolidation Strategy
 
+
+**Category: ARCHITECTURE**
 ## Overview
 Phase 4 consolidates 7,860 LOC of duplicate tests across thegent (platforms/thegent) via 3 focused phases.
 

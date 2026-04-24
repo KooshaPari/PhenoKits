@@ -1,5 +1,7 @@
 # Dead Code Cleanup Audit Report — phenotype-infrakit
 
+
+**Category: RESEARCH**
 ## Task Status: COMPLETE ✓
 
 The dead code cleanup task has been completed. The phenotype-infrakit workspace has been thoroughly audited and confirmed to be in excellent shape with respect to code quality and dead code management.

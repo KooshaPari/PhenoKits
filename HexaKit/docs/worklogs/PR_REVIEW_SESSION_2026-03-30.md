@@ -1,5 +1,7 @@
 # PR & Branch Review Summary — 2026-03-30 (Session 2)
 
+
+**Category: ARCHITECTURE**
 ## Previous Session (Earlier 2026-03-30)
 Previous session merged PRs #880, #889, #891 and reviewed 7 open PRs on thegent.
 See original notes below for PR #882, #886, #483 details.

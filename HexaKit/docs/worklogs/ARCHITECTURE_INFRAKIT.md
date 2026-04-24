@@ -1,5 +1,7 @@
 # phenotype-infrakit Architecture
 
+
+**Category: ARCHITECTURE**
 ## Overview
 
 phenotype-infrakit is a Rust workspace of four independent infrastructure crates extracted from

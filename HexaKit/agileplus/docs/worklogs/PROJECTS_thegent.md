@@ -1,5 +1,7 @@
 # Project-Level Worklog: thegent
 
+
+**Category: RESEARCH**
 **Project:** thegent | **Updated:** 2026-03-29
 
 ---

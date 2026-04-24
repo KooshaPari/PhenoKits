@@ -1,5 +1,7 @@
 # Master Audit Prompt for Agents
 
+
+**Category: ARCHITECTURE**
 ## System Organization Context
 
 ```

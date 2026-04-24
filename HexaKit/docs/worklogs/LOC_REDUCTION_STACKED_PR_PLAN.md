@@ -1,5 +1,7 @@
 # LOC Reduction & Stacked PR Plan - thegent
 
+
+**Category: ARCHITECTURE**
 **Date**: 2026-03-30
 **Status**: Planning
 

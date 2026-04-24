@@ -7,6 +7,8 @@
 
 ## Wave 79 - Test Suite Remediation COMPLETE (2026-03-29)
 
+
+**Category: ARCHITECTURE**
 ### Final Status
 
 | Metric | Before | After |

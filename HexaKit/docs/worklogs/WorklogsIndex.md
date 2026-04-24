@@ -3,6 +3,8 @@
 
 ## 2026-03-29 SAGE Audit Updates
 
+
+**Category: GOVERNANCE**
 **Session:** SAGE-audit-2026-03-29
 
 ### Updated Entries

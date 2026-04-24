@@ -1,5 +1,7 @@
 # External Dependencies Analysis
 
+
+**Category: DEPENDENCIES**
 > Fork/Wrap/Adopt opportunities for external packages and repositories.
 
 ---

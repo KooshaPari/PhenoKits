@@ -1,5 +1,7 @@
 # Work Log
 
+
+**Category: DUPLICATION**
 > Track work items, tasks, and deliverables across the Phenotype ecosystem.
 
 ---

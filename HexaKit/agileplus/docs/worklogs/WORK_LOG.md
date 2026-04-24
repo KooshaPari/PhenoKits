@@ -1,5 +1,7 @@
 # Work Log
 
+
+**Category: ARCHITECTURE**
 > Track work items, tasks, and deliverables across the Phenotype ecosystem.
 
 ---

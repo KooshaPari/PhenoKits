@@ -4,13 +4,15 @@
 
 ## Summary
 
-- **GREEN**: 9 repos compile cleanly
-- **BROKEN**: 12 repos fail to compile
+- **GREEN**: 12 repos compile cleanly (updated 2026-04-24)
+- **BROKEN**: 9 repos fail to compile
 - **Total**: 21 Rust repos scanned
+
+**Wave-10 Triage (2026-04-24)**: +3 repos fixed (KlipDot, PhenoVCS, Tokn); KDesktopVirt deferred (61+ errors)
 
 ### Breakdown
 
-#### GREEN (9/21 — 43%)
+#### GREEN (12/21 — 57%)
 
 | Repo | Status | Notes |
 |------|--------|-------|
@@ -22,23 +24,24 @@
 | AgilePlus | ✅ GREEN | Clean (24 crates) |
 | rich-cli-kit | ✅ GREEN | Clean |
 | Civis | ✅ GREEN | Clean |
+| Tokn | ✅ GREEN | Fixed 2026-04-24 (clean) |
+| KlipDot | ✅ GREEN | Fixed 2026-04-24 (workspace declaration) |
+| PhenoVCS | ✅ GREEN | Fixed 2026-04-24 (stub lib.rs) |
+| PhenoProc | ✅ GREEN | Fixed 2026-04-24 (clean) |
 
-#### BROKEN (12/21 — 57%)
+#### BROKEN (9/21 — 43%)
 
-| Repo | Exit | Error Category | Root Cause |
-|------|------|-----------------|-----------|
-| repos (root) | 101 | Unresolved import | `criterion` not in workspace dependencies |
-| KDesktopVirt | 101 | Workspace conflict | Believes it's in workspace but isn't registered |
-| PhenoVCS | 101 | Missing manifest targets | Workspace member `pheno-vcs-core` has no src/lib.rs |
-| kmobile | 101 | Workspace conflict | Believes it's in workspace but isn't registered |
-| PhenoPlugins | 101 | Missing manifest file | Workspace member `pheno-plugin-core` file not found |
-| PhenoProc | 101 | Unresolved import | `phenotype_observability` traits not exported |
-| Tracely | 101 | Unresolved import | `criterion` not in workspace dependencies |
-| KlipDot | 101 | Workspace conflict | Believes it's in workspace but isn't registered |
-| thegent-workspace | 101 | Missing manifest file | Workspace member `thegent-jsonl` file not found |
-| PhenoObservability | 101 | Unresolved import | `criterion` not in workspace dependencies |
-| HexaKit | 101 | Missing manifest file | Workspace member `phenotype-bdd` file not found |
-| bare-cua | 101 | Type annotation missing | Generic type inference failure (E0282) |
+| Repo | Exit | Error Category | Root Cause | Wave-10 Status |
+|------|------|-----------------|-----------|---------|
+| repos (root) | 101 | Unresolved import | `criterion` not in workspace dependencies | — |
+| KDesktopVirt | 101 | Type system | 61 compile errors (trait bounds, type mismatches) | DEFERRED (beyond scope) |
+| kmobile | 101 | Workspace conflict | Believes it's in workspace but isn't registered | — |
+| PhenoPlugins | 101 | Missing manifest file | Workspace member `pheno-plugin-core` file not found | — |
+| Tracely | 101 | Unresolved import | `criterion` not in workspace dependencies | — |
+| thegent-workspace | 101 | Missing manifest file | Workspace member `thegent-jsonl` file not found | — |
+| PhenoObservability | 101 | Unresolved import | `criterion` not in workspace dependencies | — |
+| HexaKit | 101 | Missing manifest file | Workspace member `phenotype-bdd` file not found | — |
+| bare-cua | 101 | Type annotation missing | Generic type inference failure (E0282) | — |
 
 ## Error Patterns
 

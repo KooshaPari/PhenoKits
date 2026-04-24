@@ -3,6 +3,34 @@
 
 Architecture decisions, library extraction candidates, and large-scale refactoring plans.
 
+## 2026-04-24 — Rust workspace consolidation analysis
+
+**Scope:** Active Rust workspaces across 30+ Phenotype repos.
+
+**Findings:**
+- **12 active workspaces** totaling ~1.7M LOC
+- **2 large monoliths** (FocalPoint 739K/57 crates, AgilePlus 693K/52 crates) — intentionally standalone
+- **1 medium workspace** (PhenoObservability 213K/10 crates) — mature, production observability
+- **5 small cohesive** (Stashly, Eidolon, Observably, thegent-workspace, Sidekick) — generic infrastructure or platform-specific
+- **4 singletons** (PlayCua, bare-cua, thegent-dispatch, kmobile) — single crate, platform-specific
+
+**Consolidation opportunity (HIGH):** `Observably` (3 crates, 1.1K LOC) **→ PhenoObservability**
+- Duplicate domains: both provide tracing, logging, sentinel/monitoring
+- Located in separate repos with different namespaces (observably-* vs pheno-tracing, pheno-questdb, etc.)
+- PhenoObservability is larger, more mature, production-focused
+- Same core deps: tokio 1.39, serde 1.0, thiserror 2.0, anyhow 1.0, tracing 0.1 (no conflicts)
+- **Benefit:** Unified release cycle, single integration surface, shared CI/CD pipeline
+- **Effort:** 1-2 days (4 crate moves, namespace consolidation, cross-repo dep updates)
+
+**Anti-consolidations (CORRECT SEPARATION):**
+- **Device automation family** (Eidolon, kmobile, PlayCua, bare-cua, KVirtualStage): Platform-specific dependencies warrant isolation. Consolidation would bloat builds (200MB+), couple independent release cycles, and complicate CI parallelization.
+- **FocalPoint/AgilePlus:** Core products, large domains, need independent versioning + release cycles
+- **Stashly:** Generic infrastructure library (cache, event store, state machine); reusable across projects; correct to keep standalone
+
+**Result:** Reduce 12 → 11 workspaces by merging Observably; keep device automation & core products intentionally separate.
+
+**See:** `docs/org-audit-2026-04/workspace_consolidation_map.md` for full consolidation matrix, dependency alignment, and phase-based implementation plan.
+
 ## 2026-04-24 — Large-file decomposition audit
 
 **Scope:** Rust/Go/Python source across 20 top-tier Phenotype-org repos.

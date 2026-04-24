@@ -135,7 +135,7 @@ The first production patch tranche is complete for targeted strict errors:
   type-aware oxlint with warning-only output.
 - `bun run typecheck:web` passes after integrating the tranche.
 - Full `lint:type-aware:web:strict` still fails, with total strict errors reduced from
-  2,503 to 1,816 after the twelfth production tranche.
+  2,503 to 1,758 after the thirteenth production tranche.
 
 Additional completed production tranche:
 
@@ -260,16 +260,30 @@ The twelfth production tranche is complete:
 - `home.tsx` was patched as a manager integration fix to restore `typecheck:web`.
 - `bun run typecheck:web` passes after the tranche.
 
+The thirteenth production tranche is complete:
+
+- `ContractListView.tsx`, ADR list helpers, and `projects.$projectId.features.tsx`
+  pass targeted strict type-aware oxlint.
+- `Settings.tsx`, `ProcessView.tsx`, `ProblemView.tsx`, and `FeatureView.tsx` pass
+  targeted strict type-aware oxlint.
+- `clustering.example.ts`, `adaptiveCacheConfig.ts`, `useWorkflows.ts`,
+  `useTableKeyboardNavigation.ts`, `useNotifications.ts`, and `useLinks.ts` pass
+  targeted strict type-aware oxlint.
+- Temporal, specification analytics, layout, integration, and graph component lanes
+  pass targeted strict type-aware oxlint.
+- `bun run typecheck:web` passes after the tranche.
+- Full `lint:type-aware:web:strict` is reduced from 1,816 to 1,758 errors.
+
 ## Next Production Patch Tranche
 
 | Order | File(s) | Why Next |
 | ---: | --- | --- |
-| 1 | `apps/web/src/views/ContractListView.tsx`, `apps/web/src/views/adr-list-filters.tsx`, `apps/web/src/views/adr-list-create-modal.tsx`, `apps/web/src/routes/projects.$projectId.features.tsx` | Remaining two-error app-facing view/route sweep |
-| 2 | `apps/web/src/pages/settings/Settings.tsx`, `apps/web/src/pages/projects/views/ProcessView.tsx`, `apps/web/src/pages/projects/views/ProblemView.tsx`, `apps/web/src/pages/projects/views/FeatureView.tsx` | Remaining two-error project/settings view sweep |
-| 3 | `apps/web/src/lib/graphology/clustering.example.ts`, `apps/web/src/lib/adaptiveCacheConfig.ts`, `apps/web/src/hooks/useWorkflows.ts`, `apps/web/src/hooks/useTableKeyboardNavigation.ts`, `apps/web/src/hooks/useNotifications.ts`, `apps/web/src/hooks/useLinks.ts` | Runtime/hook two-error sweep |
-| 4 | `apps/web/src/components/temporal/VersionDiff.tsx`, `TemporalNavigator.tsx`, `ProgressDashboard.tsx`, `apps/web/src/components/specifications/analytics/QualityDimensionRadar.tsx`, `apps/web/src/components/layout/Layout.tsx`, `sidebar-view.tsx` | Temporal/spec/layout two-error sweep |
-| 5 | `apps/web/src/components/integrations/GitHubAppInstall.tsx`, `CreateRepoModal.tsx`, `apps/web/src/components/graph/types.ts`, `customRenderers.ts`, `QAEnhancedNode.tsx`, `useGpuForceLayout.ts`, `useCrossPerspectiveSearch.ts`, `QuadTreeCullingExample.tsx`, `ComponentLibraryExplorer.tsx` | Integration/graph two-error sweep |
-| 6 | `apps/web/src/lib/websocket.test.ts`, `apps/web/src/lib/csrf.test.ts`, `apps/web/src/test/setup.ts`, `apps/web/src/components/forms/CreateItemDialog.test.tsx` | Larger colocated/test-support clusters after production source |
+| 1 | `apps/web/src/hooks/testCasesApi.ts`, `apps/web/src/hooks/test-runs/test-run-hooks.ts`, `apps/web/src/components/forms/FormArrayField.tsx`, `apps/web/src/components/forms/CreateTaskItemForm.tsx`, `apps/web/src/components/forms/CreateRequirementItemForm.tsx` | Last two-error hook/form production clusters |
+| 2 | `apps/web/src/api/mcp-config.ts`, `apps/web/src/api/mcp-client-utils.ts`, `apps/web/src/api/mcp-client-types.ts`, `apps/web/src/api/auth-utils.ts`, `apps/web/src/components/api-docs/redoc-wrapper.tsx` | Last two-error API/docs production clusters |
+| 3 | `apps/web/src/workers/worker-pool.ts`, `apps/web/src/workers/graphLayout.worker.ts`, `apps/web/src/workers/data-transform.worker.ts`, `apps/web/src/lib/*`, `apps/web/src/stores/*` | One-error runtime/store tail |
+| 4 | Remaining one-error route/view/page files under `apps/web/src/routes`, `apps/web/src/views`, and `apps/web/src/pages` | App-facing route/view tail |
+| 5 | Remaining one-error graph/specification/component files under `apps/web/src/components` | Component tail before test backlog |
+| 6 | `apps/web/src/__tests__/api/endpoints.p1.test.ts`, `apps/web/src/__tests__/api/client-errors.edgecases.test.ts`, `apps/web/src/__tests__/hooks/useItems.p1.test.ts`, `apps/web/src/__tests__/api/client.test.ts`, `apps/web/src/lib/websocket.test.ts`, `apps/web/src/lib/csrf.test.ts` | Largest recovered-test clusters after production source |
 
 ## Recommended Sequence
 

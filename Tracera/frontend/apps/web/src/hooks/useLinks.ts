@@ -10,6 +10,27 @@ import { useAuthStore } from '@/stores/authStore';
 const { getAuthHeaders } = client;
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const LINK_TYPES = new Set<string>([
+  'alternative_to',
+  'blocks',
+  'calls',
+  'conflicts_with',
+  'depends_on',
+  'derives_from',
+  'documents',
+  'imports',
+  'implements',
+  'manifests_as',
+  'mentions',
+  'parent_of',
+  'related_to',
+  'represents',
+  'same_as',
+  'supersedes',
+  'tests',
+  'traces_to',
+  'validates',
+]);
 
 interface LinkFilters {
   projectId?: string | undefined;
@@ -21,24 +42,86 @@ interface LinkFilters {
   excludeTypes?: LinkType[] | undefined; // ✅ NEW: Filter out specific link types
 }
 
+interface ItemSummary {
+  id: string;
+  status: string;
+  title: string;
+  view: string;
+}
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const asString = (value: unknown, fallback = ''): string =>
+  typeof value === 'string' ? value : fallback;
+
+const asNumber = (value: unknown, fallback = 0): number =>
+  typeof value === 'number' ? value : fallback;
+
+const isLinkType = (value: unknown): value is LinkType =>
+  typeof value === 'string' && LINK_TYPES.has(value);
+
+const parseLink = (value: unknown): Link | null => {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const sourceId = value['source_id'] ?? value['sourceId'];
+  const targetId = value['target_id'] ?? value['targetId'];
+  const projectId = value['project_id'] ?? value['projectId'];
+  const type = value['type'];
+
+  if (!isLinkType(type)) {
+    return null;
+  }
+
+  return {
+    ...value,
+    createdAt: asString(value['createdAt'] ?? value['created_at']),
+    description:
+      typeof value['description'] === 'string' ? value['description'] : undefined,
+    id: asString(value['id']),
+    metadata: isRecord(value['metadata']) ? value['metadata'] : undefined,
+    projectId: asString(projectId),
+    sourceId: asString(sourceId),
+    targetId: asString(targetId),
+    type,
+    updatedAt: asString(value['updatedAt'] ?? value['updated_at']),
+    version: asNumber(value['version'], 1),
+  };
+};
+
+const parseItemSummary = (value: unknown): ItemSummary | null => {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  return {
+    id: asString(value['id']),
+    status: asString(value['status']),
+    title: asString(value['title']),
+    view: asString(value['view']),
+  };
+};
+
 async function fetchLinks(filters: LinkFilters = {}): Promise<{ links: Link[]; total: number }> {
   const params = new URLSearchParams();
-  if (filters.projectId) {
+  if (filters.projectId !== undefined && filters.projectId !== '') {
     params.set('project_id', filters.projectId);
   }
-  if (filters.sourceId) {
+  if (filters.sourceId !== undefined && filters.sourceId !== '') {
     params.set('source_id', filters.sourceId);
   }
-  if (filters.targetId) {
+  if (filters.targetId !== undefined && filters.targetId !== '') {
     params.set('target_id', filters.targetId);
   }
-  if (filters.type) {
+  if (filters.type !== undefined) {
     params.set('type', filters.type);
   }
-  if (filters.limit) {
+  if (filters.limit !== undefined) {
     params.set('limit', String(filters.limit));
   }
-  if (filters.offset) {
+  if (filters.offset !== undefined) {
     params.set('offset', String(filters.offset));
   }
 
@@ -56,19 +139,21 @@ async function fetchLinks(filters: LinkFilters = {}): Promise<{ links: Link[]; t
   if (!res.ok) {
     throw new Error('Failed to fetch links');
   }
-  const data = await res.json();
+  const data: unknown = await res.json();
   // API returns { total: number, links: Link[] } or array
-  const linksArray = Array.isArray(data) ? data : (data['links'] ?? []);
+  const linksArray = Array.isArray(data)
+    ? data
+    : isRecord(data) && Array.isArray(data['links'])
+      ? data['links']
+      : [];
   // Transform snake_case to camelCase for frontend compatibility
-  const transformedLinks = linksArray.map((link: any) => ({
-    ...link,
-    sourceId: link.source_id ?? link.sourceId,
-    targetId: link.target_id ?? link.targetId,
-    projectId: link.project_id ?? link.projectId,
-  }));
+  const transformedLinks = linksArray
+    .map((link) => parseLink(link))
+    .filter((link): link is Link => link !== null);
+  const total = isRecord(data) && typeof data['total'] === 'number' ? data['total'] : linksArray.length;
   return {
     links: transformedLinks,
-    total: data['total'] ?? (Array.isArray(data) ? data.length : linksArray.length),
+    total,
   };
 }
 
@@ -95,7 +180,12 @@ async function createLink(data: CreateLinkData): Promise<Link> {
   if (!res.ok) {
     throw new Error('Failed to create link');
   }
-  return res.json() as Promise<Link>;
+  const responseData: unknown = await res.json();
+  const link = parseLink(responseData);
+  if (link === null) {
+    throw new Error('Invalid link response');
+  }
+  return link;
 }
 
 async function deleteLink(id: string): Promise<void> {
@@ -110,7 +200,7 @@ async function deleteLink(id: string): Promise<void> {
 
 export function useLinks(filters: LinkFilters = {}) {
   const token = useAuthStore((s) => s.token);
-  const key = filters.projectId
+  const key = filters.projectId !== undefined && filters.projectId !== ''
     ? [
         ...queryKeys.links.list(filters.projectId),
         filters.sourceId ?? null,
@@ -161,7 +251,7 @@ export function useTraceabilityGraph(projectId: string) {
   const MAX_EDGES_INITIAL = 500;
   const [visibleEdgeCount, setVisibleEdgeCount] = useState(MAX_EDGES_INITIAL);
 
-  const { data: items } = useQuery<{ id: string; title: string; view: string; status: string }[]>({
+  const { data: items } = useQuery<ItemSummary[]>({
     queryKey: queryKeys.items.list(projectId),
     queryFn: async () => {
       const res = await fetch(`${API_URL}/api/v1/items?project_id=${projectId}`, {
@@ -170,7 +260,13 @@ export function useTraceabilityGraph(projectId: string) {
       if (!res.ok) {
         throw new Error('Failed to fetch items');
       }
-      return res.json() as Promise<{ id: string; title: string; view: string; status: string }[]>;
+      const responseData: unknown = await res.json();
+      if (!Array.isArray(responseData)) {
+        return [];
+      }
+      return responseData
+        .map((item) => parseItemSummary(item))
+        .filter((item): item is ItemSummary => item !== null);
     },
     enabled: Boolean(projectId),
     ...QUERY_CONFIGS.graph, // Graph data is expensive, cache longer
@@ -204,7 +300,7 @@ export function useTraceabilityGraph(projectId: string) {
         type: link.type,
       },
     })),
-    isLoading: !(items && allLinks),
+    isLoading: items === undefined || linksData === undefined,
     nodes: (items ?? []).map((item) => ({
       data: {
         id: item.id,

@@ -75,11 +75,11 @@ export const Layout = function Layout() {
       if (document.querySelector('[role="dialog"][aria-modal="true"]')) {
         return;
       }
-      const skipLink = document.querySelector('#skip-to-main');
+      const skipLink = document.querySelector<HTMLElement>('#skip-to-main');
       if (skipLink) {
         event.preventDefault();
         hasHandledFirstTabRef.current = true;
-        (skipLink as HTMLElement).focus();
+        skipLink.focus();
       }
     };
     const handleFirstFocus = (event: FocusEvent) => {
@@ -89,12 +89,12 @@ export const Layout = function Layout() {
       if (document.querySelector('[role="dialog"][aria-modal="true"]')) {
         return;
       }
-      const skipLink = document.querySelector('#skip-to-main');
+      const skipLink = document.querySelector<HTMLElement>('#skip-to-main');
       if (!skipLink || event.target === skipLink) {
         return;
       }
       hasHandledFirstTabRef.current = true;
-      (skipLink as HTMLElement).focus();
+      skipLink.focus();
     };
     document.addEventListener('keydown', handleFirstTab, true);
     document.addEventListener('focusin', handleFirstFocus, true);

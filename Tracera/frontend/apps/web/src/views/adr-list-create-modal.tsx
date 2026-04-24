@@ -29,6 +29,18 @@ interface ADRCreateModalProps {
   onClose: () => void;
 }
 
+const ADR_STATUSES: readonly ADRStatus[] = [
+  'proposed',
+  'accepted',
+  'deprecated',
+  'superseded',
+  'rejected',
+];
+
+function isADRStatus(value: string): value is ADRStatus {
+  return ADR_STATUSES.some((status) => status === value);
+}
+
 export function ADRCreateModal({
   projectId,
   createADR,
@@ -46,11 +58,11 @@ export function ADRCreateModal({
     }
     try {
       await createADR.mutateAsync({
-        projectId,
-        title: newTitle,
+        consequences: '',
         context: newContext,
         decision: newDecision,
-        consequences: '',
+        projectId,
+        title: newTitle,
       });
       toast.success('ADR created successfully');
       onClose();
@@ -61,14 +73,13 @@ export function ADRCreateModal({
 
   return (
     <div className='fixed inset-0 z-50 flex items-center justify-center'>
-      <div
-        className='fixed inset-0 bg-black/50 backdrop-blur-sm'
+      <button
+        type='button'
+        className='fixed inset-0 appearance-none border-0 bg-black/50 p-0 backdrop-blur-sm'
         onClick={onClose}
         onKeyDown={(event) => {
           if (event.key === 'Escape') onClose();
         }}
-        role='button'
-        tabIndex={0}
         aria-label='Close dialog'
       />
       <div
@@ -115,7 +126,9 @@ export function ADRCreateModal({
               <Select
                 value={newStatus}
                 onValueChange={(value) => {
-                  setNewStatus(value as ADRStatus);
+                  if (isADRStatus(value)) {
+                    setNewStatus(value);
+                  }
                 }}
               >
                 <SelectTrigger id='adr-status' className='h-10'>

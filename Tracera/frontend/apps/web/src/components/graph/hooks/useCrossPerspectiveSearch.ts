@@ -2,6 +2,14 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { Item, Link, ItemDimensions } from '@tracertm/types';
 
+const ITEM_DIMENSION_KEYS = ['complexity', 'coverage', 'custom', 'maturity', 'risk'] as const;
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const MAX_CACHE_ENTRIES = 50;
+const MAX_HISTORY_ENTRIES = 20;
+
+const isItemDimensionKey = (key: string): key is keyof ItemDimensions =>
+  ITEM_DIMENSION_KEYS.some((dimensionKey) => dimensionKey === key);
+
 /**
  * Cross-perspective search result with equivalence information
  */
@@ -245,26 +253,37 @@ function applyFilters(
 ): CrossPerspectiveSearchResult[] {
   return results.filter((result) => {
     // Type filter
-    if (filters.type && result.item.type !== filters.type) {
+    if (filters.type !== undefined && filters.type !== '' && result.item.type !== filters.type) {
       return false;
     }
 
     // Status filter
-    if (filters.status && result.item.status !== filters.status) {
+    if (
+      filters.status !== undefined &&
+      filters.status !== '' &&
+      result.item.status !== filters.status
+    ) {
       return false;
     }
 
     // Perspective filter
-    if (filters.perspectives && filters.perspectives.length > 0) {
+    if (filters.perspectives !== undefined && filters.perspectives.length > 0) {
       if (!filters.perspectives.includes(result.perspective)) {
         return false;
       }
     }
 
     // Dimension filter
-    if (filters.dimensionKey && filters.dimensionValue) {
-      const dimensionKey = filters.dimensionKey as keyof ItemDimensions;
-      const dimensionValue = result.item.dimensions?.[dimensionKey];
+    if (
+      filters.dimensionKey !== undefined &&
+      filters.dimensionKey !== '' &&
+      filters.dimensionValue !== undefined &&
+      filters.dimensionValue !== ''
+    ) {
+      if (!isItemDimensionKey(filters.dimensionKey)) {
+        return false;
+      }
+      const dimensionValue = result.item.dimensions?.[filters.dimensionKey];
       if (dimensionValue !== filters.dimensionValue) {
         return false;
       }
@@ -300,14 +319,15 @@ export function performCrossPerspectiveSearch(
       const matchType = determineMatchType(item, query);
       const perspective = item.perspective ?? item.view;
       const equivalences = getEquivalences(item, allItems, links, item.equivalentItemIds);
+      const matchedText = getMatchedText(item, query, matchType);
 
       searchResults.push({
         item,
         perspective,
         matchType,
         score,
-        ...(getMatchedText(item, query, matchType) && {
-          matchedText: getMatchedText(item, query, matchType),
+        ...(matchedText !== undefined && matchedText !== '' && {
+          matchedText,
         }),
         equivalences,
       });
@@ -352,9 +372,6 @@ export function useCrossPerspectiveSearch() {
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const searchCacheRef = useRef<Map<string, SearchCacheEntry>>(new Map());
-  const MAX_CACHE_ENTRIES = 50;
-  const MAX_HISTORY_ENTRIES = 20;
-  const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
   /**
    * Generate cache key from search parameters

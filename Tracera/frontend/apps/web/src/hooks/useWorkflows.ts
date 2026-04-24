@@ -10,34 +10,54 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 const REFRESH_RUNS_INTERVAL_MS = 15_000;
 const REFRESH_SCHEDULES_INTERVAL_MS = 30_000;
 
+interface WorkflowRunsResponse {
+  runs: WorkflowRun[];
+  total: number;
+}
+
+interface WorkflowSchedulesResponse {
+  schedules: WorkflowSchedule[];
+  total: number;
+}
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const asStringOrUndefined = (value: unknown): string | undefined =>
+  typeof value === 'string' ? value : undefined;
+
+const asRecordOrUndefined = (value: unknown): Record<string, unknown> | undefined =>
+  isRecord(value) ? value : undefined;
+
+const parseTotal = (value: unknown): number => (typeof value === 'number' ? value : 0);
+
 function transformRun(data: Record<string, unknown>): WorkflowRun {
   return {
-    completedAt: data['completed_at'],
-    createdAt: data['created_at'],
-    createdByUserId: data['created_by_user_id'],
-    errorMessage: data['error_message'],
-    externalRunId: data['external_run_id'],
-    graphId: data['graph_id'],
-    id: data['id'],
-    payload: data['payload'],
-    projectId: data['project_id'],
-    result: data['result'],
-    startedAt: data['started_at'],
-    status: data['status'],
-    updatedAt: data['updated_at'],
-    workflowName: data['workflow_name'],
-  } as WorkflowRun;
+    completedAt: asStringOrUndefined(data['completed_at']),
+    createdAt: asStringOrUndefined(data['created_at']),
+    createdByUserId: asStringOrUndefined(data['created_by_user_id']),
+    errorMessage: asStringOrUndefined(data['error_message']),
+    externalRunId: asStringOrUndefined(data['external_run_id']),
+    graphId: asStringOrUndefined(data['graph_id']),
+    id: asStringOrUndefined(data['id']) ?? '',
+    payload: asRecordOrUndefined(data['payload']),
+    projectId: asStringOrUndefined(data['project_id']),
+    result: asRecordOrUndefined(data['result']),
+    startedAt: asStringOrUndefined(data['started_at']),
+    status: asStringOrUndefined(data['status']) ?? '',
+    updatedAt: asStringOrUndefined(data['updated_at']),
+    workflowName: asStringOrUndefined(data['workflow_name']) ?? '',
+  };
 }
 
 function transformSchedule(data: Record<string, unknown>): WorkflowSchedule {
-  return {
-    id: data['id'] ?? data['cron_id'],
-    cronName: data['cron_name'] ?? data['name'],
-    expression: data['expression'] ?? data['cron_expression'],
-    workflowName: data['workflow_name'],
-    additionalMetadata: data['additional_metadata'],
-    ...data,
-  } as WorkflowSchedule;
+  return Object.assign({}, data, {
+    additionalMetadata: asRecordOrUndefined(data['additional_metadata']),
+    cronName: asStringOrUndefined(data['cron_name'] ?? data['name']),
+    expression: asStringOrUndefined(data['expression'] ?? data['cron_expression']),
+    id: asStringOrUndefined(data['id'] ?? data['cron_id']),
+    workflowName: asStringOrUndefined(data['workflow_name']),
+  });
 }
 
 const useWorkflowRuns = (
@@ -45,15 +65,15 @@ const useWorkflowRuns = (
   status?: string,
   workflowName?: string,
   limit = 100,
-): ReturnType<typeof useQuery> =>
+): ReturnType<typeof useQuery<WorkflowRunsResponse>> =>
   useQuery({
     enabled: Boolean(projectId),
     queryFn: async () => {
       const params = new URLSearchParams({ limit: String(limit) });
-      if (status) {
+      if (status !== undefined && status !== '') {
         params.set('status', status);
       }
-      if (workflowName) {
+      if (workflowName !== undefined && workflowName !== '') {
         params.set('workflow_name', workflowName);
       }
       const res = await fetch(`${API_URL}/api/v1/projects/${projectId}/workflows/runs?${params}`, {
@@ -62,17 +82,18 @@ const useWorkflowRuns = (
       if (!res.ok) {
         throw new Error(`Failed to fetch workflow runs: ${res.status}`);
       }
-      const data = await res.json();
+      const data: unknown = await res.json();
+      const runs = isRecord(data) && Array.isArray(data['runs']) ? data['runs'] : [];
       return {
-        runs: (data['runs'] ?? []).map((run: Record<string, unknown>) => transformRun(run)),
-        total: data['total'] ?? 0,
+        runs: runs.filter(isRecord).map((run) => transformRun(run)),
+        total: isRecord(data) ? parseTotal(data['total']) : 0,
       };
     },
     queryKey: ['workflows', 'runs', projectId, status, workflowName, limit],
     refetchInterval: REFRESH_RUNS_INTERVAL_MS,
   });
 
-const useWorkflowSchedules = (projectId: string): ReturnType<typeof useQuery> =>
+const useWorkflowSchedules = (projectId: string): ReturnType<typeof useQuery<WorkflowSchedulesResponse>> =>
   useQuery({
     enabled: Boolean(projectId),
     queryFn: async () => {
@@ -82,12 +103,11 @@ const useWorkflowSchedules = (projectId: string): ReturnType<typeof useQuery> =>
       if (!res.ok) {
         throw new Error(`Failed to fetch workflow schedules: ${res.status}`);
       }
-      const data = await res.json();
+      const data: unknown = await res.json();
+      const schedules = isRecord(data) && Array.isArray(data['schedules']) ? data['schedules'] : [];
       return {
-        schedules: (data['schedules'] ?? []).map((schedule: Record<string, unknown>) =>
-          transformSchedule(schedule),
-        ),
-        total: data['total'] ?? 0,
+        schedules: schedules.filter(isRecord).map((schedule) => transformSchedule(schedule)),
+        total: isRecord(data) ? parseTotal(data['total']) : 0,
       };
     },
     queryKey: ['workflows', 'schedules', projectId],
@@ -110,7 +130,7 @@ const useBootstrapWorkflowSchedules = (): ReturnType<typeof useMutation<any, any
       }
       return res.json();
     },
-    onSuccess: async (_data, projectId) =>
+    onSuccess: (_data, projectId) =>
       queryClient.invalidateQueries({
         queryKey: ['workflows', 'schedules', projectId],
       }),
@@ -130,7 +150,7 @@ const useDeleteWorkflowSchedule = (): ReturnType<typeof useMutation<any, any, an
       }
       return res.json();
     },
-    onSuccess: async (_data, variables) =>
+    onSuccess: (_data, variables) =>
       queryClient.invalidateQueries({
         queryKey: ['workflows', 'schedules', variables.projectId],
       }),

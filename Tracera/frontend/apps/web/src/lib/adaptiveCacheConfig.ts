@@ -318,7 +318,7 @@ export const createAdaptiveQueryOptions = <TData = unknown, TError = DefaultErro
   metrics: CacheMetrics,
   configType: 'static' | 'dynamic' | 'graph',
   overrides?: Partial<CacheConfig>,
-): UseQueryOptions<TData, TError> => {
+): Partial<UseQueryOptions<TData, TError>> => {
   let config: CacheConfig;
 
   switch (configType) {
@@ -333,10 +333,11 @@ export const createAdaptiveQueryOptions = <TData = unknown, TError = DefaultErro
       break;
   }
 
-  return {
+  const options: Partial<UseQueryOptions<TData, TError>> = {
     ...config,
     ...overrides,
-  } as UseQueryOptions<TData, TError>;
+  };
+  return options;
 };
 
 /**
@@ -353,6 +354,7 @@ export const logAdaptiveCacheDecision = (
     const accessCategory = getAccessFrequencyCategory(metrics.accessFrequency);
 
     logger.debug('[AdaptiveCache]', {
+      accessCategory,
       accessFrequency: `${metrics.accessFrequency}/hour`,
       dataSize: `${(metrics.dataSize / KILOBYTE).toFixed(1)}KB`,
       gcTime: `${(config.gcTime / MINUTE_IN_MS).toFixed(1)}m`,

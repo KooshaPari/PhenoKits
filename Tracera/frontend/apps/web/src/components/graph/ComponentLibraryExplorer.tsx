@@ -129,6 +129,11 @@ const STATUS_CONFIG = {
   stable: { color: '#22c55e', icon: Check, label: 'Stable' },
 };
 
+type ExplorerTab = 'components' | 'tokens';
+
+const isExplorerTab = (value: string): value is ExplorerTab =>
+  value === 'components' || value === 'tokens';
+
 // =============================================================================
 // COMPONENT
 // =============================================================================
@@ -148,7 +153,7 @@ function ComponentLibraryExplorerComponent({
   isLoading = false,
 }: ComponentLibraryExplorerProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'components' | 'tokens'>('components');
+  const [activeTab, setActiveTab] = useState<ExplorerTab>('components');
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [filterStatus, setFilterStatus] = useState<LibraryComponent['status'] | 'all'>('all');
 
@@ -290,7 +295,7 @@ function ComponentLibraryExplorerComponent({
                 <Component className='h-3 w-3' />
                 {stats.total} components
               </span>
-              {currentLibrary.sourceUrl && (
+              {currentLibrary.sourceUrl !== undefined && currentLibrary.sourceUrl !== '' && (
                 <a
                   href={currentLibrary.sourceUrl}
                   target='_blank'
@@ -387,8 +392,10 @@ function ComponentLibraryExplorerComponent({
         {/* Tabs */}
         <Tabs
           value={activeTab}
-          onValueChange={(v) => {
-            setActiveTab(v as typeof activeTab);
+          onValueChange={(value) => {
+            if (isExplorerTab(value)) {
+              setActiveTab(value);
+            }
           }}
           className='flex flex-1 flex-col overflow-hidden'
         >
@@ -493,8 +500,8 @@ function CategorySection({
   onViewInFigma,
   onViewInCode,
 }: CategorySectionProps) {
-  const Icon = CATEGORY_ICONS[category] || Component;
-  const label = CATEGORY_LABELS[category] || category;
+  const Icon = CATEGORY_ICONS[category];
+  const label = CATEGORY_LABELS[category];
 
   return (
     <Collapsible open={isExpanded} onOpenChange={onToggle}>
@@ -572,9 +579,18 @@ function ComponentListItem({
     <div
       className={`group flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 transition-colors ${isSelected ? 'bg-primary/10 ring-primary/30 ring-1' : 'hover:bg-muted'} `}
       onClick={onSelect}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onSelect();
+        }
+      }}
+      aria-selected={isSelected}
+      role='option'
+      tabIndex={0}
     >
       {/* Thumbnail */}
-      {component.thumbnailUrl ? (
+      {component.thumbnailUrl !== undefined && component.thumbnailUrl !== '' ? (
         <img
           src={component.thumbnailUrl}
           alt=''
@@ -600,14 +616,16 @@ function ComponentListItem({
             <TooltipContent>{statusConfig.label}</TooltipContent>
           </Tooltip>
         </div>
-        {component.description && (
+        {component.description !== undefined && component.description !== '' && (
           <p className='text-muted-foreground truncate text-xs'>{component.description}</p>
         )}
       </div>
 
       {/* Actions */}
       <div className='flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100'>
-        {component.storybookUrl && onViewInStorybook && (
+        {component.storybookUrl !== undefined &&
+          component.storybookUrl !== '' &&
+          onViewInStorybook !== undefined && (
           <Tooltip delayDuration={200}>
             <TooltipTrigger asChild>
               <Button
@@ -625,7 +643,9 @@ function ComponentListItem({
             <TooltipContent>View in Storybook</TooltipContent>
           </Tooltip>
         )}
-        {component.figmaUrl && onViewInFigma && (
+        {component.figmaUrl !== undefined &&
+          component.figmaUrl !== '' &&
+          onViewInFigma !== undefined && (
           <Tooltip delayDuration={200}>
             <TooltipTrigger asChild>
               <Button
@@ -684,7 +704,9 @@ interface TokensGridProps {
 }
 
 function TokensGrid({ tokens, libraryId }: TokensGridProps) {
-  const libraryTokens = tokens.filter((t) => !libraryId || t.libraryId === libraryId);
+  const libraryTokens = tokens.filter(
+    (token) => libraryId === undefined || libraryId === '' || token.libraryId === libraryId,
+  );
 
   // Group by type
   const groupedTokens = useMemo(() => {

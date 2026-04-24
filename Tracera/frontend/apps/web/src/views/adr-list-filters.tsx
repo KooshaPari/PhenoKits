@@ -31,6 +31,24 @@ interface ADRListFiltersProps {
   statusCounts: StatusCounts;
 }
 
+type ADRDateRange = 'all' | 'week' | 'month' | 'quarter';
+
+const ADR_STATUSES: readonly ADRStatus[] = [
+  'proposed',
+  'accepted',
+  'deprecated',
+  'superseded',
+  'rejected',
+];
+
+function isADRDateRange(value: string): value is ADRDateRange {
+  return value === 'all' || value === 'week' || value === 'month' || value === 'quarter';
+}
+
+function isADRStatusFilter(value: string): value is ADRStatus | 'all' {
+  return value === 'all' || ADR_STATUSES.some((status) => status === value);
+}
+
 export function ADRListFilters({
   searchQuery,
   onSearchChange,
@@ -59,7 +77,9 @@ export function ADRListFilters({
       <Select
         value={statusFilter}
         onValueChange={(value) => {
-          onStatusChange(value as ADRStatus | 'all');
+          if (isADRStatusFilter(value)) {
+            onStatusChange(value);
+          }
         }}
       >
         <SelectTrigger className='hover:bg-background/50 h-10 w-[160px] border-none bg-transparent'>
@@ -81,7 +101,9 @@ export function ADRListFilters({
       <Select
         value={dateRange}
         onValueChange={(value) => {
-          onDateRangeChange(value as typeof dateRange);
+          if (isADRDateRange(value)) {
+            onDateRangeChange(value);
+          }
         }}
       >
         <SelectTrigger className='hover:bg-background/50 h-10 w-[140px] border-none bg-transparent'>

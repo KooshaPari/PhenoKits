@@ -196,13 +196,15 @@
 - `bun run typecheck:web` passes after integrating the first strict-lint tranche and
   repairing form, React Flow, WebGPU buffer, and placeholder TRPC typing.
 - `bun run lint:type-aware:web:strict` still exits 1, but the strict-error count is
-  reduced from 2,503 to 1,816 after twelve production tranches. The current largest
+  reduced from 2,503 to 1,758 after thirteen production tranches. The current largest
   remaining production-source clusters are now at two errors per file, led by
-  `ContractListView.tsx`, ADR list helpers, project feature/process/problem views,
-  graphology/cache/runtime helpers, workflow/link hooks, temporal/specification
-  components, layout/integration components, and smaller graph/form/API files. Test
-  and test-support clusters remain larger: `lib/websocket.test.ts`, `lib/csrf.test.ts`,
-  `test/setup.ts`, and `CreateItemDialog.test.tsx`.
+  `hooks/testCasesApi.ts`, `hooks/test-runs/test-run-hooks.ts`, `FormArrayField.tsx`,
+  create-item form variants, API MCP/auth helpers, and one-error source tails across
+  routes, stores, workers, graph components, specification components, and views. Test
+  clusters now dominate the backlog: `__tests__/api/endpoints.p1.test.ts`,
+  `__tests__/api/client-errors.edgecases.test.ts`,
+  `__tests__/hooks/useItems.p1.test.ts`, `__tests__/api/client.test.ts`,
+  `lib/websocket.test.ts`, and `lib/csrf.test.ts`.
 - `bun run test` from `frontend/` remains too broad for this pass; `@tracertm/web` has a
   large recovered legacy suite and needs chunked triage rather than a single root timeout
 

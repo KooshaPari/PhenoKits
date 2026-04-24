@@ -157,8 +157,9 @@ function QAEnhancedNodeComponent({
           {/* Image Pill - Separately Clickable */}
           {hasPreview && (
             <DialogTrigger asChild>
-              <div
-                className='group hover:border-primary/50 relative mx-3 my-2 cursor-pointer overflow-hidden rounded-xl border-2 border-dashed border-transparent transition-all'
+              <button
+                type='button'
+                className='group hover:border-primary/50 relative mx-3 my-2 block w-[calc(100%-1.5rem)] cursor-pointer overflow-hidden rounded-xl border-2 border-dashed border-transparent bg-transparent p-0 text-left transition-all'
                 onClick={handleImageClick}
               >
                 <img
@@ -170,7 +171,7 @@ function QAEnhancedNodeComponent({
 
                 {/* Hover Overlay */}
                 <div className='absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/60 opacity-0 transition-opacity group-hover:opacity-100'>
-                  {data.preview?.hasLiveDemo ? (
+                  {data.preview?.hasLiveDemo === true ? (
                     <>
                       <Play className='h-8 w-8 text-white' />
                       <span className='text-xs font-medium text-white'>Run Demo</span>
@@ -189,7 +190,7 @@ function QAEnhancedNodeComponent({
                     {data.artifacts.length} artifacts
                   </div>
                 )}
-              </div>
+              </button>
             </DialogTrigger>
           )}
 
@@ -217,7 +218,7 @@ function QAEnhancedNodeComponent({
                 </TooltipContent>
               </Tooltip>
 
-              {data.metrics?.avgDuration && (
+              {data.metrics?.avgDuration !== undefined && data.metrics.avgDuration !== 0 && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span className='flex items-center gap-0.5'>
@@ -408,10 +409,12 @@ function ArtifactsTab({ data }: { data: QAEnhancedNodeData }) {
                     className='h-full w-full object-cover'
                     muted
                     playsInline
-                    onMouseEnter={async (e) => e.currentTarget.play()}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.pause();
-                      e.currentTarget.currentTime = 0;
+                    onMouseEnter={(event) => {
+                      void event.currentTarget.play();
+                    }}
+                    onMouseLeave={(event) => {
+                      event.currentTarget.pause();
+                      event.currentTarget.currentTime = 0;
                     }}
                   />
                 )}
@@ -455,7 +458,7 @@ function DemoTab({ data }: { data: QAEnhancedNodeData }) {
   const hasLiveDemo = data.preview?.hasLiveDemo;
   const previewUrl = data.preview?.screenshotUrl ?? data.preview?.videoUrl;
 
-  if (hasLiveDemo) {
+  if (hasLiveDemo === true) {
     return (
       <div className='space-y-4'>
         <div className='flex items-center justify-between'>
@@ -470,14 +473,14 @@ function DemoTab({ data }: { data: QAEnhancedNodeData }) {
             src={data.preview?.videoUrl}
             title={`Demo: ${data.label}`}
             className='h-full w-full border-0'
-            sandbox='allow-scripts allow-same-origin'
+            sandbox='allow-scripts'
           />
         </div>
       </div>
     );
   }
 
-  if (previewUrl) {
+  if (previewUrl !== undefined && previewUrl !== '') {
     const isVideo = previewUrl.endsWith('.webm') || previewUrl.endsWith('.mp4');
     const isGif = previewUrl.endsWith('.gif');
 
@@ -580,7 +583,7 @@ function TestsTab({ data }: { data: QAEnhancedNodeData }) {
       )}
 
       {/* Last Run */}
-      {metrics.lastRunAt && (
+      {metrics.lastRunAt !== undefined && metrics.lastRunAt !== '' && (
         <p className='text-muted-foreground text-sm'>
           Last run: {new Date(metrics.lastRunAt).toLocaleString()}
         </p>
@@ -596,7 +599,7 @@ function MetricsTab({ data }: { data: QAEnhancedNodeData }) {
     <div className='space-y-4'>
       <h3 className='font-semibold'>Performance Metrics</h3>
 
-      {metrics?.avgDuration && (
+      {metrics?.avgDuration !== undefined && metrics.avgDuration !== 0 && (
         <Card className='p-4'>
           <div className='flex items-center justify-between'>
             <div>

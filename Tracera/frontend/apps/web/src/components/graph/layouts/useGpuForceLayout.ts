@@ -82,7 +82,7 @@ export function useGpuForceLayout<T extends Record<string, unknown>>(
         workerRef.current.terminate();
         workerRef.current = null;
       }
-      if (animationFrameRef.current) {
+      if (animationFrameRef.current !== null) {
         cancelAnimationFrame(animationFrameRef.current);
       }
     },
@@ -236,6 +236,7 @@ export function useGpuForceLayout<T extends Record<string, unknown>>(
           type: 'simulate',
         };
 
+        // eslint-disable-next-line unicorn/require-post-message-target-origin -- Worker.postMessage has no targetOrigin parameter.
         worker.postMessage(request);
       }),
     [config],
@@ -345,7 +346,7 @@ export function useGpuForceLayout<T extends Record<string, unknown>>(
       setLayoutedNodes(newNodes);
     };
 
-    runLayout().catch((error) => {
+    runLayout().catch((error: unknown) => {
       if (cancelled) {
         return;
       }
@@ -368,6 +369,7 @@ export function useGpuForceLayout<T extends Record<string, unknown>>(
     animateLayout,
     animationDuration,
     animateTransitions,
+    layoutedNodes,
   ]);
 
   return {

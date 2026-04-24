@@ -24,6 +24,42 @@ export interface NotificationEvent {
   timestamp: number;
 }
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const isNotificationType = (value: unknown): value is Notification['type'] =>
+  value === 'info' || value === 'success' || value === 'warning' || value === 'error';
+
+const isNotification = (value: unknown): value is Notification => {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    typeof value['id'] === 'string' &&
+    typeof value['user_id'] === 'string' &&
+    isNotificationType(value['type']) &&
+    typeof value['title'] === 'string' &&
+    typeof value['message'] === 'string' &&
+    typeof value['created_at'] === 'string'
+  );
+};
+
+const isNotificationEventType = (value: unknown): value is NotificationEvent['type'] =>
+  value === 'notification' || value === 'read' || value === 'read_all' || value === 'delete';
+
+const isNotificationEvent = (value: unknown): value is NotificationEvent => {
+  if (!isRecord(value) || !isNotificationEventType(value['type'])) {
+    return false;
+  }
+
+  return (
+    typeof value['user_id'] === 'string' &&
+    typeof value['timestamp'] === 'number' &&
+    (value['notification'] === undefined || isNotification(value['notification']))
+  );
+};
+
 export function useNotifications() {
   const { token } = useAuthStore();
   const queryClient = useQueryClient();
@@ -34,7 +70,7 @@ export function useNotifications() {
   const query = useQuery({
     enabled: Boolean(token),
     queryFn: async () => {
-      if (!token) {
+      if (token === undefined || token === null || token === '') {
         return [];
       }
       const response = await fetch(`${API_URL}/api/v1/notifications`, {
@@ -47,7 +83,12 @@ export function useNotifications() {
       if (!response.ok) {
         throw new Error('Failed to fetch notifications');
       }
-      return response.json() as Promise<Notification[]>;
+      const responseData: unknown = await response.json();
+      return Array.isArray(responseData)
+        ? responseData.filter((notification): notification is Notification =>
+            isNotification(notification),
+          )
+        : [];
     },
     queryKey: ['notifications'],
     // No refetchInterval - we use SSE for real-time updates
@@ -56,7 +97,11 @@ export function useNotifications() {
   // Handle notification events from SSE
   const handleNotificationEvent = useCallback(
     (data: unknown) => {
-      const event = data as NotificationEvent;
+      if (!isNotificationEvent(data)) {
+        return;
+      }
+
+      const event = data;
 
       queryClient.setQueryData<Notification[]>(['notifications'], (oldData) => {
         if (!oldData) {
@@ -103,7 +148,7 @@ export function useNotifications() {
 
   // Setup SSE connection
   useEffect(() => {
-    if (!token) {
+    if (token === undefined || token === null || token === '') {
       // Cleanup existing connection if token is removed
       if (sseClientRef.current) {
         sseClientRef.current.close();
@@ -178,7 +223,7 @@ export function useNotifications() {
     },
   });
 
-  const unreadCount = query.data?.filter((n) => !n.read_at).length ?? 0;
+  const unreadCount = query.data?.filter((n) => n.read_at === undefined || n.read_at === '').length ?? 0;
   const isConnected = sseClientRef.current?.isConnected() ?? false;
 
   return {

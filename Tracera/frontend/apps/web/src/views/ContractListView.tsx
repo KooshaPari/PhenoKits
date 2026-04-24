@@ -17,9 +17,37 @@ interface ContractListViewProps {
   projectId: string;
 }
 
+const CONTRACT_STATUSES: readonly ContractStatus[] = [
+  'draft',
+  'active',
+  'verified',
+  'violated',
+  'deprecated',
+];
+
+function getSearchValue(searchParams: unknown, key: string): unknown {
+  if (!isRecord(searchParams) || !(key in searchParams)) {
+    return;
+  }
+
+  return searchParams[key];
+}
+
+function isContractStatus(value: unknown): value is ContractStatus {
+  return typeof value === 'string' && CONTRACT_STATUSES.some((status) => status === value);
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function isString(value: unknown): value is string {
+  return typeof value === 'string';
+}
+
 const ContractListView: FC<ContractListViewProps> = ({ projectId }) => {
   const navigate = useNavigate();
-  const searchParams = useSearch({ strict: false });
+  const searchParams: unknown = useSearch({ strict: false });
 
   const { data: contractsData, isLoading } = useContracts({ projectId });
 
@@ -29,10 +57,12 @@ const ContractListView: FC<ContractListViewProps> = ({ projectId }) => {
   }, [contractsData?.contracts]);
 
   const [searchQuery, setSearchQuery] = useState('');
+  const searchStatus = getSearchValue(searchParams, 'status');
+  const searchType = getSearchValue(searchParams, 'type');
   const [statusFilter, setStatusFilter] = useState<ContractStatus | 'all'>(
-    (searchParams.status as ContractStatus) || 'all',
+    isContractStatus(searchStatus) ? searchStatus : 'all',
   );
-  const [typeFilter, setTypeFilter] = useState<string>(searchParams.type ?? 'all');
+  const [typeFilter, setTypeFilter] = useState<string>(isString(searchType) ? searchType : 'all');
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   const filteredContracts = useMemo(
@@ -53,7 +83,7 @@ const ContractListView: FC<ContractListViewProps> = ({ projectId }) => {
 
   const handleContractClick = useCallback(
     (contract: Contract) => {
-      navigate({
+      void navigate({
         params: { contractId: contract.id, projectId },
         to: '/projects/$projectId/contracts/$contractId',
       });

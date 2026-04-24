@@ -36,6 +36,34 @@ interface ProcessViewProps {
   projectId: string;
 }
 
+function isProcessStatus(value: string): value is ProcessStatus {
+  switch (value) {
+    case 'active':
+    case 'archived':
+    case 'deprecated':
+    case 'draft':
+    case 'retired':
+      return true;
+    default:
+      return false;
+  }
+}
+
+function isProcessCategory(value: string): value is ProcessCategory {
+  switch (value) {
+    case 'compliance':
+    case 'development':
+    case 'integration':
+    case 'management':
+    case 'operational':
+    case 'other':
+    case 'support':
+      return true;
+    default:
+      return false;
+  }
+}
+
 export function ProcessView({ projectId }: ProcessViewProps) {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [statusFilter, setStatusFilter] = useState<ProcessStatus | ''>('');
@@ -143,7 +171,8 @@ export function ProcessView({ projectId }: ProcessViewProps) {
           <select
             value={statusFilter}
             onChange={(e) => {
-              setStatusFilter(e.target.value as ProcessStatus | '');
+              const { value } = e.target;
+              setStatusFilter(isProcessStatus(value) ? value : '');
             }}
             className='bg-background rounded-lg border px-3 py-2'
           >
@@ -157,7 +186,8 @@ export function ProcessView({ projectId }: ProcessViewProps) {
           <select
             value={categoryFilter}
             onChange={(e) => {
-              setCategoryFilter(e.target.value as ProcessCategory | '');
+              const { value } = e.target;
+              setCategoryFilter(isProcessCategory(value) ? value : '');
             }}
             className='bg-background rounded-lg border px-3 py-2'
           >
@@ -230,8 +260,8 @@ export function ProcessView({ projectId }: ProcessViewProps) {
 }
 
 function ProcessCard({ process }: { process: Process }) {
-  const stageCount = process.stages?.length ?? 0;
-  const swimlaneCount = process.swimlanes?.length ?? 0;
+  const stageCount = process.stages === undefined ? 0 : process.stages.length;
+  const swimlaneCount = process.swimlanes === undefined ? 0 : process.swimlanes.length;
 
   return (
     <div className='bg-card rounded-lg border p-4 transition-shadow hover:shadow-md'>
@@ -249,12 +279,12 @@ function ProcessCard({ process }: { process: Process }) {
         </span>
       </div>
 
-      {process.description && (
+      {process.description !== undefined && process.description !== '' && (
         <p className='text-muted-foreground mt-2 line-clamp-2 text-sm'>{process.description}</p>
       )}
 
       <div className='text-muted-foreground mt-4 flex items-center gap-4 text-sm'>
-        {process.category && (
+        {process.category !== undefined && (
           <span className='bg-muted rounded px-2 py-0.5 text-xs'>
             {categoryLabels[process.category] || process.category}
           </span>
@@ -268,13 +298,13 @@ function ProcessCard({ process }: { process: Process }) {
         {process.isActiveVersion && (
           <span className='rounded bg-green-100 px-2 py-0.5 text-green-700'>Active Version</span>
         )}
-        {process.owner && <span>Owner: {process.owner}</span>}
+        {process.owner !== undefined && process.owner !== '' && <span>Owner: {process.owner}</span>}
       </div>
 
-      {process.expectedDurationHours && (
+      {process.expectedDurationHours !== undefined && (
         <div className='text-muted-foreground mt-2 text-xs'>
           Expected duration: {process.expectedDurationHours}h
-          {process.slaHours && ` (SLA: ${process.slaHours}h)`}
+          {process.slaHours !== undefined && ` (SLA: ${process.slaHours}h)`}
         </div>
       )}
     </div>

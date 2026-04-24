@@ -35,6 +35,32 @@ interface ProblemViewProps {
   projectId: string;
 }
 
+function isProblemStatus(value: string): value is ProblemStatus {
+  switch (value) {
+    case 'awaiting_fix':
+    case 'closed':
+    case 'in_investigation':
+    case 'known_error':
+    case 'open':
+    case 'pending_workaround':
+      return true;
+    default:
+      return false;
+  }
+}
+
+function isImpactLevel(value: string): value is ImpactLevel {
+  switch (value) {
+    case 'critical':
+    case 'high':
+    case 'low':
+    case 'medium':
+      return true;
+    default:
+      return false;
+  }
+}
+
 export const ProblemView = ({ projectId }: ProblemViewProps) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [statusFilter, setStatusFilter] = useState<ProblemStatus | ''>('');
@@ -60,11 +86,13 @@ export const ProblemView = ({ projectId }: ProblemViewProps) => {
   };
 
   const handleStatusFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setStatusFilter(e.target.value as ProblemStatus | '');
+    const { value } = e.target;
+    setStatusFilter(isProblemStatus(value) ? value : '');
   };
 
   const handlePriorityFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setPriorityFilter(e.target.value as ImpactLevel | '');
+    const { value } = e.target;
+    setPriorityFilter(isImpactLevel(value) ? value : '');
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -249,7 +277,7 @@ function ProblemRow({ problem }: { problem: Problem }) {
         <div>
           <span className='text-muted-foreground text-xs'>{problem.problemNumber}</span>
           <div className='font-medium'>{problem.title}</div>
-          {problem.category && (
+          {problem.category !== undefined && problem.category !== '' && (
             <span className='text-muted-foreground text-xs'>{problem.category}</span>
           )}
         </div>

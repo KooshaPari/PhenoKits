@@ -1,9 +1,5 @@
 [workspace]
-members = [
-    "crates/observably-tracing",
-    "crates/observably-logging",
-    "crates/observably-sentinel",
-  ]
+members = []
 resolver = "2"
 
 [workspace.package]

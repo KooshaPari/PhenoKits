@@ -284,9 +284,9 @@ function ComparisonView({ currentBranchId, branches }: ComparisonViewProps) {
     <div className='space-y-4 p-4'>
       <div className='grid grid-cols-2 gap-4'>
         <div>
-          <label className='mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300'>
+          <span className='mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300'>
             Left Branch
-          </label>
+          </span>
           <Select value={currentBranchId} disabled>
             <SelectTrigger>
               <SelectValue />
@@ -295,9 +295,9 @@ function ComparisonView({ currentBranchId, branches }: ComparisonViewProps) {
         </div>
 
         <div>
-          <label className='mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300'>
+          <span className='mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300'>
             Right Branch
-          </label>
+          </span>
           <Select value={compareBranchId ?? ''} onValueChange={setCompareBranchId}>
             <SelectTrigger>
               <SelectValue placeholder='Select branch to compare' />

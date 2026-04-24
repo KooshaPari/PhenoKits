@@ -3,7 +3,7 @@ import { ChevronDown, ChevronRight, Layers, Plus, Sparkles, Target } from 'lucid
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
-import type { TypedItem } from '@tracertm/types';
+import type { ItemStatus, Priority, TypedItem } from '@tracertm/types';
 
 import { CreateItemForm } from '@/components/forms/CreateItemForm';
 import { useCreateItem, useItems } from '@/hooks/useItems';
@@ -23,6 +23,16 @@ interface FeatureViewProps {
   projectId: string;
 }
 
+interface FeatureFormData {
+  title: string;
+  description?: string | undefined;
+  view: string;
+  type: string;
+  status: ItemStatus;
+  priority: Priority;
+  parentId?: string | undefined;
+}
+
 /** Build epic/feature hierarchy: epics as roots, features (or items with parentId) as children */
 function buildHierarchy(items: TypedItem[]) {
   const roots: TypedItem[] = [];
@@ -31,7 +41,7 @@ function buildHierarchy(items: TypedItem[]) {
   for (const item of items) {
     const isEpic = item.type === 'epic';
     const parentId = item.parentId ?? null;
-    if (isEpic || !parentId) {
+    if (isEpic || parentId === null || parentId === '') {
       roots.push(item);
     } else {
       const list = childrenByParent.get(parentId) ?? [];
@@ -88,22 +98,14 @@ export function FeatureView({ projectId }: FeatureViewProps) {
     setShowCreate(true);
   };
 
-  const handleCreateSubmit = async (formData: {
-    title: string;
-    description?: string | undefined;
-    view: string;
-    type: string;
-    status: string;
-    priority: string;
-    parentId?: string | undefined;
-  }) => {
+  const handleCreateSubmit = async (formData: FeatureFormData): Promise<void> => {
     try {
       await createItem.mutateAsync({
         description: formData.description,
         parentId: createType === 'feature' ? (parentIdForFeature ?? undefined) : undefined,
-        priority: formData.priority as 'low' | 'medium' | 'high' | 'critical',
+        priority: formData.priority,
         projectId,
-        status: formData.status as 'todo' | 'in_progress' | 'done' | 'blocked' | 'cancelled',
+        status: formData.status,
         title: formData.title,
         type: createType,
         view: 'feature',
@@ -113,6 +115,10 @@ export function FeatureView({ projectId }: FeatureViewProps) {
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to create');
     }
+  };
+
+  const handleCreateFormSubmit = (formData: FeatureFormData): void => {
+    void handleCreateSubmit(formData);
   };
 
   if (isLoading) {
@@ -338,7 +344,7 @@ export function FeatureView({ projectId }: FeatureViewProps) {
           submitLabel='Create Feature'
           submitBusyLabel='Creating...'
           defaultView='FEATURE'
-          onSubmit={handleCreateSubmit}
+          onSubmit={handleCreateFormSubmit}
           onCancel={() => {
             setShowCreate(false);
           }}

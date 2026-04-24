@@ -56,14 +56,19 @@ const ICONS: Record<string, string> = {
   test: '✓',
 };
 
-const readNumber = (obj: Record<string, unknown>, key: string): number | undefined => {
-  const value = obj[key];
+const readNumber = (obj: object, key: string): number | undefined => {
+  const value: unknown = Reflect.get(obj, key);
   return typeof value === 'number' ? value : undefined;
 };
 
-const readString = (obj: Record<string, unknown>, key: string): string | undefined => {
-  const value = obj[key];
+const readString = (obj: object, key: string): string | undefined => {
+  const value: unknown = Reflect.get(obj, key);
   return typeof value === 'string' ? value : undefined;
+};
+
+const readBoolean = (obj: object, key: string): boolean | undefined => {
+  const value: unknown = Reflect.get(obj, key);
+  return typeof value === 'boolean' ? value : undefined;
 };
 
 const getZoomRatio = (settings: Record<string, unknown>): number => {
@@ -235,15 +240,14 @@ const customNodeRenderer = (
   settings: Record<string, unknown>,
 ): void => {
   const { x, y, size, label, type } = data;
-  const extra = data as unknown as Record<string, unknown>;
   const zoomRatio = getZoomRatio(settings);
   const typeColor = getTypeColor(type);
 
   drawNodeBase(context, x, y, size, typeColor);
 
-  const status = readString(extra, 'status');
-  if (status) {
-    const statusColor = readString(extra, 'statusColor') ?? DEFAULT_STATUS_COLOR;
+  const status = readString(data, 'status');
+  if (status !== undefined && status !== '') {
+    const statusColor = readString(data, 'statusColor') ?? DEFAULT_STATUS_COLOR;
     drawStatusIndicator(context, x, y, size, statusColor);
   }
 
@@ -257,7 +261,8 @@ const customNodeRenderer = (
     drawNodeLabel(context, x, y, size, label);
   }
 
-  if (extra['highlighted'] === true) {
+  const isHighlighted = readBoolean(data, 'highlighted');
+  if (isHighlighted !== undefined && isHighlighted) {
     drawNodeHighlight(context, x, y, size, typeColor);
   }
 };
@@ -271,28 +276,28 @@ const customEdgeRenderer = (
   data: EdgeDisplayData,
   settings: Record<string, unknown>,
 ): void => {
-  const extra = data as unknown as Record<string, unknown>;
-  const x1 = readNumber(extra, 'x1');
-  const y1 = readNumber(extra, 'y1');
-  const x2 = readNumber(extra, 'x2');
-  const y2 = readNumber(extra, 'y2');
+  const x1 = readNumber(data, 'x1');
+  const y1 = readNumber(data, 'y1');
+  const x2 = readNumber(data, 'x2');
+  const y2 = readNumber(data, 'y2');
 
   if (x1 === undefined || y1 === undefined || x2 === undefined || y2 === undefined) {
     return;
   }
 
-  const color = readString(extra, 'color') ?? EDGE_COLOR;
-  const size = readNumber(extra, 'size') ?? DEFAULT_EDGE_SIZE;
-  const label = readString(extra, 'label');
+  const color = readString(data, 'color') ?? EDGE_COLOR;
+  const size = readNumber(data, 'size') ?? DEFAULT_EDGE_SIZE;
+  const label = readString(data, 'label');
   const zoomRatio = getZoomRatio(settings);
 
   drawEdgeLine(context, x1, y1, x2, y2, color, size);
 
-  if (zoomRatio > ZOOM_EDGE_LABEL_THRESHOLD && label) {
+  if (zoomRatio > ZOOM_EDGE_LABEL_THRESHOLD && label !== undefined && label !== '') {
     drawEdgeLabel(context, x1, y1, x2, y2, label, color);
   }
 
-  if (extra['highlighted'] === true) {
+  const isHighlighted = readBoolean(data, 'highlighted');
+  if (isHighlighted !== undefined && isHighlighted) {
     drawEdgeHighlight(context, x1, y1, x2, y2, color, size);
   }
 };

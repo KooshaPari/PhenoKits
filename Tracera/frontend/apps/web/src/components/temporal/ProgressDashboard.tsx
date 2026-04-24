@@ -191,11 +191,17 @@ function MilestoneRow({ milestone, onClickMilestone }: MilestoneRowProps) {
     (new Date(milestone.targetDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24),
   );
   const isOverdue = daysRemaining < 0;
+  const handleClick = (): void => {
+    if (onClickMilestone !== undefined) {
+      onClickMilestone(milestone.id);
+    }
+  };
 
   return (
-    <div
-      className='group flex cursor-pointer items-center justify-between rounded-lg border border-gray-200 p-3 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800'
-      onClick={() => onClickMilestone?.(milestone.id)}
+    <button
+      type='button'
+      className='group flex w-full cursor-pointer items-center justify-between rounded-lg border border-gray-200 p-3 text-left transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800'
+      onClick={handleClick}
     >
       <div className='min-w-0 flex-1 space-y-1'>
         <div className='flex items-center gap-2'>
@@ -239,7 +245,7 @@ function MilestoneRow({ milestone, onClickMilestone }: MilestoneRowProps) {
         </div>
         <ChevronRight className='h-4 w-4 text-gray-400 opacity-0 transition-opacity group-hover:opacity-100 dark:text-gray-600' />
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -290,11 +296,17 @@ function SprintRow({ sprint, onClickSprint }: SprintRowProps) {
   const daysRemaining = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
   const isActive = sprint.status === 'active';
   const isCompleted = sprint.status === 'completed';
+  const handleClick = (): void => {
+    if (onClickSprint !== undefined) {
+      onClickSprint(sprint.id);
+    }
+  };
 
   return (
-    <div
-      className='cursor-pointer rounded-lg border border-gray-200 p-4 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800'
-      onClick={() => onClickSprint?.(sprint.id)}
+    <button
+      type='button'
+      className='w-full cursor-pointer rounded-lg border border-gray-200 p-4 text-left transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800'
+      onClick={handleClick}
     >
       <div className='mb-3 flex items-start justify-between'>
         <div className='min-w-0 flex-1'>
@@ -354,7 +366,7 @@ function SprintRow({ sprint, onClickSprint }: SprintRowProps) {
         </span>
         <span>{sprint.durationDays} days</span>
       </div>
-    </div>
+    </button>
   );
 }
 

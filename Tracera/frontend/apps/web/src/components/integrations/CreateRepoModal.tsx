@@ -3,11 +3,10 @@
  */
 
 import { Github, Loader2 } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { type ChangeEvent, type SyntheticEvent, useCallback, useState } from 'react';
 import { toast } from 'sonner';
 
 import type { GitHubAppInstallation, GitHubRepo } from '@/api/github';
-import type { ApiErrorResponse } from '@/types';
 
 import { Button } from '@/components/ui/enterprise-button';
 import { useCreateGitHubRepo } from '@/hooks/useGitHub';
@@ -23,6 +22,11 @@ import {
 import { Label } from '@tracertm/ui/components/Label';
 import { Textarea } from '@tracertm/ui/components/Textarea';
 
+const readMessage = (error: object): string | undefined => {
+  const message: unknown = Reflect.get(error, 'message');
+  return typeof message === 'string' ? message : undefined;
+};
+
 export interface CreateRepoModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -35,13 +39,8 @@ function getCreateRepoErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }
-  if (
-    error &&
-    typeof error === 'object' &&
-    'message' in error &&
-    typeof (error as ApiErrorResponse).message === 'string'
-  ) {
-    return (error as ApiErrorResponse).message;
+  if (typeof error === 'object' && error !== null) {
+    return readMessage(error) ?? 'Failed to create repository';
   }
   return 'Failed to create repository';
 }
@@ -60,8 +59,8 @@ export const CreateRepoModal = function CreateRepoModal({
   const createRepo = useCreateGitHubRepo();
 
   const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
+    async (event: SyntheticEvent<HTMLFormElement>) => {
+      event.preventDefault();
 
       if (!name.trim()) {
         toast.error('Repository name is required');
@@ -74,10 +73,10 @@ export const CreateRepoModal = function CreateRepoModal({
           installation.target_type === 'Organization' ? installation.account_login : undefined;
         const repo = await createRepo.mutateAsync({
           account_id: accountId,
-          ...(trimmedDescription ? { description: trimmedDescription } : {}),
+          ...(trimmedDescription !== '' ? { description: trimmedDescription } : {}),
           installation_id: installation.id,
           name: name.trim(),
-          ...(orgValue ? { org: orgValue } : {}),
+          ...(orgValue !== undefined && orgValue !== '' ? { org: orgValue } : {}),
           private: isPrivate,
         });
 
@@ -106,14 +105,14 @@ export const CreateRepoModal = function CreateRepoModal({
     ],
   );
 
-  const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setName(e.target.value);
+  const handleNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    setName(event.target.value);
   }, []);
-  const handleDescriptionChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setDescription(e.target.value);
+  const handleDescriptionChange = useCallback((event: ChangeEvent<HTMLTextAreaElement>) => {
+    setDescription(event.target.value);
   }, []);
-  const handlePrivateChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setIsPrivate(e.target.checked);
+  const handlePrivateChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    setIsPrivate(event.target.checked);
   }, []);
   const handleCancel = useCallback(() => {
     onOpenChange(false);
@@ -132,7 +131,13 @@ export const CreateRepoModal = function CreateRepoModal({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit}>
+        <form
+          onSubmit={(event) => {
+            handleSubmit(event).catch((error: unknown) => {
+              toast.error(getCreateRepoErrorMessage(error));
+            });
+          }}
+        >
           <div className='space-y-4 py-4'>
             <div className='space-y-2'>
               <Label htmlFor='repo-name'>Repository Name *</Label>

@@ -389,7 +389,7 @@ export const SidebarView = ({
                                         <Ui.Tooltip key={view.href}>
                                           <Ui.TooltipTrigger asChild>
                                             <Link
-                                              to={view.href as never}
+                                              to={view.href}
                                               className={cn(
                                                 'group flex items-center gap-2 rounded-lg px-3 py-1.5 border transition-all duration-200 ease-out cursor-pointer relative min-w-0 w-full max-w-full text-xs overflow-hidden box-border',
                                                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary',
@@ -529,7 +529,7 @@ export const SidebarView = ({
                             <Ui.TooltipTrigger asChild>
                               <div className='group relative flex w-full min-w-0 items-center overflow-hidden'>
                                 <Link
-                                  to={`/projects/${project.id}` as never}
+                                  to={`/projects/${project.id}`}
                                   className='bg-background/10 text-muted-foreground hover:bg-background/20 hover:text-foreground group/item flex max-w-full min-w-0 flex-1 cursor-pointer items-center gap-2 overflow-hidden rounded-lg border border-transparent px-3 py-1.5 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0 active:scale-[0.99]'
                                 >
                                   <div className='bg-primary/40 group-hover/item:bg-primary h-2 w-2 shrink-0 rounded-full transition-colors' />

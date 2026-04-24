@@ -38,7 +38,7 @@ export function useTableKeyboardNavigation({
   // Get focusable element at given coordinates
   const getFocusableElement = useCallback(
     (rowIdx: number, colIdx: number): HTMLElement | null => {
-      if (containerId) {
+      if (containerId !== undefined && containerId !== '') {
         const container = document.querySelector(`#${containerId}`);
         if (!container) {
           return null;
@@ -49,7 +49,7 @@ export function useTableKeyboardNavigation({
           return null;
         }
 
-        const cell = row.querySelector(`[data-col-index="${colIdx}"]`);
+        const cell = row.querySelector<HTMLElement>(`[data-col-index="${colIdx}"]`);
         if (!cell) {
           return null;
         }
@@ -59,7 +59,7 @@ export function useTableKeyboardNavigation({
           "button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])",
         );
 
-        return (focusable ?? cell) as HTMLElement;
+        return focusable ?? cell;
       }
 
       return null;
@@ -75,7 +75,7 @@ export function useTableKeyboardNavigation({
       let newColIndex = focusState.colIndex;
       let shouldPreventDefault = false;
 
-      const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
+      const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
       const isCtrlKey = isMac ? metaKey : ctrlKey;
 
       switch (key) {
@@ -181,8 +181,8 @@ export function useTableKeyboardNavigation({
 
   // Setup event listeners
   useEffect(() => {
-    const container = containerId
-      ? (document.querySelector(`#${containerId}`) as HTMLElement | null)
+    const container = containerId !== undefined && containerId !== ''
+      ? document.querySelector<HTMLElement>(`#${containerId}`)
       : containerRef.current;
 
     if (!container) {

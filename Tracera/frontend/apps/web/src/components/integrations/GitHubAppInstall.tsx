@@ -3,7 +3,7 @@
  */
 
 import { Github, Trash2 } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { type MouseEvent, useCallback, useState } from 'react';
 import { toast } from 'sonner';
 
 import type { GitHubAppInstallation, GitHubRepo } from '@/api/github';
@@ -20,6 +20,11 @@ import { Badge, Card } from '@tracertm/ui';
 import { CreateRepoModal } from './CreateRepoModal';
 import { RepoSearchCombobox } from './RepoSearchCombobox';
 
+const readMessage = (error: object): string | undefined => {
+  const message: unknown = Reflect.get(error, 'message');
+  return typeof message === 'string' ? message : undefined;
+};
+
 export interface GitHubAppInstallProps {
   accountId: string;
   onRepoSelect?: (repo: GitHubRepo | null) => void;
@@ -30,13 +35,8 @@ function getUninstallErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }
-  if (
-    error &&
-    typeof error === 'object' &&
-    'message' in error &&
-    typeof (error as { message?: string }).message === 'string'
-  ) {
-    return (error as { message: string }).message;
+  if (typeof error === 'object' && error !== null) {
+    return readMessage(error) ?? 'Failed to remove installation';
   }
   return 'Failed to remove installation';
 }
@@ -58,8 +58,9 @@ export const GitHubAppInstall = function GitHubAppInstall({
   const installations: GitHubAppInstallation[] = installationsData?.installations ?? [];
 
   const handleInstall = useCallback(() => {
-    if (installUrlData?.install_url) {
-      globalThis.location.href = installUrlData.install_url;
+    const installUrl = installUrlData?.install_url;
+    if (installUrl !== undefined && installUrl !== '') {
+      globalThis.location.href = installUrl;
     }
   }, [installUrlData?.install_url]);
 
@@ -68,7 +69,7 @@ export const GitHubAppInstall = function GitHubAppInstall({
   }, []);
 
   const handleUninstallConfirm = useCallback(async () => {
-    if (!uninstallConfirmId) {
+    if (uninstallConfirmId === null || uninstallConfirmId === '') {
       return;
     }
     try {
@@ -85,7 +86,7 @@ export const GitHubAppInstall = function GitHubAppInstall({
   }, []);
 
   const activeInstallation = installations.find(
-    (inst: GitHubAppInstallation) => !inst.suspended_at,
+    (inst: GitHubAppInstallation) => inst.suspended_at === null || inst.suspended_at === undefined,
   );
   const installationForCreate = activeInstallation ?? installations[0];
 
@@ -102,9 +103,9 @@ export const GitHubAppInstall = function GitHubAppInstall({
   );
 
   const handleUninstallClickFromEvent = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
-      const id = (e.currentTarget as HTMLButtonElement).dataset['installationId'];
-      if (id) {
+    (event: MouseEvent<HTMLButtonElement>) => {
+      const id = event.currentTarget.dataset['installationId'];
+      if (id !== undefined && id !== '') {
         handleUninstallClick(id);
       }
     },
@@ -118,7 +119,7 @@ export const GitHubAppInstall = function GitHubAppInstall({
   }, []);
 
   const handleOpenCreateRepo = useCallback(() => {
-    if (activeInstallation) {
+    if (activeInstallation !== undefined) {
       handleCreateRepoOpen(activeInstallation.id);
     }
   }, [activeInstallation, handleCreateRepoOpen]);
@@ -149,8 +150,16 @@ export const GitHubAppInstall = function GitHubAppInstall({
                   <div className='mb-2 flex items-center gap-2'>
                     <Github className='h-5 w-5' />
                     <h3 className='font-semibold'>{installation.account_login}</h3>
-                    <Badge variant={installation.suspended_at ? 'destructive' : 'default'}>
-                      {installation.suspended_at ? 'Suspended' : 'Active'}
+                    <Badge
+                      variant={
+                        installation.suspended_at !== null && installation.suspended_at !== undefined
+                          ? 'destructive'
+                          : 'default'
+                      }
+                    >
+                      {installation.suspended_at !== null && installation.suspended_at !== undefined
+                        ? 'Suspended'
+                        : 'Active'}
                     </Badge>
                     <Badge variant='outline'>{installation.target_type}</Badge>
                   </div>
@@ -173,7 +182,7 @@ export const GitHubAppInstall = function GitHubAppInstall({
             </Card>
           ))}
 
-          {activeInstallation && (
+          {activeInstallation !== undefined && (
             <Card className='p-4'>
               <h3 className='mb-4 font-semibold'>Select Repository</h3>
               <RepoSearchCombobox
@@ -187,7 +196,7 @@ export const GitHubAppInstall = function GitHubAppInstall({
             </Card>
           )}
 
-          {installationForCreate && (
+          {installationForCreate !== undefined && (
             <CreateRepoModal
               open={createRepoOpen}
               onOpenChange={setCreateRepoOpen}

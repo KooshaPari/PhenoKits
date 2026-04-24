@@ -1,8 +1,13 @@
 // Enhanced Graph View Types
 
-import type { Item, ItemStatus, LayoutType, LinkType, PerspectiveType } from '@tracertm/types';
-
-import { DEFAULT_PERSPECTIVES } from '@tracertm/types';
+import {
+  DEFAULT_PERSPECTIVES,
+  type Item,
+  type ItemStatus,
+  type LayoutType,
+  type LinkType,
+  type PerspectiveType,
+} from '@tracertm/types';
 
 // Re-export PerspectiveType from canonical types for backward compatibility
 type GraphPerspective = PerspectiveType;
@@ -177,7 +182,7 @@ const ENHANCED_TYPE_COLORS: Record<string, string> = {
 };
 
 // Status opacity mapping
-const STATUS_OPACITY: Record<ItemStatus | string, number> = {
+const STATUS_OPACITY: Record<string, number> = {
   blocked: 0.5,
   cancelled: 0.3,
   completed: 1,
@@ -188,7 +193,7 @@ const STATUS_OPACITY: Record<ItemStatus | string, number> = {
 };
 
 // Link type colors and styles
-const LINK_STYLES: Record<LinkType | string, { color: string; dashed: boolean; arrow: boolean }> = {
+const LINK_STYLES: Record<string, { color: string; dashed: boolean; arrow: boolean }> = {
   blocks: { arrow: true, color: '#ef4444', dashed: true },
   depends_on: { arrow: true, color: '#f59e0b', dashed: true },
   implements: { arrow: true, color: '#9333ea', dashed: false },

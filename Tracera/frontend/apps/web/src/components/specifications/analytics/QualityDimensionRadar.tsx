@@ -26,6 +26,17 @@ const dimensionLabels: Record<QualityDimension, string> = {
   verifiability: 'Verifiability',
 };
 
+const qualityDimensions: QualityDimension[] = [
+  'completeness',
+  'consistency',
+  'feasibility',
+  'necessity',
+  'singularity',
+  'traceability',
+  'unambiguity',
+  'verifiability',
+];
+
 const gradeColors: Record<QualityGrade, { bg: string; text: string; ring: string }> = {
   A: { bg: 'bg-green-100', ring: 'ring-green-500', text: 'text-green-800' },
   B: { bg: 'bg-blue-100', ring: 'ring-blue-500', text: 'text-blue-800' },
@@ -41,7 +52,7 @@ export function QualityDimensionRadar({
   size = 200,
   className,
 }: QualityDimensionRadarProps) {
-  const dimKeys = Object.keys(dimensions) as QualityDimension[];
+  const dimKeys = qualityDimensions.filter((key) => Object.hasOwn(dimensions, key));
   const numDimensions = dimKeys.length;
   const angleStep = (2 * Math.PI) / numDimensions;
   const center = size / 2;
@@ -167,7 +178,7 @@ interface QualityDimensionBarProps {
 }
 
 export function QualityDimensionBars({ dimensions, className }: QualityDimensionBarProps) {
-  const dimKeys = Object.keys(dimensions) as QualityDimension[];
+  const dimKeys = qualityDimensions.filter((key) => Object.hasOwn(dimensions, key));
 
   return (
     <div className={cn('space-y-2', className)}>

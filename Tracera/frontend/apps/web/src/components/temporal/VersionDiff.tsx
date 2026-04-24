@@ -49,6 +49,17 @@ export interface VersionDiffProps {
 
 type ChangeFilter = 'all' | 'added' | 'removed' | 'modified';
 type SignificanceFilter = 'all' | 'breaking' | 'major' | 'moderate' | 'minor';
+const significanceFilters: readonly SignificanceFilter[] = [
+  'all',
+  'breaking',
+  'major',
+  'moderate',
+  'minor',
+];
+
+function isSignificanceFilter(value: string): value is SignificanceFilter {
+  return significanceFilters.some((filter) => filter === value);
+}
 
 // =============================================================================
 // MAIN COMPONENT
@@ -220,7 +231,9 @@ export function VersionDiff({
         <select
           value={significanceFilter}
           onChange={(e) => {
-            setSignificanceFilter(e.target.value as SignificanceFilter);
+            if (isSignificanceFilter(e.target.value)) {
+              setSignificanceFilter(e.target.value);
+            }
           }}
           className='rounded-md border border-gray-300 bg-white px-2 py-1 text-xs dark:border-gray-600 dark:bg-gray-800'
         >
@@ -314,7 +327,8 @@ interface DiffItemRowProps {
 }
 
 function DiffItemRow({ item, isExpanded, onToggleExpand, onItemClick, compact }: DiffItemRowProps) {
-  const hasFieldChanges = item.fieldChanges && item.fieldChanges.length > 0;
+  const fieldChanges = item.fieldChanges ?? [];
+  const hasFieldChanges = fieldChanges.length > 0;
 
   const changeTypeConfig = {
     added: {
@@ -345,27 +359,25 @@ function DiffItemRow({ item, isExpanded, onToggleExpand, onItemClick, compact }:
   return (
     <div className={`${config.bgColor} border-l-4 ${config.borderColor}`}>
       {/* Main row */}
-      <div
-        className='flex cursor-pointer items-center gap-3 px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5'
-        onClick={() => hasFieldChanges && onToggleExpand()}
-        onKeyDown={(e) => {
-          if (hasFieldChanges && (e.key === 'Enter' || e.key === ' ')) {
-            e.preventDefault();
+      <button
+        type='button'
+        className='flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left hover:bg-black/5 dark:hover:bg-white/5'
+        onClick={() => {
+          if (hasFieldChanges) {
             onToggleExpand();
           }
         }}
-        role='button'
-        tabIndex={hasFieldChanges ? 0 : undefined}
+        disabled={!hasFieldChanges}
       >
         {/* Expand toggle */}
         {hasFieldChanges ? (
-          <button className='p-0.5'>
+          <span className='p-0.5'>
             {isExpanded ? (
               <ChevronDown className='h-4 w-4 text-gray-400' />
             ) : (
               <ChevronRight className='h-4 w-4 text-gray-400' />
             )}
-          </button>
+          </span>
         ) : (
           <div className='w-5' />
         )}
@@ -384,10 +396,10 @@ function DiffItemRow({ item, isExpanded, onToggleExpand, onItemClick, compact }:
               {item.type}
             </span>
           </div>
-          {!compact && item.changeType === 'modified' && item.fieldChanges && (
+          {!compact && item.changeType === 'modified' && hasFieldChanges && (
             <p className='mt-0.5 text-xs text-gray-500'>
-              {item.fieldChanges.length} field
-              {item.fieldChanges.length !== 1 ? 's' : ''} changed
+              {fieldChanges.length} field
+              {fieldChanges.length !== 1 ? 's' : ''} changed
             </p>
           )}
         </div>
@@ -407,7 +419,7 @@ function DiffItemRow({ item, isExpanded, onToggleExpand, onItemClick, compact }:
             View
           </button>
         )}
-      </div>
+      </button>
 
       {/* Expanded field changes */}
       {isExpanded && hasFieldChanges && (
@@ -426,7 +438,7 @@ function DiffItemRow({ item, isExpanded, onToggleExpand, onItemClick, compact }:
                 </tr>
               </thead>
               <tbody className='divide-y divide-gray-200 dark:divide-gray-700'>
-                {item.fieldChanges!.map((change, index) => (
+                {fieldChanges.map((change, index) => (
                   <tr key={`${change.field}-${index}`}>
                     <td className='px-3 py-2 font-medium text-gray-900 dark:text-gray-100'>
                       {change.field}

@@ -7,8 +7,10 @@ export function Settings() {
           <h3 className='font-semibold'>General</h3>
           <div className='mt-4 space-y-4'>
             <div>
-              <label className='text-sm font-medium'>Theme</label>
-              <select className='mt-1 h-10 w-full rounded-lg border px-3'>
+              <label htmlFor='settings-theme' className='text-sm font-medium'>
+                Theme
+              </label>
+              <select id='settings-theme' className='mt-1 h-10 w-full rounded-lg border px-3'>
                 <option>System</option>
                 <option>Light</option>
                 <option>Dark</option>
@@ -19,8 +21,11 @@ export function Settings() {
         <div className='rounded-lg border p-6'>
           <h3 className='font-semibold'>API Configuration</h3>
           <div className='mt-4'>
-            <label className='text-sm font-medium'>Backend URL</label>
+            <label htmlFor='settings-backend-url' className='text-sm font-medium'>
+              Backend URL
+            </label>
             <input
+              id='settings-backend-url'
               type='text'
               defaultValue='http://localhost:4000'
               className='mt-1 h-10 w-full rounded-lg border px-3'

@@ -14,12 +14,18 @@ import type { Node } from '@xyflow/react';
 import { useReactFlow } from '@xyflow/react';
 import { useMemo } from 'react';
 
-import type { RichNodeData } from '@/components/graph/RichNodePill';
-
 import { getNodeType } from '@/components/graph/nodeRegistry';
 import { determineLODLevel } from '@/components/graph/utils/lod';
 import { useQuadTreeCulling } from '@/hooks/useQuadTreeCulling';
 import { logger } from '@/lib/logger';
+
+interface ExampleNodeData extends Record<string, unknown> {
+  id: string;
+  label: string;
+  lodLevel?: number | undefined;
+  status?: string | undefined;
+  type: string;
+}
 
 interface QuadTreeCullingExampleProps {
   items: {
@@ -32,6 +38,28 @@ interface QuadTreeCullingExampleProps {
   selectedNodeId?: string | null;
 }
 
+const readString = (source: object, key: string): string | undefined => {
+  const value: unknown = Reflect.get(source, key);
+  return typeof value === 'string' ? value : undefined;
+};
+
+const readExampleNodeData = (rawData: unknown, fallbackId: string): ExampleNodeData => {
+  if (typeof rawData === 'object' && rawData !== null) {
+    return {
+      id: readString(rawData, 'id') ?? fallbackId,
+      label: readString(rawData, 'label') ?? fallbackId,
+      status: readString(rawData, 'status'),
+      type: readString(rawData, 'type') ?? 'task',
+    };
+  }
+
+  return {
+    id: fallbackId,
+    label: fallbackId,
+    type: 'task',
+  };
+};
+
 /**
  * Example component showing quad-tree culling integration
  */
@@ -40,7 +68,7 @@ export function QuadTreeCullingExample({ items, selectedNodeId }: QuadTreeCullin
   const viewport = getViewport();
 
   // Convert items to nodes with positions
-  const allNodes = useMemo(
+  const allNodes = useMemo<Node<ExampleNodeData>[]>(
     () =>
       items.map((item) => ({
         data: {
@@ -114,7 +142,7 @@ export function QuadTreeCullingExample({ items, selectedNodeId }: QuadTreeCullin
   // NEW APPROACH (O(log n) - processes only visible nodes)
   // ============================================
 
-  const nodesForLayout = useMemo(() => {
+  const _nodesForLayout = useMemo<Node<ExampleNodeData>[]>(() => {
     // Use quad-tree culled nodes instead of all nodes
     const nodesToProcess = visibleNodes;
     const totalCount = allNodes.length;
@@ -136,7 +164,8 @@ export function QuadTreeCullingExample({ items, selectedNodeId }: QuadTreeCullin
         (node.x - viewportCenter.x) ** 2 + (node.y - viewportCenter.y) ** 2,
       );
 
-      const lodNodeType = getNodeType(node.data.type, {
+      const data = readExampleNodeData(Reflect.get(node, 'data'), node.id);
+      const lodNodeType = getNodeType(data.type, {
         distance,
         isFocused: false,
         isSelected: selectedNodeId === node.id,
@@ -146,18 +175,15 @@ export function QuadTreeCullingExample({ items, selectedNodeId }: QuadTreeCullin
 
       return {
         data: {
-          ...node.data,
+          ...data,
           lodLevel,
         },
         id: node.id,
         position: { x: node.x, y: node.y },
         type: lodNodeType,
-      } as Node<RichNodeData>;
+      };
     });
   }, [visibleNodes, allNodes.length, viewport, selectedNodeId]);
-
-  // For demonstration purposes - showing the optimized processing
-  undefined;
 
   // Performance comparison
   const performanceGain = useMemo(() => {

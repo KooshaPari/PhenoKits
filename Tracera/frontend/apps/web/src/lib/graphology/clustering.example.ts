@@ -5,16 +5,16 @@
  * large graphs from 1M edges to <100 visible clusters.
  */
 
-import Graph from 'graphology';
+import Graphology from 'graphology';
 
 import { logger } from '@/lib/logger';
 
-import { createClustering, type ClusteringResult } from './clustering';
+import { createClustering } from './clustering';
 
 // Example 1: Basic clustering workflow
 export function basicClusteringExample() {
   // Create a graph with 100 nodes
-  const graph = new Graph({ type: 'undirected' });
+  const graph = new Graphology({ type: 'undirected' });
 
   // Add nodes with positions
   for (let i = 0; i < 100; i++) {
@@ -52,7 +52,7 @@ export function basicClusteringExample() {
 
 // Example 2: Filtering small clusters
 export function filterSmallClustersExample() {
-  const graph = new Graph({ type: 'undirected' });
+  const graph = new Graphology({ type: 'undirected' });
 
   // Create graph with mixed cluster sizes
   // Large cluster A: 50 nodes
@@ -94,7 +94,7 @@ export function filterSmallClustersExample() {
 
 // Example 3: Community statistics
 export function communityStatisticsExample() {
-  const graph = new Graph({ type: 'undirected' });
+  const graph = new Graphology({ type: 'undirected' });
 
   // Create graph with known community structure
   for (let i = 0; i < 100; i++) {
@@ -130,7 +130,7 @@ export function communityStatisticsExample() {
 
 // Example 4: Expanding a cluster
 export function expandClusterExample() {
-  const graph = new Graph({ type: 'undirected' });
+  const graph = new Graphology({ type: 'undirected' });
 
   // Create simple graph with 2 clusters
   graph.addNode('a1', { x: 0, y: 0 });
@@ -160,7 +160,7 @@ export function expandClusterExample() {
 
 // Example 5: React Flow integration
 export function reactFlowIntegrationExample() {
-  const graph = new Graph({ type: 'undirected' });
+  const graph = new Graphology({ type: 'undirected' });
 
   // Add sample nodes and edges
   for (let i = 0; i < 50; i++) {
@@ -193,8 +193,12 @@ export function reactFlowIntegrationExample() {
       memberIds: cluster.memberIds,
       color: cluster.color,
       isExpanded: false,
-      onExpand: (id: string) => logger.info('Expand', id),
-      onCollapse: (id: string) => logger.info('Collapse', id),
+      onExpand: (id: string) => {
+        logger.info('Expand', id);
+      },
+      onCollapse: (id: string) => {
+        logger.info('Collapse', id);
+      },
     },
   }));
 
@@ -213,7 +217,7 @@ export function reactFlowIntegrationExample() {
 // Example 6: Performance benchmark for large graphs
 export function performanceBenchmarkExample() {
   logger.info('Creating large graph...');
-  const graph = new Graph({ type: 'undirected' });
+  const graph = new Graphology({ type: 'undirected' });
 
   // Create 10,000 nodes
   for (let i = 0; i < 10000; i++) {

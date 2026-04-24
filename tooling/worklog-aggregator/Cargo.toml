@@ -1,0 +1,11 @@
+[workspace]
+
+[package]
+name = "worklog-aggregator"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+walkdir = "2"
+regex = "1"
+anyhow = "1"

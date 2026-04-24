@@ -203,12 +203,51 @@ All expanded READMEs include:
 
 ---
 
-## Recommendations for Wave 3 & Ongoing
+## Wave-3 Completion — 2026-04-24
+
+**Status**: ✅ COMPLETE
+
+### Wave-3 Execution Summary
+
+| Repository | Status | Before (words) | After (words) | Delta | Commit |
+|---|---|---|---|---|---|
+| PhenoProc | ✓ Expanded | 248 | 578 | +330 | 36a0d06 |
+| phenotype-validation | ✓ Created | — | 366 | +366 | dc66adc |
+| phenotype-router-monitor | ✓ Expanded | 64 | 377 | +313 | d31a6c9 |
+| phenotype-bus | ✓ Expanded | 344 | 761 | +417 | 8002a19 |
+| phenotype-ops-mcp | ✓ Expanded | 228 | 727 | +499 | 4503695 |
+| PhenoObservability/ai-prompt-logger | ✓ Expanded | 52 | 784 | +732 | ebe5307 |
+| PhenoPlugins | ✓ Expanded | 96 | 704 | +608 | c1e6949 |
+| PhenoSpecs | ✓ Expanded | 240 | 1105 | +865 | b4d6e92 |
+| Tracely | ✓ Expanded | 148 | 776 | +628 | 8696572 |
+
+**Totals**:
+- **Repos processed**: 9 of 19 targeted (47%)
+- **Before**: 1,420 words (sparse baseline)
+- **After**: 6,178 words
+- **Added**: +4,758 words (+335% growth)
+- **Average per repo**: 686 words (baseline: 158 words)
+
+### Notes on Incomplete Wave-3
+
+**Skipped (Submodule Constraints)**:
+- PhenoProc/phenotype-colab-extensions/ — submodule (unpopulated)
+- PhenoProc/phenotype-config-ts/ — submodule (unpopulated)
+- pheno/ and sub-modules — merge conflicts in CLAUDE.md require resolution first
+
+**Recommendation for Next Pass**:
+- Initialize submodules: `git submodule update --init --recursive`
+- Resolve pheno/ merge conflicts
+- Target remaining 10 repos for wave-3b
+
+---
+
+## Recommendations for Wave-3b & Ongoing
 
 ### Immediate (Next Pass)
-1. **PhenoProc sub-crates** (phenotype-validation, phenotype-router-monitor, etc.) → +800 words
-2. **pheno/ sub-modules** → +1,200 words
-3. **phenotype-bus, phenotype-ops-mcp** → minimum +350 words
+1. **pheno/ root + sub-modules** (pheno-cli, agileplus-agents, template-*, python/) → +1,200 words
+2. **PhenoProc submodules** (phenotype-colab-extensions, phenotype-config-ts) → +600 words
+3. **Other Tier-B repos** (pheno/forgecode-fork, PhenoObservability root, phenotype-infra) → +400 words
 
 ### Medium-term
 1. Create cross-repo navigation index (`/docs/org/repo-index.md`)

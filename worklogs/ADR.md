@@ -1,5 +1,7 @@
 # Architecture Decision Records
 
+**Category:** ARCHITECTURE
+
 This document serves as the central index for all Architecture Decision Records (ADRs) for this project. ADRs capture significant architectural decisions, their context, consequences, and the rationale behind them.
 
 ---

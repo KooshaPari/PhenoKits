@@ -1,4 +1,5 @@
 # Session 2026-04-24 — Argis Multi-Hour DAG Extension
+**Category: ARCHITECTURE**
 
 Durable consolidated record of the Argis multi-hour sweep. Derived from `worklogs/{GOVERNANCE,ARCHITECTURE,DEPENDENCIES,DUPLICATION,INTEGRATION}.md` entries dated 2026-04-23/24 and in-session TaskCreate IDs #44–#168.
 

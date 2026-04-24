@@ -27,14 +27,15 @@ R1 recover implementation tree
 | R7 | Done | Repair native Alloy/Tempo runtime contract | `alloy-if-not-running.sh`, `alloy-local.alloy`, `tempo.yml`, and APM docs restored; APM static verifier passes |
 | R8 | Done | Restore frontend lint/test gate determinism | `.oxlintrc.json` restored; package test imports normalized; Storybook, docs, desktop, UI, API, a11y, primitive component, query hook, auth/link hook, item hook, core store, auth/websocket/ui store, cache, utility, ErrorBoundary, CreateItemForm, CreateLinkForm, CreateTestItemForm, Header, Sidebar, UICodeTracePanel, PageHeader, CreateProjectForm, KeyboardShortcutsModal, BulkActionToolbar, TableAccessibility, ProgressDashboard, command palette, keyboard shortcuts, route guards/routes, security/CSRF, ResponsiveCardView, graph/websocket hooks, CRUD/search hook tranche, full store tranche, ReportsView, TraceabilityMatrixView, 10 remaining view chunks, 12-file component tranche, 4-file integration tranche, full app-integration tranche, and page tranche pass |
 | R9 | Done | Bring up native/process-compose stack and validate health | Go backend `:8080/health`, Python backend `:8000/health`, and frontend `:5173` respond under process-compose |
-| R10 | In progress | Burn down strict web type-aware lint production backlog | Nine production tranches are warning-only under targeted oxlint and `typecheck:web` passes; full strict count reduced from 2,503 to 1,939 |
+| R10 | In progress | Burn down strict web type-aware lint production backlog | Ten production tranches are warning-only under targeted oxlint and `typecheck:web` passes; full strict count reduced from 2,503 to 1,897 |
 
 ## Next Queue
 
 1. Continue production-first strict type-aware lint tranches, now led by three-error
-   clusters in views, routes, stores, API/runtime helpers, enterprise UI components,
-   and remaining graph components. Keep colocated `lib/websocket.test.ts` and
-   `lib/csrf.test.ts` queued after production source.
+   clusters in app providers, `useChat.ts`, enterprise UI, temporal/layout components,
+   remaining graph components, equivalence import/export wizards, API docs wrappers,
+   and `api/system.ts`. Keep colocated `lib/websocket.test.ts` and `lib/csrf.test.ts`
+   queued after production source.
 2. Defer recovered test-suite lint style until production runtime source errors are
    materially lower.
 3. Align AgilePlus and PhenoObservability to the same shared OTLP endpoint names.

@@ -18,6 +18,10 @@ import { api } from '../api/endpoints';
 
 type ImportFormat = 'json' | 'csv';
 
+function isImportFormat(value: string): value is ImportFormat {
+  return value === 'json' || value === 'csv';
+}
+
 export const ImportView = () => {
   // Note: projectId would come from route params in actual implementation
   // For now, we'll use state
@@ -63,10 +67,11 @@ export const ImportView = () => {
 
     setFile(selectedFile);
     const reader = new FileReader();
-    reader.onload = (e) => {
-      const content = e.target?.result as string;
-      setData(content);
-    };
+    reader.addEventListener('load', (event) => {
+      if (typeof event.target?.result === 'string') {
+        setData(event.target.result);
+      }
+    });
     reader.readAsText(selectedFile);
   };
 
@@ -88,8 +93,10 @@ export const ImportView = () => {
     setProjectId(value === 'none' ? '' : value);
   };
 
-  const handleFormatChange = (v: string) => {
-    setFormat(v as ImportFormat);
+  const handleFormatChange = (value: string) => {
+    if (isImportFormat(value)) {
+      setFormat(value);
+    }
   };
 
   const handleDataChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {

@@ -1,4 +1,5 @@
 # Repository Consolidation Analysis
+**Category: ARCHITECTURE**
 
 **Date:** 2026-04-06
 **Purpose:** Evaluate all repos for consolidation opportunities

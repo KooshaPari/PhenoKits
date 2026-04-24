@@ -54,17 +54,17 @@ const createStatusActions = (
   set: SyncSetter,
 ): Pick<SyncActions, 'finishSync' | 'setOnline' | 'startSync'> => ({
   finishSync: (error) => {
-    set((state) => ({
+    set({
       isSyncing: false,
       lastSyncedAt: error ? null : new Date(),
       syncError: error ?? null,
-    }));
+    });
   },
   setOnline: (online) => {
-    set((state) => ({ isOnline: online }));
+    set({ isOnline: online });
   },
   startSync: () => {
-    set((state) => ({ isSyncing: true, syncError: null }));
+    set({ isSyncing: true, syncError: null });
   },
 });
 

@@ -1,4 +1,5 @@
 # DEPENDENCIES Worklog
+**Category: DEPENDENCIES**
 
 External deps, forks, modernization, Dependabot coverage.
 

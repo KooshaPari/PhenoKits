@@ -50,7 +50,8 @@ export function createFocusTrap(container: HTMLElement, onEscape?: () => void): 
     const firstElement = focusableElements[0];
     const lastElement = focusableElements[focusableElements.length - 1];
     if (!firstElement || !lastElement) return;
-    const activeElement = document.activeElement as HTMLElement;
+    const activeElement =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
     if (event.shiftKey) {
       // Shift+Tab: move to previous element
@@ -79,7 +80,7 @@ export function createFocusTrap(container: HTMLElement, onEscape?: () => void): 
  * Store the current focus for later restoration
  */
 export function saveFocus(): HTMLElement | null {
-  return document.activeElement as HTMLElement | null;
+  return document.activeElement instanceof HTMLElement ? document.activeElement : null;
 }
 
 /**
@@ -118,10 +119,10 @@ export function getNextFocusableElement(
   const currentIndex = focusableElements.indexOf(current);
 
   if (currentIndex === -1 || currentIndex === focusableElements.length - 1) {
-    return focusableElements[0] || null;
+    return focusableElements[0] ?? null;
   }
 
-  return focusableElements[currentIndex + 1] || null;
+  return focusableElements[currentIndex + 1] ?? null;
 }
 
 /**
@@ -135,10 +136,10 @@ export function getPreviousFocusableElement(
   const currentIndex = focusableElements.indexOf(current);
 
   if (currentIndex <= 0) {
-    return focusableElements[focusableElements.length - 1] || null;
+    return focusableElements[focusableElements.length - 1] ?? null;
   }
 
-  return focusableElements[currentIndex - 1] || null;
+  return focusableElements[currentIndex - 1] ?? null;
 }
 
 /**
@@ -195,6 +196,6 @@ export function announceToScreenReader(
   announcer.textContent = '';
   // Use setTimeout to ensure screen readers pick up the change
   setTimeout(() => {
-    announcer!.textContent = message;
+    announcer.textContent = message;
   }, 100);
 }

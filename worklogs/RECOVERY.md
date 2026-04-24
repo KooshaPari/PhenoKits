@@ -1,4 +1,5 @@
 # Recovery Analysis Worklog
+**Category: RESEARCH**
 
 **Date:** 2026-04-05
 **Analysis:** Manual recovery assessment of worktrees and stashes before cleanup/consolidation

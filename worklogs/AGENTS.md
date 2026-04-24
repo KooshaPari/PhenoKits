@@ -1,5 +1,7 @@
 # AGENTS.md — worklogs
 
+**Category:** GOVERNANCE
+
 ## Project Overview
 
 - **Name**: worklogs

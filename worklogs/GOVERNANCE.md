@@ -1,4 +1,5 @@
 # Governance Worklog
+**Category: GOVERNANCE**
 
 Tracks governance-related work: policy, evidence, and quality gates.
 

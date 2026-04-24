@@ -168,15 +168,30 @@ const statusBadge: Record<string, string> = {
   planned: 'bg-yellow-500',
 };
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const isHttpMethod = (value: unknown): value is HttpMethod =>
+  typeof value === 'string' && value in methodColors;
+
+const getItemMethod = (item: TypedItem): HttpMethod => {
+  if (!isRecord(item.metadata)) {
+    return 'GET';
+  }
+
+  const method = item.metadata['method'];
+  return isHttpMethod(method) ? method : 'GET';
+};
+
 export const ApiView = ({ projectId }: ApiViewProps) => {
   const [expanded, setExpanded] = useState<Set<string>>(new Set(['1']));
-  const [copied, setCopied] = useState<string | null>(null);
+  const [copied, setCopied] = useState<string>();
 
   const { data: projectData, isLoading: projectLoading } = useItems({
     projectId,
     view: 'api',
   });
-  const projectItems = projectData?.items ?? [];
+  const projectItems = projectData !== undefined ? projectData.items : [];
 
   const toggle = (id: string) => {
     const next = new Set(expanded);
@@ -188,13 +203,14 @@ export const ApiView = ({ projectId }: ApiViewProps) => {
     setExpanded(next);
   };
 
-  const copyPath = async (endpoint: Endpoint, group: ApiGroup) => {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(group.baseUrl + endpoint.path);
+  const copyPath = (endpoint: Endpoint, group: ApiGroup) => {
+    const clipboard = navigator.clipboard;
+    if (clipboard !== undefined && typeof clipboard.writeText === 'function') {
+      void clipboard.writeText(group.baseUrl + endpoint.path);
     }
     setCopied(endpoint.id);
     setTimeout(() => {
-      setCopied(null);
+      setCopied(undefined);
     }, 2000);
   };
 
@@ -218,7 +234,7 @@ export const ApiView = ({ projectId }: ApiViewProps) => {
           <h2 className='text-lg font-semibold'>Project API items</h2>
           <div className='rounded-lg border'>
             {projectItems.map((item: TypedItem) => {
-              const method = (item.metadata as { method?: string })?.method ?? 'GET';
+              const method = getItemMethod(item);
               const path = item.title ?? item.id;
               return (
                 <Link
@@ -232,7 +248,7 @@ export const ApiView = ({ projectId }: ApiViewProps) => {
                   className='hover:bg-muted/50 flex items-center gap-3 border-b p-3 last:border-b-0'
                 >
                   <span
-                    className={`rounded px-2 py-0.5 font-mono text-xs font-bold ${methodColors[method as HttpMethod] ?? methodColors.GET}`}
+                    className={`rounded px-2 py-0.5 font-mono text-xs font-bold ${methodColors[method]}`}
                   >
                     {method}
                   </span>
@@ -252,8 +268,9 @@ export const ApiView = ({ projectId }: ApiViewProps) => {
         <div className='rounded-lg border'>
           {apiGroups.map((group) => (
             <div key={group.id} className='border-b last:border-b-0'>
-              <div
-                className='hover:bg-accent/50 flex cursor-pointer items-center gap-3 p-4'
+              <button
+                type='button'
+                className='hover:bg-accent/50 flex w-full cursor-pointer items-center gap-3 p-4 text-left'
                 onClick={() => {
                   toggle(group.id);
                 }}
@@ -269,7 +286,7 @@ export const ApiView = ({ projectId }: ApiViewProps) => {
                 <span className='text-muted-foreground ml-auto text-xs'>
                   {group.endpoints.length} endpoints
                 </span>
-              </div>
+              </button>
               {expanded.has(group.id) && (
                 <div className='bg-muted/20 border-t'>
                   {group.endpoints.map((endpoint) => (
@@ -291,7 +308,9 @@ export const ApiView = ({ projectId }: ApiViewProps) => {
                         title={endpoint.status}
                       />
                       <button
-                        onClick={async () => copyPath(endpoint, group)}
+                        onClick={() => {
+                          copyPath(endpoint, group);
+                        }}
                         className='hover:bg-accent rounded p-1'
                       >
                         {copied === endpoint.id ? (

@@ -1,4 +1,5 @@
 # Recovery Work Verification Report
+**Category: GOVERNANCE**
 
 **Date:** 2026-04-05  
 **Status:** PARTIAL - Action Required  

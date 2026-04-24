@@ -7,5 +7,6 @@ repository.workspace = true
 description = "Phenotype shared crate"
 
 [dependencies]
+phenotype-bus = { path = "../../../phenotype-bus" }
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true

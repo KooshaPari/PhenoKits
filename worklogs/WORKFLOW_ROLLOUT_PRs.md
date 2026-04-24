@@ -1,4 +1,5 @@
 # Workflow Rollout PRs
+**Category: GOVERNANCE**
 Generated: 2026-04-05
 
 ## PRs Created Successfully

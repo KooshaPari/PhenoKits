@@ -135,7 +135,7 @@ The first production patch tranche is complete for targeted strict errors:
   type-aware oxlint with warning-only output.
 - `bun run typecheck:web` passes after integrating the tranche.
 - Full `lint:type-aware:web:strict` still fails, with total strict errors reduced from
-  2,503 to 1,939 after the ninth production tranche.
+  2,503 to 1,897 after the tenth production tranche.
 
 Additional completed production tranche:
 
@@ -221,15 +221,27 @@ The ninth production tranche is complete:
   type-aware oxlint.
 - `bun run typecheck:web` passes after the tranche.
 
+The tenth production tranche is complete:
+
+- `ScenarioActivityView.tsx`, `ImportView.tsx`, and `adr-list-view.tsx` pass targeted
+  strict type-aware oxlint.
+- `sync-store.ts`, `auth.logout.tsx`, and `auth.callback.tsx` pass targeted strict
+  type-aware oxlint.
+- `projects.$projectId.views.integrations.tsx`, `WorkflowRunsView.tsx`, and
+  `ApiView.tsx` pass targeted strict type-aware oxlint.
+- `sse-client.ts`, `graphClustering.ts`, `focus-management.ts`, `edgeBenchmark.ts`,
+  and `api-error-handler.ts` pass targeted strict type-aware oxlint.
+- `bun run typecheck:web` passes after the tranche.
+
 ## Next Production Patch Tranche
 
 | Order | File(s) | Why Next |
 | ---: | --- | --- |
-| 1 | `apps/web/src/views/ScenarioActivityView.tsx`, `apps/web/src/views/ImportView.tsx`, `apps/web/src/views/adr-list-view.tsx` | App-facing view clusters at three errors each |
-| 2 | `apps/web/src/stores/sync-store.ts`, `apps/web/src/routes/auth.logout.tsx`, `apps/web/src/routes/auth.callback.tsx` | Store/auth route runtime clusters |
-| 3 | `apps/web/src/routes/projects.$projectId.views.integrations.tsx`, `apps/web/src/pages/projects/views/WorkflowRunsView.tsx`, `apps/web/src/pages/projects/views/ApiView.tsx` | Project integration/API view clusters |
-| 4 | `apps/web/src/lib/sse-client.ts`, `apps/web/src/lib/graphClustering.ts`, `apps/web/src/lib/focus-management.ts`, `apps/web/src/lib/edgeBenchmark.ts`, `apps/web/src/lib/api-error-handler.ts` | Runtime helper clusters |
-| 5 | `apps/web/src/components/graph/UnifiedGraphView.tsx`, `ThumbnailPreview.tsx`, `PageDecompositionView.tsx`, `GraphSearch.tsx`, `CrossPerspectiveSearch.tsx`, `ComponentUsageMatrix.tsx` | Remaining graph component clusters |
+| 1 | `apps/web/src/providers/app-providers.jsx`, `apps/web/src/hooks/useChat.ts`, `apps/web/src/api/system.ts` | Runtime/provider/API clusters at three errors each |
+| 2 | `apps/web/src/components/ui/enterprise-table.tsx`, `apps/web/src/components/ui/enterprise-button.tsx`, `apps/web/src/components/layout/Breadcrumb.tsx` | Enterprise UI/layout clusters |
+| 3 | `apps/web/src/components/temporal/DiffViewer.tsx`, `apps/web/src/components/graph/UnifiedGraphView.tsx`, `apps/web/src/components/graph/ThumbnailPreview.tsx` | Temporal and graph display clusters |
+| 4 | `apps/web/src/components/graph/PageDecompositionView.tsx`, `GraphSearch.tsx`, `CrossPerspectiveSearch.tsx`, `ComponentUsageMatrix.tsx` | Remaining graph interaction clusters |
+| 5 | `apps/web/src/components/equivalence/ImportWizard.tsx`, `apps/web/src/components/equivalence/ExportWizard.tsx`, `apps/web/src/components/api-docs/swagger-ui-wrapper.tsx` | Equivalence/API-docs clusters |
 | 6 | `apps/web/src/lib/websocket.test.ts`, `apps/web/src/lib/csrf.test.ts` | Larger colocated test files outside `__tests__/`; handle after production source |
 
 ## Recommended Sequence

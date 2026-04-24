@@ -17,30 +17,67 @@ interface ADRListViewProps {
   projectId: string;
 }
 
+type ADRDateRange = 'all' | 'week' | 'month' | 'quarter';
+type ADRViewMode = 'cards' | 'timeline' | 'graph';
+
 const MILLISECONDS_PER_DAY = 86_400_000;
 const DATE_RANGE_DAYS: Record<string, number> = {
   week: 7,
   month: 30,
   quarter: 90,
 };
+const ADR_STATUSES: readonly ADRStatus[] = [
+  'proposed',
+  'accepted',
+  'deprecated',
+  'superseded',
+  'rejected',
+];
+
+function getSearchValue(searchParams: unknown, key: string): unknown {
+  if (!isRecord(searchParams) || !(key in searchParams)) {
+    return;
+  }
+
+  return searchParams[key];
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function isADRStatus(value: unknown): value is ADRStatus {
+  return typeof value === 'string' && ADR_STATUSES.some((status) => status === value);
+}
+
+function isADRDateRange(value: unknown): value is ADRDateRange {
+  return value === 'all' || value === 'week' || value === 'month' || value === 'quarter';
+}
+
+function isADRViewMode(value: unknown): value is ADRViewMode {
+  return value === 'cards' || value === 'timeline' || value === 'graph';
+}
 
 export function ADRListView({ projectId }: ADRListViewProps): React.JSX.Element {
   const navigate = useNavigate();
-  const searchParams = useSearch({ strict: false });
+  const searchParams: unknown = useSearch({ strict: false });
   const { data: adrsData, isLoading } = useADRs({ projectId });
-  const adrs = adrsData?.adrs ?? [];
+  const adrs = useMemo(() => adrsData?.adrs ?? [], [adrsData]);
   const createADR = useCreateADR();
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const searchStatus = getSearchValue(searchParams, 'status');
+  const searchDateRange = getSearchValue(searchParams, 'dateRange');
+  const searchView = getSearchValue(searchParams, 'view');
   const [statusFilter, setStatusFilter] = useState<ADRStatus | 'all'>(
-    (searchParams?.status as ADRStatus) ?? 'all',
+    isADRStatus(searchStatus) ? searchStatus : 'all',
   );
-  const [dateRange, setDateRange] = useState<'all' | 'week' | 'month' | 'quarter'>(
-    searchParams?.dateRange ?? 'all',
+  const [dateRange, setDateRange] = useState<ADRDateRange>(
+    isADRDateRange(searchDateRange) ? searchDateRange : 'all',
   );
-  const [viewMode, setViewMode] = useState<'cards' | 'timeline' | 'graph'>(
-    searchParams?.view ?? 'cards',
+  const [viewMode, setViewMode] = useState<ADRViewMode>(
+    isADRViewMode(searchView) ? searchView : 'cards',
   );
 
   const filteredADRs = useMemo(() => {
@@ -53,7 +90,7 @@ export function ADRListView({ projectId }: ADRListViewProps): React.JSX.Element 
         (adr.context?.toLowerCase().includes(lowerQuery) ?? false);
 
       if (!matchesStatus || !matchesQuery) return false;
-      if (dateRange !== 'all' && adr.date) {
+      if (dateRange !== 'all' && adr.date !== undefined && adr.date !== null && adr.date !== '') {
         const adrDate = new Date(adr.date);
         const daysAgo = DATE_RANGE_DAYS[dateRange] ?? 0;
         const cutoffDate = new Date(Date.now() - daysAgo * MILLISECONDS_PER_DAY);
@@ -63,8 +100,10 @@ export function ADRListView({ projectId }: ADRListViewProps): React.JSX.Element 
     });
 
     return filtered.toSorted((a: ADR, b: ADR) => {
-      const dateA = a.date ? new Date(a.date).getTime() : 0;
-      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      const dateA =
+        a.date !== undefined && a.date !== null && a.date !== '' ? new Date(a.date).getTime() : 0;
+      const dateB =
+        b.date !== undefined && b.date !== null && b.date !== '' ? new Date(b.date).getTime() : 0;
       return dateB - dateA;
     });
   }, [adrs, statusFilter, searchQuery, dateRange]);
@@ -137,7 +176,9 @@ export function ADRListView({ projectId }: ADRListViewProps): React.JSX.Element 
       <Tabs
         value={viewMode}
         onValueChange={(value: string) => {
-          setViewMode(value as typeof viewMode);
+          if (isADRViewMode(value)) {
+            setViewMode(value);
+          }
         }}
       >
         <TabsList className='border-border/50 h-auto w-full justify-start rounded-none border-b bg-transparent p-0'>

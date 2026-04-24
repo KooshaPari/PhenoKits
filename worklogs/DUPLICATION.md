@@ -1,4 +1,5 @@
 # Duplication Worklog
+**Category: DUPLICATION**
 
 Cross-repo duplication tracking for the Phenotype org shared-crate shelf.
 

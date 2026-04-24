@@ -56,6 +56,6 @@
   compiler/typecheck blocker.
 - Strict web type-aware lint triage is captured in `07_TYPE_AWARE_LINT_TRIAGE.md`.
   Initial strict-error buckets were 940 production, 1616 test, 9 story, and 5
-  test-support errors. After nine production tranches, full strict errors are down
-  from 2,503 to 1,939 and `typecheck:web` remains green. Continue production cleanup
+  test-support errors. After ten production tranches, full strict errors are down
+  from 2,503 to 1,897 and `typecheck:web` remains green. Continue production cleanup
   before recovered test style.

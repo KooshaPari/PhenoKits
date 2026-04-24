@@ -14,6 +14,41 @@ interface WorkflowRunsViewProps {
   projectId: string;
 }
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const isWorkflowRun = (value: unknown): value is WorkflowRun =>
+  isRecord(value) &&
+  typeof value['id'] === 'string' &&
+  typeof value['workflowName'] === 'string' &&
+  typeof value['status'] === 'string';
+
+const isWorkflowSchedule = (value: unknown): value is WorkflowSchedule => isRecord(value);
+
+const getWorkflowRuns = (value: unknown): WorkflowRun[] => {
+  if (!isRecord(value) || !Array.isArray(value['runs'])) {
+    return [];
+  }
+
+  return value['runs'].filter(isWorkflowRun);
+};
+
+const getWorkflowSchedules = (value: unknown): WorkflowSchedule[] => {
+  if (!isRecord(value) || !Array.isArray(value['schedules'])) {
+    return [];
+  }
+
+  return value['schedules'].filter(isWorkflowSchedule);
+};
+
+const getCreatedScheduleCount = (value: unknown): number => {
+  if (!isRecord(value) || !Array.isArray(value['created'])) {
+    return 0;
+  }
+
+  return value['created'].length;
+};
+
 export function WorkflowRunsView({ projectId }: WorkflowRunsViewProps) {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const { data: runsData, isLoading: runsLoading } = useWorkflowRuns(
@@ -24,8 +59,9 @@ export function WorkflowRunsView({ projectId }: WorkflowRunsViewProps) {
   const bootstrapSchedules = useBootstrapWorkflowSchedules();
   const deleteSchedule = useDeleteWorkflowSchedule();
 
-  const runs = (runsData as { runs?: WorkflowRun[] })?.runs ?? [];
-  const schedules = (schedulesData as { schedules?: WorkflowSchedule[] })?.schedules ?? [];
+  const runs = getWorkflowRuns(runsData);
+  const schedules = getWorkflowSchedules(schedulesData);
+  const createdScheduleCount = getCreatedScheduleCount(bootstrapSchedules.data);
 
   return (
     <div className='space-y-6 p-6'>
@@ -53,9 +89,9 @@ export function WorkflowRunsView({ projectId }: WorkflowRunsViewProps) {
       <div className='rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800'>
         <div className='mb-4 flex items-center justify-between'>
           <h2 className='text-lg font-semibold'>Schedules</h2>
-          {bootstrapSchedules.data != null ? (
+          {bootstrapSchedules.data !== null && bootstrapSchedules.data !== undefined ? (
             <span className='text-xs text-green-600'>
-              Created {(bootstrapSchedules.data as { created?: unknown[] }).created?.length ?? 0}
+              Created {createdScheduleCount}
             </span>
           ) : null}
         </div>
@@ -121,8 +157,10 @@ function RunRow({ run }: { run: WorkflowRun }) {
       <div>
         <div className='text-sm font-medium'>{run.workflowName}</div>
         <div className='text-xs text-gray-500'>
-          {run.graphId ? `Graph ${run.graphId.slice(0, 8)}…` : 'Project-level'}
-          {run.externalRunId ? ` • ${run.externalRunId}` : ''}
+          {run.graphId != null && run.graphId !== ''
+            ? `Graph ${run.graphId.slice(0, 8)}…`
+            : 'Project-level'}
+          {run.externalRunId != null && run.externalRunId !== '' ? ` • ${run.externalRunId}` : ''}
         </div>
       </div>
       <div className='text-right'>
@@ -140,7 +178,9 @@ function RunRow({ run }: { run: WorkflowRun }) {
           {run.status}
         </span>
         <div className='mt-1 text-xs text-gray-400'>
-          {run.startedAt ? new Date(run.startedAt).toLocaleString() : '-'}
+          {run.startedAt != null && run.startedAt !== ''
+            ? new Date(run.startedAt).toLocaleString()
+            : '-'}
         </div>
       </div>
     </div>

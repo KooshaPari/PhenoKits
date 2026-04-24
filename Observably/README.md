@@ -25,6 +25,42 @@ cargo test --workspace
 cargo clippy --workspace -- -D warnings
 ```
 
+## Cross-Collection Integration
+
+Observably is part of the **Phenotype named collections**:
+
+- **Sidekick** — Agent dispatch & presence
+- **Eidolon** — Device automation
+- **Observably** (this) — Distributed tracing & observability
+- **Stashly** — State, events, caching, migrations
+- **Paginary** — Knowledge collection (specs, tutorials, handbooks)
+
+### Event Bus
+
+Observably uses **phenotype-bus** to subscribe to domain events from other collections and emit observability events:
+
+```rust
+use phenotype_bus::{Bus, Event};
+
+// Subscribe to Eidolon automation events
+let mut rx = automation_bus.subscribe();
+
+while let Ok(event) = rx.recv().await {
+    // Emit trace for the automation
+    tracing::info!(
+        target: "observably",
+        event = event.event_name(),
+        "Automation event received"
+    );
+    
+    // Propagate to Stashly for event sourcing
+    let trace_event = TraceEvent { event_id: event.id };
+    trace_bus.publish(trace_event).await?;
+}
+```
+
+See `../../phenotype-bus/README.md` and `../../docs/org-audit-2026-04/collection_build_matrix.md` for integration details.
+
 ## Provenance
 
 - **observably-tracing**: Extracted from `FocalPoint/crates/focus-observability`

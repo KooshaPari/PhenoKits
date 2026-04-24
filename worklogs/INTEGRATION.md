@@ -1,4 +1,5 @@
 # INTEGRATION Worklog
+**Category: INTEGRATION**
 
 External integration notes for Phenotype-org repositories. See `worklogs/README.md`
 for category conventions and `worklogs/AGENT_ONBOARDING.md` for writing guidance.

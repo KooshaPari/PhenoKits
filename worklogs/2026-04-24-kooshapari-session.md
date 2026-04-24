@@ -1,5 +1,6 @@
 # Session Worklog — 2026-04-24 (kooshapari, autonomous)
 
+**Category:** ARCHITECTURE  
 **Project tags:** `[cross-repo]`
 **Categories:** GOVERNANCE, INTEGRATION, DEPENDENCIES, ARCHITECTURE
 **Session scope:** Org-wide workflow dedup, hygiene bootstrap, Dependabot triage, compute mesh bring-up, governance anomaly fixes.

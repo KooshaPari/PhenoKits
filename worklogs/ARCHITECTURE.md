@@ -1,4 +1,5 @@
 # ARCHITECTURE — Worklog
+**Category: ARCHITECTURE**
 
 Architecture decisions, library extraction candidates, and large-scale refactoring plans.
 

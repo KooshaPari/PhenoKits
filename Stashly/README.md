@@ -29,6 +29,56 @@ cargo test --workspace
 cargo clippy --workspace -- -D warnings
 ```
 
+## Cross-Collection Integration
+
+Stashly is part of the **Phenotype named collections**:
+
+- **Sidekick** — Agent dispatch & presence
+- **Eidolon** — Device automation
+- **Observably** — Distributed tracing & observability
+- **Stashly** (this) — State, events, caching, migrations
+- **Paginary** — Knowledge collection (specs, tutorials, handbooks)
+
+### Event Bus
+
+Stashly uses **phenotype-bus** to subscribe to events from other collections and store them in the event store:
+
+```rust
+use phenotype_bus::{Bus, Event};
+use stashly_eventstore::EventStore;
+
+// Subscribe to Sidekick dispatch events
+let mut rx = dispatch_bus.subscribe();
+
+let event_store = EventStore::new();
+
+while let Ok(event) = rx.recv().await {
+    // Append to event store for replaying / auditing
+    event_store.append(
+        &event.event_name(),
+        serde_json::to_value(event)?,
+    ).await?;
+}
+```
+
+Stashly's state machines can also emit events for other collections:
+
+```rust
+pub struct StateTransitioned {
+    pub from_state: String,
+    pub to_state: String,
+}
+
+impl Event for StateTransitioned {
+    fn event_name(&self) -> &'static str { "StateTransitioned" }
+}
+
+// Emit for Observably to trace
+state_transition_bus.publish(StateTransitioned { /* ... */ }).await?;
+```
+
+See `../../phenotype-bus/README.md` and `../../docs/org-audit-2026-04/collection_build_matrix.md` for integration details.
+
 ## Provenance
 
 - **stashly-cache**: Extracted from `crates/phenotype-cache-adapter`

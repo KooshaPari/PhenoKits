@@ -1,4 +1,5 @@
 # Worklog: Fork Strategy Implementation
+**Category: DEPENDENCIES**
 
 ## Date: 2026-04-05 to 2026-04-06
 

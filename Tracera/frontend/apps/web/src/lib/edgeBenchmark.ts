@@ -16,6 +16,26 @@ import {
   createDefaultSamplingConfig,
 } from './edgeAggregation';
 
+interface PerformanceMemory {
+  usedJSHeapSize?: number;
+}
+
+interface PerformanceWithMemory extends Performance {
+  memory?: PerformanceMemory;
+}
+
+interface EdgeBenchmarkApi {
+  run: typeof runAndLogBenchmark;
+  runCustom: typeof runCustomBenchmark;
+  runSuite: typeof runBenchmarkSuite;
+}
+
+declare global {
+  interface Window {
+    edgeBenchmark?: EdgeBenchmarkApi;
+  }
+}
+
 // ============================================================================
 // Synthetic Data Generation
 // ============================================================================
@@ -144,11 +164,11 @@ export function runEdgeBenchmark(
   nodes: Node[],
   config?: EdgeSamplingConfig,
 ): BenchmarkResult {
-  const actualConfig = config || createDefaultSamplingConfig(edges.length);
+  const actualConfig = config ?? createDefaultSamplingConfig(edges.length);
   const filterConfig = createDefaultFilterConfig();
 
   // Measure memory before
-  const memBefore = (performance as any).memory?.usedJSHeapSize || 0;
+  const memBefore = (performance as PerformanceWithMemory).memory?.usedJSHeapSize ?? 0;
 
   // Run benchmark
   const startTime = performance.now();
@@ -158,7 +178,7 @@ export function runEdgeBenchmark(
   const endTime = performance.now();
 
   // Measure memory after
-  const memAfter = (performance as any).memory?.usedJSHeapSize || 0;
+  const memAfter = (performance as PerformanceWithMemory).memory?.usedJSHeapSize ?? 0;
   const memDelta = (memAfter - memBefore) / 1024 / 1024; // Convert to MB
 
   return {
@@ -292,7 +312,7 @@ export function runCustomBenchmark(
 
 // Expose to window for dev console access
 if (typeof window !== 'undefined') {
-  (window as any).edgeBenchmark = {
+  window.edgeBenchmark = {
     run: runAndLogBenchmark,
     runCustom: runCustomBenchmark,
     runSuite: runBenchmarkSuite,

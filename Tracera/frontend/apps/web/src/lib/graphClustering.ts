@@ -65,13 +65,20 @@ interface GraphStructure {
   totalEdges: number;
 }
 
-/**
- * Community structure for Louvain algorithm
- */
-interface Community {
-  nodes: Set<string>;
-  internalEdges: number;
-  totalDegree: number;
+function isClusteringResult(value: unknown): value is ClusteringResult {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const candidate = value as Partial<ClusteringResult>;
+  return (
+    candidate.clusters instanceof Map &&
+    candidate.hierarchy instanceof Map &&
+    typeof candidate.maxLevel === 'number' &&
+    typeof candidate.totalClusters === 'number' &&
+    typeof candidate.compressionRatio === 'number' &&
+    typeof candidate.modularity === 'number'
+  );
 }
 
 /**
@@ -102,12 +109,12 @@ function buildGraph(items: Item[], links: Link[]): GraphStructure {
     if (!nodes.has(link.sourceId) || !nodes.has(link.targetId)) continue;
 
     const sourceEdges = edges.get(link.sourceId)!;
-    const weight = sourceEdges.get(link.targetId) || 0;
+    const weight = sourceEdges.get(link.targetId) ?? 0;
     sourceEdges.set(link.targetId, weight + 1);
 
     // Undirected graph - add reverse edge
     const targetEdges = edges.get(link.targetId)!;
-    const reverseWeight = targetEdges.get(link.sourceId) || 0;
+    const reverseWeight = targetEdges.get(link.sourceId) ?? 0;
     targetEdges.set(link.sourceId, reverseWeight + 1);
 
     // Update degrees
@@ -188,8 +195,8 @@ export function louvainClustering(
   // Check cache first
   const cacheKey = `louvain:${items.length}:${links.length}:${resolution}`;
   const cached = groupingCache.get(cacheKey);
-  if (cached) {
-    return cached as unknown as ClusteringResult;
+  if (isClusteringResult(cached)) {
+    return cached;
   }
 
   const graph = buildGraph(items, links);
@@ -291,7 +298,7 @@ export function louvainClustering(
   };
 
   // Cache result
-  groupingCache.set(cacheKey, result as unknown as any);
+  groupingCache.set(cacheKey, result);
 
   return result;
 }
@@ -367,8 +374,8 @@ function createClusterNodes(
 
     for (const nodeId of nodeIds) {
       const node = graph.nodes.get(nodeId)!;
-      const itemType = node.item.type || 'unknown';
-      typeDistribution[itemType] = (typeDistribution[itemType] || 0) + 1;
+      const itemType = node.item.type ?? 'unknown';
+      typeDistribution[itemType] = (typeDistribution[itemType] ?? 0) + 1;
       totalDegree += node.degree;
 
       const neighbors = graph.edges.get(nodeId)!;
@@ -438,7 +445,11 @@ export function extractClusterEdges(
     const sourceCluster = nodeToCluster.get(link.sourceId);
     const targetCluster = nodeToCluster.get(link.targetId);
 
-    if (!sourceCluster || !targetCluster || sourceCluster === targetCluster) {
+    if (
+      sourceCluster === undefined ||
+      targetCluster === undefined ||
+      sourceCluster === targetCluster
+    ) {
       continue;
     }
 
@@ -459,7 +470,7 @@ export function extractClusterEdges(
 
     const edge = edgeMap.get(canonicalKey)!;
     edge.weight++;
-    edge.linkTypes[link.type] = (edge.linkTypes[link.type] || 0) + 1;
+    edge.linkTypes[link.type] = (edge.linkTypes[link.type] ?? 0) + 1;
   }
 
   return Array.from(edgeMap.values());
@@ -528,7 +539,7 @@ export function labelPropagationClustering(
       const labelCounts = new Map<string, number>();
       for (const [neighborId, weight] of neighbors) {
         const label = labels.get(neighborId)!;
-        labelCounts.set(label, (labelCounts.get(label) || 0) + weight);
+        labelCounts.set(label, (labelCounts.get(label) ?? 0) + weight);
       }
 
       if (labelCounts.size === 0) continue;
@@ -598,7 +609,8 @@ export function adaptiveClustering(
 
   // Medium graphs: use Louvain with adjusted resolution
   if (nodeCount < 10000) {
-    const resolution = targetClusters ? nodeCount / targetClusters / 10 : 1.0;
+    const resolution =
+      targetClusters !== undefined && targetClusters !== 0 ? nodeCount / targetClusters / 10 : 1.0;
     return louvainClustering(items, links, resolution);
   }
 
@@ -638,7 +650,11 @@ export function calculateClusteringQuality(
     const sourceCluster = nodeToCluster.get(link.sourceId);
     const targetCluster = nodeToCluster.get(link.targetId);
 
-    if (sourceCluster && targetCluster && sourceCluster === targetCluster) {
+    if (
+      sourceCluster !== undefined &&
+      targetCluster !== undefined &&
+      sourceCluster === targetCluster
+    ) {
       internalEdges++;
     }
   }

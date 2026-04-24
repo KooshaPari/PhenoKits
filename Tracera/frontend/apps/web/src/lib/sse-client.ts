@@ -22,7 +22,7 @@ export class SSEClient {
   private currentDelay: number;
 
   constructor(private options: SSEClientOptions) {
-    this.currentDelay = options.initialReconnectDelay || 1000;
+    this.currentDelay = options.initialReconnectDelay ?? 1000;
   }
 
   /**
@@ -41,25 +41,25 @@ export class SSEClient {
       const url = this.buildUrlWithAuth(this.options.url, this.options.headers);
       this.eventSource = new EventSource(url);
 
-      this.eventSource.onopen = () => {
+      this.eventSource.addEventListener('open', () => {
         console.log('SSE connection established');
         this.reconnectAttempts = 0;
-        this.currentDelay = this.options.initialReconnectDelay || 1000;
+        this.currentDelay = this.options.initialReconnectDelay ?? 1000;
         this.options.onOpen?.();
-      };
+      });
 
-      this.eventSource.onmessage = (event: MessageEvent) => {
+      this.eventSource.addEventListener('message', (event: MessageEvent) => {
         this.options.onMessage?.(event);
-      };
+      });
 
-      this.eventSource.onerror = (error: Event) => {
+      this.eventSource.addEventListener('error', (error: Event) => {
         console.error('SSE connection error:', error);
         this.options.onError?.(error);
 
         // EventSource will auto-reconnect for network errors, but we handle manual reconnection
         // for auth failures or other issues
         this.handleError();
-      };
+      });
 
       // Handle custom event types
       this.eventSource.addEventListener('notification', (event: MessageEvent) => {
@@ -103,12 +103,13 @@ export class SSEClient {
    * EventSource doesn't support custom headers, so we need to pass auth in URL or use cookies
    */
   private buildUrlWithAuth(url: string, headers?: Record<string, string>): string {
-    if (!headers?.['Authorization']) {
+    const authorization = headers?.['Authorization'];
+    if (authorization === undefined || authorization === '') {
       return url;
     }
 
     // Extract bearer token from Authorization header
-    const token = headers['Authorization'].replace('Bearer ', '');
+    const token = authorization.replace('Bearer ', '');
     const separator = url.includes('?') ? '&' : '?';
     return `${url}${separator}token=${encodeURIComponent(token)}`;
   }
@@ -134,7 +135,7 @@ export class SSEClient {
    * Schedule reconnection with exponential backoff
    */
   private scheduleReconnect(): void {
-    const maxAttempts = this.options.maxReconnectAttempts || Infinity;
+    const maxAttempts = this.options.maxReconnectAttempts ?? Infinity;
 
     if (this.reconnectAttempts >= maxAttempts) {
       console.error(`Max reconnection attempts (${maxAttempts}) reached. Giving up.`);
@@ -158,7 +159,7 @@ export class SSEClient {
     }, this.currentDelay);
 
     // Exponential backoff
-    this.currentDelay = Math.min(this.currentDelay * 2, this.options.maxReconnectDelay || 30000);
+    this.currentDelay = Math.min(this.currentDelay * 2, this.options.maxReconnectDelay ?? 30000);
   }
 
   /**
@@ -203,11 +204,14 @@ export function createNotificationSSEClient(
   onNotification: (notification: unknown) => void,
   onError?: (error: Event) => void,
 ): SSEClient | null {
-  if (!token) {
+  if (token === null || token === '') {
     return null;
   }
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+  const API_URL =
+    typeof import.meta.env.VITE_API_URL === 'string' && import.meta.env.VITE_API_URL !== ''
+      ? import.meta.env.VITE_API_URL
+      : 'http://localhost:4000';
 
   return new SSEClient({
     url: `${API_URL}/api/v1/notifications/stream`,
@@ -219,7 +223,7 @@ export function createNotificationSSEClient(
     maxReconnectDelay: 30000,
     onMessage: (event: MessageEvent) => {
       try {
-        const data = JSON.parse(event.data);
+        const data: unknown = JSON.parse(String(event.data));
         onNotification(data);
       } catch (error) {
         console.error('Failed to parse notification data:', error);

@@ -28,6 +28,17 @@ export interface ErrorMetadata {
   originalError: Error;
 }
 
+function isValidationErrorMap(value: unknown): value is Record<string, string[]> {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return false;
+  }
+
+  return Object.values(value).every(
+    (fieldErrors) =>
+      Array.isArray(fieldErrors) && fieldErrors.every((message) => typeof message === 'string'),
+  );
+}
+
 /**
  * Discriminate error type from thrown error
  */
@@ -60,24 +71,20 @@ export function extractValidationErrors(error: unknown): Record<string, string[]
   }
 
   // Try to extract field errors from response data
-  const data = error.data as Record<string, unknown> | undefined;
-  if (!data) {
+  const data = error.data;
+  if (typeof data !== 'object' || data === null || Array.isArray(data)) {
     return null;
   }
 
   // Format 1: { errors: { field: ["error1", "error2"] } }
-  if ('errors' in data && typeof data['errors'] === 'object' && data['errors'] !== null) {
-    return data['errors'] as Record<string, string[]>;
+  if ('errors' in data && isValidationErrorMap(data.errors)) {
+    return data.errors;
   }
 
   // Format 2: { field: ["error1", "error2"] }
   // Check if object has string array values (looks like validation errors)
-  const isValidationFormat = Object.entries(data).every(
-    ([, value]) => Array.isArray(value) && value.every((v) => typeof v === 'string'),
-  );
-
-  if (isValidationFormat) {
-    return data as Record<string, string[]>;
+  if (isValidationErrorMap(data)) {
+    return data;
   }
 
   return null;
@@ -104,7 +111,7 @@ export function getUserFriendlyMessage(errorType: ErrorType, error?: Error): str
       return 'Server error. Please try again later.';
     }
     case 'unknown': {
-      return error?.message || 'An unexpected error occurred. Please try again.';
+      return error?.message ?? 'An unexpected error occurred. Please try again.';
     }
     default: {
       return 'An error occurred. Please try again.';

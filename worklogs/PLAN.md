@@ -1,4 +1,5 @@
 # worklogs - Project Plan
+**Category: GOVERNANCE**
 
 **Document ID**: PLAN-WORKLOGS-001  
 **Version**: 1.0.0  

@@ -18,7 +18,7 @@
 | `HexaKit` | `ARCHITECTURE_INFRAKIT.md` | unknown | **GENERAL** | ✓ Active | phenotype-infrakit is a Rust workspace of four independent infrastructure crates… |
 | `HexaKit` | `PHASE4_CONSOLIDATION_STRATEGY.md` | unknown | **GENERAL** | ✓ Active | Phase 4 consolidates 7,860 LOC of duplicate tests across thegent (platforms/theg |
 | `HexaKit` | `PHASE2_COMPLETE_REPORT.md` | unknown | **GENERAL** | ✓ Active | **Date:** April 2, 2026 |
-| `worklogs` | `AGENTS.md` | unknown | **ARCHITECTURE** | ✓ Active | - **Name**: worklogs |
+| `worklogs` | `AGENTS.md` | unknown | **ARCHITECTURE** | ✓ Active | **Category:** GOVERNANCE |
 | `PhenoKits` | `PHASE2_COMPLETE_REPORT.md` | unknown | **GENERAL** | ✓ Active | **Date:** April 2, 2026 |
 | `pheno-wtrees` | `PHASE2_COMPLETE_REPORT.md` | unknown | **GENERAL** | ✓ Active | **Date:** April 2, 2026 |
 | `pheno-wtrees` | `PHASE2_COMPLETE_REPORT.md` | unknown | **GENERAL** | ✓ Active | **Date:** April 2, 2026 |
@@ -58,13 +58,14 @@
 | `AgentMCP` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Index:** See `/Users/kooshapari/CodeProjects/Phenotype/repos/worklogs/README.m… |
 | `argis-extensions` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Index:** See `/Users/kooshapari/CodeProjects/Phenotype/repos/worklogs/README.m… |
 | `cliproxyapi-plusplus` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Index:** See `/Users/kooshapari/CodeProjects/Phenotype/repos/worklogs/README.m… |
-| `worklogs` | `ARCHITECTURE.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Architecture decisions, library extraction candidates, and large-scale refactori |
-| `worklogs` | `SESSION_2026_04_24_ARGIS_SUMMARY.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Durable consolidated record of the Argis multi-hour sweep. Derived from `worklog |
-| `worklogs` | `2026-04-24-kooshapari-session.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Project tags:** `[cross-repo]` |
-| `worklogs` | `GOVERNANCE.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | Tracks governance-related work: policy, evidence, and quality gates. |
-| `worklogs` | `DEPENDENCIES.md` | 2026-04-24 | **DEPENDENCIES** | ✓ Active | External deps, forks, modernization, Dependabot coverage. |
-| `worklogs` | `INDEX.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | | Repos Indexed | Categories | Empty Templates | Last Updated | |
-| `worklogs` | `DUPLICATION.md` | 2026-04-24 | **GENERAL** | ✓ Active | Cross-repo duplication tracking for the Phenotype org shared-crate shelf. |
+| `worklogs` | `ARCHITECTURE.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `worklogs` | `SESSION_2026_04_24_ARGIS_SUMMARY.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `worklogs` | `2026-04-24-kooshapari-session.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category:** ARCHITECTURE |
+| `worklogs` | `GOVERNANCE.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: GOVERNANCE** |
+| `worklogs` | `DEPENDENCIES.md` | 2026-04-24 | **DEPENDENCIES** | ✓ Active | **Category: DEPENDENCIES** |
+| `worklogs` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: GOVERNANCE** |
+| `worklogs` | `INDEX.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Category: GOVERNANCE** |
+| `worklogs` | `DUPLICATION.md` | 2026-04-24 | **DUPLICATION** | ✓ Active | **Category: DUPLICATION** |
 | `kmobile` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Index:** See `/Users/kooshapari/CodeProjects/Phenotype/repos/worklogs/README.m… |
 | `PhenoPlugins` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Index:** See `/Users/kooshapari/CodeProjects/Phenotype/repos/worklogs/README.m… |
 | `atoms.tech` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Index:** See `/Users/kooshapari/CodeProjects/Phenotype/repos/worklogs/README.m… |
@@ -78,20 +79,19 @@
 | `DataKit` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Index:** See `/Users/kooshapari/CodeProjects/Phenotype/repos/worklogs/README.m… |
 | `KDesktopVirt` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Index:** See `/Users/kooshapari/CodeProjects/Phenotype/repos/worklogs/README.m… |
 | `PhenoVCS` | `README.md` | 2026-04-24 | **ARCHITECTURE** | ✓ Active | **Index:** See `/Users/kooshapari/CodeProjects/Phenotype/repos/worklogs/README.m… |
-| `worklogs` | `INTEGRATION.md` | 2026-04-23 | **INTEGRATION** | ✓ Active | External integration notes for Phenotype-org repositories. See `worklogs/README.… |
-| `worklogs` | `REPO_CONSOLIDATION_ANALYSIS_2026-04-06.md` | 2026-04-06 | **GENERAL** | ✓ Active | **Date:** 2026-04-06 |
+| `worklogs` | `INTEGRATION.md` | 2026-04-23 | **INTEGRATION** | ✓ Active | **Category: INTEGRATION** |
+| `worklogs` | `REPO_CONSOLIDATION_ANALYSIS_2026-04-06.md` | 2026-04-06 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
 | `repos-wtrees` | `REPO_CONSOLIDATION_ANALYSIS_2026-04-06.md` | 2026-04-06 | **GENERAL** | ✓ Active | **Date:** 2026-04-06 |
 | `worklog.md` | `worklog.md` | 2026-04-05 | **GENERAL** | ✓ Active | **This project is managed through AgilePlus.** |
-| `worklogs` | `FORK_STRATEGY.md` | 2026-04-05 | **GENERAL** | ✓ Active | Implemented a comprehensive whitebox/blackbox fork strategy for integrating majo |
-| `worklogs` | `PRD.md` | 2026-04-05 | **GENERAL** | ✓ Active | **worklogs** is the work logging and documentation system for the Phenotype ecos |
-| `worklogs` | `README.md` | 2026-04-05 | **GENERAL** | ✓ Active | | Category | File | Purpose | |
-| `worklogs` | `RECOVERY.md` | 2026-04-05 | **GENERAL** | ✓ Active | **Date:** 2026-04-05 |
-| `worklogs` | `WORKFLOW_ROLLOUT_PRs.md` | 2026-04-05 | **GENERAL** | ✓ Active | Generated: 2026-04-05 |
-| `worklogs` | `CHARTER.md` | 2026-04-05 | **ARCHITECTURE** | ✓ Active | **Document ID:** CHARTER-WORKLOGS-001 |
-| `worklogs` | `PLAN.md` | 2026-04-05 | **ARCHITECTURE** | ✓ Active | **Document ID**: PLAN-WORKLOGS-001 |
-| `worklogs` | `RECOVERY_VERIFICATION.md` | 2026-04-05 | **GENERAL** | ✓ Active | **Date:** 2026-04-05 |
-| `worklogs` | `REPO_CONSOLIDATION_COMPLETE.md` | 2026-04-05 | **GENERAL** | ✓ Active | **Date**: 2026-04-05 |
-| `worklogs` | `PHENOSDK_MIGRATION_CLEANUP_COMPLETE.md` | 2026-04-05 | **GENERAL** | ✓ Active | **Date:** 2026-04-05 |
+| `worklogs` | `FORK_STRATEGY.md` | 2026-04-05 | **DEPENDENCIES** | ✓ Active | **Category: DEPENDENCIES** |
+| `worklogs` | `PRD.md` | 2026-04-05 | **GOVERNANCE** | ✓ Active | **Category: GOVERNANCE** |
+| `worklogs` | `RECOVERY.md` | 2026-04-05 | **RESEARCH** | ✓ Active | **Category: RESEARCH** |
+| `worklogs` | `WORKFLOW_ROLLOUT_PRs.md` | 2026-04-05 | **GOVERNANCE** | ✓ Active | **Category: GOVERNANCE** |
+| `worklogs` | `CHARTER.md` | 2026-04-05 | **ARCHITECTURE** | ✓ Active | **Category: GOVERNANCE** |
+| `worklogs` | `PLAN.md` | 2026-04-05 | **ARCHITECTURE** | ✓ Active | **Category: GOVERNANCE** |
+| `worklogs` | `RECOVERY_VERIFICATION.md` | 2026-04-05 | **GOVERNANCE** | ✓ Active | **Category: GOVERNANCE** |
+| `worklogs` | `REPO_CONSOLIDATION_COMPLETE.md` | 2026-04-05 | **ARCHITECTURE** | ✓ Active | **Category: ARCHITECTURE** |
+| `worklogs` | `PHENOSDK_MIGRATION_CLEANUP_COMPLETE.md` | 2026-04-05 | **GOVERNANCE** | ✓ Active | **Category: GOVERNANCE** |
 | `repos-wtrees` | `worklog.md` | 2026-04-05 | **GENERAL** | ✓ Active | **This project is managed through AgilePlus.** |
 | `repos-wtrees` | `FORK_STRATEGY.md` | 2026-04-05 | **GENERAL** | ✓ Active | Implemented a comprehensive whitebox/blackbox fork strategy for integrating majo |
 | `repos-wtrees` | `PRD.md` | 2026-04-05 | **GENERAL** | ✓ Active | **worklogs** is the work logging and documentation system for the Phenotype ecos |
@@ -240,12 +240,12 @@
 | `pheno-wtrees` | `worklog.md` | 2026-03-03 | **RESEARCH** | ✓ Active | --- |
 | `repos-wtrees` | `worklog.md` | 2026-03-03 | **RESEARCH** | ✓ Active | --- |
 | `heliosApp` | `worklog.md` | 2026-03-02 | **GENERAL** | ✓ Active | | ID | Goal | Status | Notes | |
-| `worklogs` | `ADR.md` | 2026-01-15 | **GENERAL** | ✓ Active | This document serves as the central index for all Architecture Decision Records  |
+| `worklogs` | `ADR.md` | 2026-01-15 | **ARCHITECTURE** | ✓ Active | **Category:** ARCHITECTURE |
 | `repos-wtrees` | `ADR.md` | 2026-01-15 | **GENERAL** | ✓ Active | This document serves as the central index for all Architecture Decision Records  |
 
 ## By Category
 
-### ARCHITECTURE (77)
+### ARCHITECTURE (81)
 
 - [`worklogs`](worklogs/AGENTS.md) — unknown — *active*
 - [`repos-wtrees`](repos-wtrees/dep-nkeys/worklogs/AGENTS.md) — unknown — *active*
@@ -284,6 +284,7 @@
 - [`worklogs`](worklogs/SESSION_2026_04_24_ARGIS_SUMMARY.md) — 2026-04-24 — *active*
 - [`worklogs`](worklogs/2026-04-24-kooshapari-session.md) — 2026-04-24 — *active*
 - [`worklogs`](worklogs/GOVERNANCE.md) — 2026-04-24 — *active*
+- [`worklogs`](worklogs/README.md) — 2026-04-24 — *active*
 - [`worklogs`](worklogs/INDEX.md) — 2026-04-24 — *active*
 - [`kmobile`](kmobile/docs/worklogs/README.md) — 2026-04-24 — *active*
 - [`PhenoPlugins`](PhenoPlugins/docs/worklogs/README.md) — 2026-04-24 — *active*
@@ -298,8 +299,10 @@
 - [`DataKit`](DataKit/docs/worklogs/README.md) — 2026-04-24 — *active*
 - [`KDesktopVirt`](KDesktopVirt/docs/worklogs/README.md) — 2026-04-24 — *active*
 - [`PhenoVCS`](PhenoVCS/docs/worklogs/README.md) — 2026-04-24 — *active*
+- [`worklogs`](worklogs/REPO_CONSOLIDATION_ANALYSIS_2026-04-06.md) — 2026-04-06 — *active*
 - [`worklogs`](worklogs/CHARTER.md) — 2026-04-05 — *active*
 - [`worklogs`](worklogs/PLAN.md) — 2026-04-05 — *active*
+- [`worklogs`](worklogs/REPO_CONSOLIDATION_COMPLETE.md) — 2026-04-05 — *active*
 - [`repos-wtrees`](repos-wtrees/dep-nkeys/worklogs/CHARTER.md) — 2026-04-05 — *active*
 - [`repos-wtrees`](repos-wtrees/dep-nkeys/worklogs/PLAN.md) — 2026-04-05 — *active*
 - [`HexaKit`](HexaKit/docs/worklogs/README.md) — 2026-03-31 — *active*
@@ -324,16 +327,19 @@
 - [`AgilePlus`](AgilePlus/docs/worklogs/README.md) — 2026-03-29 — *active*
 - [`AgilePlus`](AgilePlus/docs/worklogs/WORK_LOG.md) — 2026-03-29 — *active*
 - [`AgilePlus`](AgilePlus/docs/worklogs/AGENT_ONBOARDING.md) — 2026-03-29 — *active*
+- [`worklogs`](worklogs/ADR.md) — 2026-01-15 — *active*
 
-### DEPENDENCIES (4)
+### DEPENDENCIES (5)
 
 - [`worklogs`](worklogs/DEPENDENCIES.md) — 2026-04-24 — *active*
+- [`worklogs`](worklogs/FORK_STRATEGY.md) — 2026-04-05 — *active*
 - [`HexaKit`](HexaKit/docs/worklogs/DEPENDENCIES.md) — 2026-03-31 — *active*
 - [`HexaKit`](HexaKit/docs/worklogs/SESSION_2026-03-30_COMPREHENSIVE.md) — 2026-03-30 — *active*
 - [`AgilePlus`](AgilePlus/docs/worklogs/DEPENDENCIES.md) — 2026-03-29 — *active*
 
-### DUPLICATION (15)
+### DUPLICATION (16)
 
+- [`worklogs`](worklogs/DUPLICATION.md) — 2026-04-24 — *active*
 - [`HexaKit`](HexaKit/docs/worklogs/DUPLICATION_AUDIT_SUMMARY.md) — 2026-03-29 — *active*
 - [`HexaKit`](HexaKit/docs/worklogs/WorklogsIndex.md) — 2026-03-29 — *active*
 - [`HexaKit`](HexaKit/docs/worklogs/PHASE1_2_3_4_COMPLETION_SUMMARY.md) — 2026-03-29 — *active*
@@ -350,7 +356,7 @@
 - [`AgilePlus`](AgilePlus/docs/worklogs/PROJECTS_thegent.md) — 2026-03-29 — *active*
 - [`AgilePlus`](AgilePlus/docs/worklogs/DUPLICATION.md) — 2026-03-29 — *active*
 
-### GENERAL (114)
+### GENERAL (103)
 
 - [`heliosApp`](heliosApp/worklog.md) — unknown — *active*
 - [`phenoDesign`](phenoDesign/worklog.md) — unknown — *active*
@@ -364,18 +370,8 @@
 - [`PhenoProc`](PhenoProc/crates/phenotype-shared/worklog.md) — unknown — *active*
 - [`PhenoProc`](PhenoProc/phenotype-config-ts/worklog.md) — unknown — *active*
 - [`portage`](portage/worklog.md) — unknown — *active*
-- [`worklogs`](worklogs/DUPLICATION.md) — 2026-04-24 — *active*
-- [`worklogs`](worklogs/REPO_CONSOLIDATION_ANALYSIS_2026-04-06.md) — 2026-04-06 — *active*
 - [`repos-wtrees`](repos-wtrees/dep-nkeys/worklogs/REPO_CONSOLIDATION_ANALYSIS_2026-04-06.md) — 2026-04-06 — *active*
 - [`worklog.md`](worklog.md) — 2026-04-05 — *active*
-- [`worklogs`](worklogs/FORK_STRATEGY.md) — 2026-04-05 — *active*
-- [`worklogs`](worklogs/PRD.md) — 2026-04-05 — *active*
-- [`worklogs`](worklogs/README.md) — 2026-04-05 — *active*
-- [`worklogs`](worklogs/RECOVERY.md) — 2026-04-05 — *active*
-- [`worklogs`](worklogs/WORKFLOW_ROLLOUT_PRs.md) — 2026-04-05 — *active*
-- [`worklogs`](worklogs/RECOVERY_VERIFICATION.md) — 2026-04-05 — *active*
-- [`worklogs`](worklogs/REPO_CONSOLIDATION_COMPLETE.md) — 2026-04-05 — *active*
-- [`worklogs`](worklogs/PHENOSDK_MIGRATION_CLEANUP_COMPLETE.md) — 2026-04-05 — *active*
 - [`repos-wtrees`](repos-wtrees/dep-nkeys/worklog.md) — 2026-04-05 — *active*
 - [`repos-wtrees`](repos-wtrees/dep-nkeys/worklogs/FORK_STRATEGY.md) — 2026-04-05 — *active*
 - [`repos-wtrees`](repos-wtrees/dep-nkeys/worklogs/PRD.md) — 2026-04-05 — *active*
@@ -464,11 +460,14 @@
 - [`PhenoProc`](PhenoProc/crates/phenotype-dep-guard/worklog.md) — 2026-03-26 — *active*
 - [`HexaKit`](HexaKit/docs/worklogs/LOC_REDUCTION_INITIATIVE_FINAL_STATUS.md) — 2026-03-25 — *active*
 - [`heliosApp`](heliosApp/docs/reports/worklog.md) — 2026-03-02 — *active*
-- [`worklogs`](worklogs/ADR.md) — 2026-01-15 — *active*
 - [`repos-wtrees`](repos-wtrees/dep-nkeys/worklogs/ADR.md) — 2026-01-15 — *active*
 
-### GOVERNANCE (2)
+### GOVERNANCE (6)
 
+- [`worklogs`](worklogs/PRD.md) — 2026-04-05 — *active*
+- [`worklogs`](worklogs/WORKFLOW_ROLLOUT_PRs.md) — 2026-04-05 — *active*
+- [`worklogs`](worklogs/RECOVERY_VERIFICATION.md) — 2026-04-05 — *active*
+- [`worklogs`](worklogs/PHENOSDK_MIGRATION_CLEANUP_COMPLETE.md) — 2026-04-05 — *active*
 - [`HexaKit`](HexaKit/docs/worklogs/GOVERNANCE.md) — 2026-03-29 — *active*
 - [`AgilePlus`](AgilePlus/docs/worklogs/GOVERNANCE.md) — 2026-03-29 — *active*
 
@@ -484,8 +483,9 @@
 - [`HexaKit`](HexaKit/docs/worklogs/PERFORMANCE.md) — 2026-03-29 — *active*
 - [`AgilePlus`](AgilePlus/docs/worklogs/PERFORMANCE.md) — 2026-03-29 — *active*
 
-### RESEARCH (11)
+### RESEARCH (12)
 
+- [`worklogs`](worklogs/RECOVERY.md) — 2026-04-05 — *active*
 - [`HexaKit`](HexaKit/docs/worklogs/SessionTranscriptAudit.md) — 2026-03-29 — *active*
 - [`AgilePlus-wtrees`](AgilePlus-wtrees/dep-pyjwt-lodash/.work-audit/worklog.md) — 2026-03-03 — *active*
 - [`AgilePlus-wtrees`](AgilePlus-wtrees/dep-high/.work-audit/worklog.md) — 2026-03-03 — *active*

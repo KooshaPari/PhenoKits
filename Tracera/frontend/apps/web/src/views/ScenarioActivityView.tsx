@@ -20,20 +20,35 @@ import {
   SelectValue,
 } from '@tracertm/ui';
 
+type SortOrder = 'recent' | 'oldest';
+
+function getProjectId(params: unknown): string {
+  if (typeof params !== 'object' || params === null || !('projectId' in params)) {
+    return '';
+  }
+
+  const projectId = params.projectId;
+  return typeof projectId === 'string' ? projectId : '';
+}
+
+function isSortOrder(value: string): value is SortOrder {
+  return value === 'recent' || value === 'oldest';
+}
+
 export function ScenarioActivityView() {
-  const params = useParams({ strict: false });
+  const params: unknown = useParams({ strict: false });
   const _navigate = useNavigate();
-  const projectId = params.projectId ?? '';
+  const projectId = getProjectId(params);
   const [statusFilter, setStatusFilter] = useState('all');
   const { data: scenariosData } = useProjectScenarios(
     projectId,
     statusFilter === 'all' ? undefined : statusFilter,
   );
   const { data: featuresData } = useFeatures({ projectId });
-  const scenarios = scenariosData?.scenarios ?? [];
+  const scenarios = useMemo(() => scenariosData?.scenarios ?? [], [scenariosData]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedScenarioId, setSelectedScenarioId] = useState('');
-  const [sortOrder, setSortOrder] = useState<'recent' | 'oldest'>('recent');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('recent');
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(() => new Set());
   const [page, setPage] = useState(1);
   const pageSize = 10;
@@ -94,7 +109,7 @@ export function ScenarioActivityView() {
     });
   }, [filteredScenarios, featureMap]);
 
-  const activitiesList = activities?.activities ?? [];
+  const activitiesList = useMemo(() => activities?.activities ?? [], [activities]);
   const sortedActivities = useMemo(() => {
     if (activitiesList.length === 0) {
       return [];
@@ -170,8 +185,10 @@ export function ScenarioActivityView() {
           </Select>
           <Select
             value={sortOrder}
-            onValueChange={(v) => {
-              setSortOrder(v as any);
+            onValueChange={(value) => {
+              if (isSortOrder(value)) {
+                setSortOrder(value);
+              }
             }}
           >
             <SelectTrigger className='md:w-[160px]'>

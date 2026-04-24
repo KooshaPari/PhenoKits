@@ -1,4 +1,5 @@
 # Product Requirements Document (PRD) - worklogs
+**Category: GOVERNANCE**
 
 ## 1. Executive Summary
 

@@ -1,4 +1,5 @@
 # Phenotype Org Worklog System
+**Category: GOVERNANCE**
 
 Worklogs are the canonical audit trail for research, decisions, and significant findings across the Phenotype organization. They are organized by category and queryable via the **[INDEX](./INDEX.md)**.
 

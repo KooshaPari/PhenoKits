@@ -1,24 +1,35 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
 import { toast } from 'sonner';
 
 import { logger } from '@/lib/logger';
 import { useAuthStore } from '@/stores/auth-store';
 
-const AuthCallback = () => {
+const LOGIN_REDIRECT_DELAY_MS = 2000;
+
+const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return 'Authentication failed';
+};
+
+const AuthCallback = (): ReactElement => {
   const navigate = useNavigate();
   const loginWithCode = useAuthStore((state) => state.loginWithCode);
-  const [error, setError] = useState<string | null>(null);
+  const [authError, setAuthError] = useState<string>();
 
   useEffect(() => {
-    const handleCallback = async () => {
-      try {
-        const params = new URLSearchParams(window.location.search);
-        const code = params.get('code');
-        const state = params.get('state');
+    const handleCallback = async (): Promise<void> => {
+      const params = new URLSearchParams(globalThis.location.search);
+      const code = params.get('code');
+      const state = params.get('state');
 
-        if (!code) {
+      try {
+        if (code === null || code === '') {
           const errorDesc =
             params.get('error_description') ??
             params.get('error') ??
@@ -26,34 +37,35 @@ const AuthCallback = () => {
           throw new Error(errorDesc);
         }
 
-        if (!state) {
+        if (state === null || state === '') {
           throw new Error('No state parameter received');
         }
 
         await loginWithCode(code, state);
         toast.success('Welcome back!');
-        navigate({ to: '/home', replace: true });
-      } catch (err) {
-        const message = err instanceof Error ? err.message : 'Authentication failed';
-        logger.error('AuthKit callback failed:', err);
-        setError(message);
+        await navigate({ replace: true, to: '/home' });
+      } catch (error) {
+        const message = getErrorMessage(error);
+
+        logger.error('AuthKit callback failed:', error);
+        setAuthError(message);
         toast.error(message);
         setTimeout(() => {
-          navigate({ to: '/auth/login', replace: true });
-        }, 2000);
+          void navigate({ replace: true, to: '/auth/login' });
+        }, LOGIN_REDIRECT_DELAY_MS);
       }
     };
 
-    handleCallback();
+    void handleCallback();
   }, [loginWithCode, navigate]);
 
-  if (error) {
+  if (authError !== undefined && authError !== '') {
     return (
       <div className='flex min-h-screen items-center justify-center bg-slate-950 p-4'>
         <div className='space-y-6 text-center'>
           <div className='space-y-2'>
             <h2 className='text-2xl font-bold text-red-400'>Authentication failed</h2>
-            <p className='text-sm text-slate-400'>{error}</p>
+            <p className='text-sm text-slate-400'>{authError}</p>
             <p className='text-sm text-slate-500'>Redirecting to login...</p>
           </div>
         </div>

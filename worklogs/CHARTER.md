@@ -1,4 +1,5 @@
 # worklogs Project Charter
+**Category: GOVERNANCE**
 
 **Document ID:** CHARTER-WORKLOGS-001  
 **Version:** 1.0.0  

@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useEffect } from 'react';
 
-export const Route = createFileRoute('/projects/$projectId/views/integrations' as any)({
+export const Route = createFileRoute('/projects/$projectId/views/integrations')({
   component: ProjectIntegrationsPage,
 });
 
@@ -11,10 +11,11 @@ function ProjectIntegrationsPage() {
 
   useEffect(() => {
     navigate({
+      params: { projectId },
       replace: true,
-      search: { tab: 'integrations' } as any,
-      to: `/projects/${projectId}/settings`,
-    });
+      search: { tab: 'integrations' },
+      to: '/projects/$projectId/settings',
+    }).catch(() => undefined);
   }, [navigate, projectId]);
 
   return null;

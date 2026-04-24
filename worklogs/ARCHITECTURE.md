@@ -3,6 +3,34 @@
 
 Architecture decisions, library extraction candidates, and large-scale refactoring plans.
 
+## 2026-04-24 — pheno monorepo module extraction (Phase 2 discovery)
+
+**Task:** Execute Phase 2 of pheno extraction plan — extract 5 crates into phenotype-shared.
+
+**Scope:**
+- phenotype-testing (1,063 LOC) — test utilities, fixtures, BDD helpers
+- phenotype-mock (754 LOC) — mockito-style test mocking
+- phenotype-cost-core (740 LOC) — billing/cost abstractions
+- phenotype-bdd (679 LOC) — behavior-driven dev scaffolding
+- phenotype-event-bus (393 LOC) — publish-subscribe event implementation
+
+**Discovery:** These 5 items are **NOT standalone Cargo crates**; they are **modules within pheno monorepo**. Each is a `src/` directory with no Cargo.toml.
+
+**Impact on extraction:**
+- Cannot copy directly into phenotype-shared (no workspace manifest)
+- Each requires creation of standalone Cargo.toml + dependency resolution
+- Internal monorepo deps must be broken (phenotype-bdd/event-bus have heavy coupling to cache-adapter, config-core, compliance-scanner, infrastructure, etc.)
+- Requires explicit decoupling refactoring per crate (estimated +4-6h additional effort)
+
+**Recommendation:**
+- **Phase 2 DEFERRED** until after Phase 1 (phenotype-retry, phenotype-port-traits, phenotype-policy-engine — all are standalone crates with Cargo.toml)
+- Phase 2 requires module→crate conversion + decoupling sprints
+- Alternative: Create lightweight re-exports in phenotype-shared that delegate to pheno::* crates (lower-effort shim layer)
+
+**Decision:** Documented in `docs/migrations/pheno_extraction_plan.md` Phase 2 notes section.
+
+---
+
 ## 2026-04-24 — Rust workspace consolidation analysis
 
 **Scope:** Active Rust workspaces across 30+ Phenotype repos.

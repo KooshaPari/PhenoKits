@@ -1,17 +1,10 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import Footer from '../../components/Footer.astro';
-
-// Import product data
-import focalpointData from '../../content/products/focalpoint.json';
-import agileplusData from '../../content/products/agileplus.json';
-import traceraData from '../../content/products/tracera.json';
-import hwledgerData from '../../content/products/hwledger.json';
-
-const products = [focalpointData, agileplusData, traceraData, hwledgerData];
+import { products } from '../../lib/data';
 
 export function getStaticPaths() {
-  return products.map(product => ({
+  return Object.values(products).map(product => ({
     params: { slug: product.slug },
     props: { product }
   }));

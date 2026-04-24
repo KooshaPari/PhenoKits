@@ -22,11 +22,29 @@ const { title = 'Phenotype', description = 'Developer hub for Phenotype organiza
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
 
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Global Styles -->
     <style is:global>
-      @import 'tailwindcss/base';
-      @import 'tailwindcss/components';
-      @import 'tailwindcss/utilities';
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+      }
+      img, video {
+        max-width: 100%;
+        height: auto;
+      }
+      input, button, textarea, select {
+        font: inherit;
+      }
+      p, h1, h2, h3, h4, h5, h6 {
+        overflow-wrap: break-word;
+      }
     </style>
   </head>
   <body class="bg-slate-950 text-slate-100">

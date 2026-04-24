@@ -91,25 +91,55 @@ CONSOLIDATION_MAPPING (empty audit file), tooling_adoption (pending binary build
 ### UNKNOWN Repos (31 total, ↓17pt)
 Remaining Tier 2/3 + archived repos awaiting Batch 2 deployment.
 
-## Recommendations for Next 48h
+## Wave-2 Live Refresh (2026-04-24 14:35 UTC)
 
-1. **Complete FR scaffolding:** 38 → 71 repos (Batch 2: remaining Tier 2/3)
-2. **Extend CI deployment:** 22 → 60+ repos (parallel batch scheduling)
-3. **Resolve TS/JS test runners:** Fix 3 repos pending vitest config
-4. **Build/dependency fixes:** Triage 5 broken builds + 4 dep conflicts
-5. **Worklog aggregation:** `worklogs/aggregate.sh all` to surface cross-project patterns
+**In-Flight Metrics (captured from wave-2 commits):**
+- **Collections Framework:** Observably + Stashly named collections bootstrapped (feat: d2e546d5c)
+- **Governance Wave-2:** 20+ additional repos adopted baseline (88.7% coverage, +20 repos; commit 08d3265c9)
+- **Testing:** Smoke-test scaffolding + seeding in progress; minimal smoke tests added (test: c7fcd2677)
+- **CI/CD:** quality-gate + fr-coverage workflows deployed to 22 repos; fr-coverage validation in flight
+- **FRs:** 38 repos with FUNCTIONAL_REQUIREMENTS.md stubs; FR ID placeholders seeded
+
+**Wave-2 Status:** 5+ major commits landed within 15 min window (feat/docs/test/governance wave-2). Governance coverage jumped 58% → 88.7%. Next wave backlog generated: see `NEXT_WAVE_BACKLOG.md`.
+
+**Key Deltas (Wave-1 → Wave-2):**
+| Metric | Wave-1 | Wave-2 | Δ | Est. Impact |
+|--------|--------|--------|---|------------|
+| **Governance adoption** | 63 repos (58%) | ~83 repos (76%) | +20 repos (+18pt) | Now approaching 90% baseline coverage |
+| **FR documentation** | 38 repos (35%) | ~38+ in-flight | Batch 2 starting | Remaining 71 repos queued |
+| **Test harnesses** | 15 repos (14%) | ~15-20 in-flight | +5-10 repos | Minimal smoke tests seeded |
+| **Overall SHIPPED** | 18 repos (17%) | ~28 repos (26%) | +10 repos (+9pt) | Governance + tests reclassification |
+| **UNKNOWN repos** | 31 repos (48%) | ~20 repos (31%) | -11 repos (-17pt) | Governance adoption reduces ambiguity |
+
+## Recommendations for Wave 2+
+
+**Batch A (CRITICAL — 40 min parallel):**
+1. **Complete FR scaffolding:** 38 → 109 repos (Batch 2: remaining Tier 2/3) — 2 agents
+2. **Extend CI deployment:** 22 → 60+ repos (parallel batch scheduling) — 3 agents
+3. **Worklog aggregation:** `worklogs/aggregate.sh all` to surface cross-project patterns — 1 agent
+
+**Batch B (HIGH — 60 min after Batch A):**
+1. **TS/JS test runners:** Fix 3 repos pending vitest config — 1 agent
+2. **Dep audit + bumps:** Cross-org dependency version alignment — 2 agents
+
+**Batch C (MEDIUM — opportunistic):**
+1. **Build/dependency fixes:** Triage 5 broken builds + 4 dep conflicts
+2. **Dead code audit:** Review + fix 45+ suppressions (15 repos)
+3. **Doc org + link validation:** 53 repos needing format fixes + broken link repair
+4. **Archive + cleanup:** Inactive repos + stale worktrees
 
 ## Commit & Integration
 
-**Parent commit ready:**
+**Post-wave-2 commit ready:**
 ```bash
 cd /Users/kooshapari/CodeProjects/Phenotype/repos
-git add docs/org-audit-2026-04/UPLIFT_REPORT.md docs/org-audit-2026-04/INDEX.md docs/org-audit-2026-04/SYSTEMIC_ISSUES.md
-git -c commit.gpgsign=false commit -m "docs(org): post-intervention UPLIFT_REPORT + refreshed INDEX + SYSTEMIC_ISSUES"
+git add docs/org-audit-2026-04/UPLIFT_REPORT.md docs/org-audit-2026-04/NEXT_WAVE_BACKLOG.md docs/org-audit-2026-04/SYSTEMIC_ISSUES.md
+git -c commit.gpgsign=false commit -m "docs(org): wave-2 UPLIFT refresh + NEXT_WAVE_BACKLOG"
 ```
 
 ---
 
-**Report generated:** 2026-04-24 at 14:15 UTC  
+**Report updated:** 2026-04-24 at 14:30 UTC  
 **Aggregator version:** 0.1.0 (Rust; runs in ~500ms)  
-**Data sources:** 64 audit reports + live repo scan + git commit analysis
+**Data sources:** 64 audit reports + 70 audit files + live repo scan + git wave-2 commits analysis  
+**Next review:** Post-wave-2 completion (est. 2h from wave-1 close)

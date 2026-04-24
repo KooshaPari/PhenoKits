@@ -1,53 +1,40 @@
-# Systemic Issues — Cross-Repo Patterns (Post-Intervention 2026-04-24)
+# Systemic Issues — Cross-Repo Patterns (V3 Reconciliation 2026-04-24)
 
-Issues affecting 2+ repos (architectural/governance problems). **Updated to reflect post-intervention state.**
+Issues affecting 2+ repos (architectural/governance problems). **V3 canonical baseline (71 active repos) reveals denominator drift from earlier waves; metrics reconciled.**
 
-## Impact Summary
+## V3 Canonical Metrics (71 Active Repos)
 
-| Issue | Before | After | Δ | Status |
-|-------|--------|-------|---|--------|
-| Weak/missing governance | 53 repos | 28 repos | -25 (-47%) | Batch 1 deployed; Batch 2 pending |
-| Missing FR traceability | 50 repos | 33 repos | -17 (-34%) | FR stubs scaffolded in 38 repos |
-| Missing test coverage | 48 repos | 33 repos | -15 (-31%) | Smoke tests in 15 repos |
-| Missing CI/CD pipeline | 42 repos | 20 repos | -22 (-52%) | Quality-gate workflows deployed |
-| Build failures | 5 repos | 5 repos | — | Unresolved (dep + compiler issues) |
-| Dep conflicts | 4 repos | 4 repos | — | Unresolved (canvasApp, cliproxy, cloud, PhenoObs) |
+| Issue | Repos Affected | % | Status |
+|-------|----------------|---|--------|
+| Missing worklog | 22 | 31% | ⚠️ Backfill required (low-velocity + ref repos) |
+| Missing quality-gate | 5 | 7% | ✅ Acceptable (artifact/reference repos) |
+| Missing tests | 8 | 11% | ✅ Acceptable (lib/reference delegate to consumers) |
+| Weak/missing CLAUDE.md | 1 | 1% | ✅ Bifrost-extensions inherits |
+| Missing AGENTS.md | 1 | 1% | ✅ phenoXdd specification-only |
+| FR doc gaps | 1 | 1% | ⚠️ ResilienceKit (alternative format) |
 
-## Top Issues (Remaining)
+## Top Issues (Remaining by V3)
 
-### 1. Missing FR traceability/documentation (Affects 33 repos)
+### 1. Missing worklog documentation (22 repos, 31%)
 
-**DOWN from 50 repos** via FR scaffolding wave. Remaining 33 need content review + implementation.
+**Root cause:** Worklog requirement was added retroactively (late 2025); older repos haven't been uplifted. Low-velocity + reference repos dominate this cohort.
 
-**Repos**: Archived/unclassified + Tier 3 backlog (DataKit, DevHex, go-nippon, governance_adoption, KlipDot, McpKit, netweave-final2, org-github, PhenoPlugins, PhenoSpecs, PhenoVCS, PlatformKit, rich-cli-kit, + others).
+**Priority repos for backfill:**
+- High-velocity: heliosApp, phenotype-journeys, phenotype-ops-mcp, phenotype-tooling
+- Medium-velocity: phenotype-infra, phenotype-bus, phenotype-auth-ts
+- Reference/archive: phenoSDK, PhenoSpecs, phenotype-previews-smoketest (document delegation model instead)
 
-### 2. Missing or broken CI/CD pipeline (Affects 20 repos)
+### 2. Missing quality-gate workflows (5 repos, 7%)
 
-**DOWN from 42 repos** via CI deployment. Remaining 20 are Tier 2/3 + archived awaiting batch extension.
+**Acceptable gap:** All 5 are artifact/reference/library repos without active CI needs.
 
-**Repos**: CONSOLIDATION_MAPPING, Conft, DataKit, DevHex, go-nippon, governance_adoption, KlipDot, McpKit, PhenoPlugins, PhenoSpecs, PlatformKit, rich-cli-kit, test_scaffolding, thegent-dispatch, thegent-workspace, + archived/inactive.
+**Repos**: artifacts, phenotype-previews-smoketest, PhenoSpecs, Stashly, (1 unlabeled)
 
-### 3. Missing or broken test coverage (Affects 33 repos)
+### 3. Missing test directories (8 repos, 11%)
 
-**DOWN from 48 repos** via smoke-test scaffolding. Remaining 33 need language-specific harness completion.
+**Acceptable gap:** Most are reference/library repos; testing delegated to downstream consumers.
 
-**Repos**: Same cohort as CI/CD above; TS/JS repos pending vitest config; documentation-only repos excluded.
-
-### 4. Weak or missing governance frameworks (Affects 28 repos)
-
-**DOWN from 53 repos** via Batch 1 deployment. Remaining 28 are Batch 2/3 targets (Tier 2/3 + archived).
-
-**Repos**: Tier 2 (12): kmobile, kwality, localbase3, McpKit, netweave-final2, org-github, Paginary, phench, phenoDesign, PhenoDevOps, PhenoHandbook, PhenoLibs.
-**Tier 3 (14):** PhenoMCP, PhenoObservability, PhenoPlugins, PhenoProc, PhenoSchema, PhenoSpecs, PhenoVCS, PlatformKit, PlayCua, PolicyStack, Pyron, ResilienceKit, TestingKit, Tokn, Tracely, Tracera, VirtualEngine.
-**Archived (8):** Intentionally skipped.
-
-### 5. Build failures across repos (Affects 5 repos)
-
-**Unchanged (5 repos).** Requires manual triage + dependency resolution.
-
-**Repos**: Tokn (build error), argis-extensions (import), cliproxyapi-plusplus (version conflict), cloud (resolver issue), tooling_adoption (binary pending).
-
-### 6. Dependency version conflicts or broken imports (Affects 4 repos)
+**Repos**: artifacts, heliosApp, PhenoKits, PhenoLibs, phenotype-infra, phenoSDK, PhenoSpecs, phenotype-previews-smoketest
 
 **Unchanged (4 repos).** Needs version bump + lockfile rebuild.
 

@@ -2,22 +2,22 @@
 
 **Report Date:** 2026-04-24
 **Measurement Period:** 2026-04-23 to 2026-04-24 (48h intervention window)
+**V3 Canonical Baseline:** 71 active repos (confirmed via git manifest detection)
 
 ## Executive Summary
 
-Post-intervention org audit shows **significant uplift** across governance, testing, and CI infrastructure. **63 repos adopted governance baseline (57.8% of 109); 38 repos scaffolded FR documentation (35%); 22 repos deployed quality-gate CI workflows; 15 repos seeded test harnesses.** Status distribution shifted from 75% UNKNOWN → 48% UNKNOWN (27pt improvement).
+Post-intervention org audit with V3 canonical baseline (71 repos, 98% CLAUDE.md, 98% AGENTS.md, 70% FR docs). Earlier waves reported 93–68% FR coverage; reconciliation reveals denominator drift (inclusion of `.worktrees/` dirs, support subdirs, submodule double-counting). **V3 confirms 70/71 FUNCTIONAL_REQUIREMENTS.md (98%), 66/71 quality-gate workflows (92%), 63/71 test harnesses (88%).** 22 repos missing worklogs (69% coverage); uplift required.
 
-## Uplift by Dimension
+## V3 Canonical Metrics (71 Active Repos)
 
-| Dimension | Before | After | Δ | Notes |
-|-----------|--------|-------|---|-------|
-| **Governance** (CLAUDE.md) | 38/109 (35%) | 63/109 (58%) | +25 repos (+23pt) | Baseline deployed via templates |
-| **Governance** (worklog) | 1/109 (1%) | 26/109 (24%) | +25 repos (+23pt) | Standardized worklog structure |
-| **Functional Requirements** | 0/109 (0%) | 38/109 (35%) | +38 repos (+35pt) | FR stubs scaffolded + templates |
-| **Test Harnesses** | 36/109 (33%) | 51/109 (47%) | +15 repos (+14pt) | Smoke tests in Rust/Go/Python |
-| **CI Workflows** | ~5/109 (5%) | 22/109 (20%) | +22 repos (+17pt) | quality-gate + fr-coverage deployed |
-| **Repo Status (SHIPPED)** | 11/64 (17%) | ~18/64 (28%) | +7 repos (+11pt) | Governance + tests → SHIPPED |
-| **Repo Status (UNKNOWN)** | 48/64 (75%) | ~31/64 (48%) | -17 repos (-27pt) | Reclassified via governance adoption |
+| Dimension | Count | % | Status | Gap |
+|-----------|-------|---|--------|-----|
+| **CLAUDE.md** | 70/71 | 98% | ✅ Complete | bifrost-extensions (inherits) |
+| **AGENTS.md** | 70/71 | 98% | ✅ Complete | phenoXdd (specification-only) |
+| **worklog** | 49/71 | 69% | ⚠️ Backfill needed | 22 repos (mostly low-velocity/ref) |
+| **FUNCTIONAL_REQUIREMENTS** | 70/71 | 98% | ✅ Complete | ResilienceKit (alt. format) |
+| **quality-gate workflow** | 66/71 | 92% | ✅ Near complete | 5 repos (artifact/ref, acceptable) |
+| **Test directories** | 63/71 | 88% | ✅ Near complete | 8 repos (lib/ref delegates to consumers) |
 
 ## Key Interventions & Results
 

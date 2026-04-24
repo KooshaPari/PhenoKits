@@ -6,6 +6,33 @@ for category conventions and `worklogs/AGENT_ONBOARDING.md` for writing guidance
 
 ---
 
+## [AgilePlus ↔ Tasken] 2026-04-24 — Satellite Integration Bridge (Phase 1 Scaffolding)
+
+**Scope**: Bidirectional sync bridge between Tasken (task execution framework with scheduling/DAG/plugins)
+and AgilePlus (spec-driven development engine with work packages).
+
+**Integration Model**: **Satellite** (Option B). Tasken operates as a standalone execution layer;
+AgilePlus remains source of truth for spec decomposition and work-package planning. Event bridge
+syncs work packages ↔ tasks without coupling.
+
+**Phase 1 Deliverables**:
+1. **Integration Plan Doc** (`docs/integrations/tasken_agileplus_integration.md`, 450 LOC)
+   - Architecture overview; gap analysis; three options evaluated; Option B recommended
+   - Bidirectional event schema (7 event types: WorkPackageCreated, TaskExecutionCompleted, etc.)
+   - Design decisions documented: Tasken as library (not microservice); WP ID = Task ID
+
+2. **`agileplus-tasken-sync` Crate** (skeleton, 180 LOC + tests)
+   - `sync.rs`: `TaskenSync` trait stubs for work_package_to_task(), task_to_work_package_event()
+   - `events.rs`: `WorkPackageTaskEvent` enum (all 7 bridge events); serde-serializable
+   - `config.rs`: `BridgeConfig` (retry policy, scheduling defaults, time-tracking toggles)
+   - All tests pass (9/9); crate builds cleanly
+
+**Commit**: `09690b0` (AgilePlus) — "docs(integration): Tasken ↔ AgilePlus bridge plan + stub crate"
+
+**Phase 2 Ready**: Stubs in place; ~15 tool calls; 3-5 parallel agents for integration tests and end-to-end workflow validation.
+
+---
+
 ## [phenotype-ops-mcp] 2026-04-23 — Fork of nanovms/ops-mcp (Task #59)
 
 Forked [`nanovms/ops-mcp`](https://github.com/nanovms/ops-mcp) (Apache-2.0, Go,

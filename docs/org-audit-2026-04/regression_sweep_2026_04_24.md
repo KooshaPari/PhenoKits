@@ -27,7 +27,7 @@ Test execution running across all 9 repos in parallel (3-min timeout per repo vi
 |------|--------|-------|--------|--------|----------|-------|
 | FocalPoint | 🟢 GREEN | 4 | 4 | 0 | 0 | All tests passed |
 | AgilePlus | 🟢 GREEN | 11 | 11 | 0 | 0 | 24-crate monorepo; clean build |
-| PhenoObservability | 🔴 RED | - | - | 2 | 2 | **REGRESSION PENDING**: pheno-dragonfly Redis type mismatch |
+| PhenoObservability | 🟢 GREEN | 0 | 0 | 0 | 0 | **FIXED**: Redis 0.27 macro type mismatch resolved |
 | Stashly | 🟢 GREEN | 0 | 0 | 0 | 0 | No-op tests (empty workspace) |
 | Observably | 🟢 GREEN | 1 | 1 | 0 | 0 | All tests passed |
 | Eidolon | 🟢 GREEN | 0 | 0 | 0 | 0 | No-op tests (empty workspace) |
@@ -38,33 +38,32 @@ Test execution running across all 9 repos in parallel (3-min timeout per repo vi
 ## Aggregate Metrics
 
 - **Total Repos:** 9 (phenotype-shared not yet created)
-- **🟢 GREEN Count:** 8 repos (88.9%) — including 1 FIXED
+- **🟢 GREEN Count:** 9 repos (100%) — including 2 FIXED
 - **🟡 YELLOW Count:** 0 repos
-- **🔴 RED Count:** 1 repo (11.1%)
+- **🔴 RED Count:** 0 repos
 - **Total Tests Executed:** 31 (31 passed, 0 test failures)
-- **Compilation Errors Found:** 1 repo (1 pre-existing regression)
-- **Overall Org Score:** 8/9 GREEN (up from 7/9)
+- **Compilation Errors Found:** 0 repos
+- **Overall Org Score:** 9/9 GREEN (up from 7/9)
 
 ## Regressions Found & Resolution Status
 
-### 1. **PhenoObservability** — 🔴 CRITICAL (UNRESOLVED)
+### 1. **PhenoObservability** — 🟢 FIXED
 
-**Error:** `pheno-dragonfly` crate compilation failure
+**Error (Original):** `pheno-dragonfly` crate compilation failure
 
 ```
-error[E0277]: the trait bound `redis::commands::PubSubCommands::get_ex<K, V>: 
-FromStr` is not satisfied [for redis = "0.27.6"]
+error[E0277]: the trait bound `!: FromRedisValue` is not satisfied
 ```
 
-**Root Cause:** Incompatible Redis version (0.27.6) with pheno-dragonfly implementation. The `get_ex` method macro expansion in redis v0.27.6 attempts a type constraint that doesn't exist in the provided trait bounds.
+**Root Cause:** Redis 0.27 tightened macro expansion in `AsyncCommands` trait. Methods like `set_ex()` return `RedisFuture<T>` where `T` must be explicitly specified at the call site. Macro inference could not infer the return type, leading to type `!` (never type).
 
-**Location:** `crates/pheno-dragonfly/src/lib.rs` (error from redis macro at src/commands/mod.rs:136)
+**Location:** `crates/pheno-dragonfly/src/lib.rs:70, 97` — calls to `conn.set_ex()` without explicit return type annotation.
 
-**Action Taken:** Ran `cargo update` — no newer redis versions available within constraints. This is a code-level compatibility issue, not a dependency version issue.
+**Fix Applied:** Annotated result type explicitly: `let _: () = conn.set_ex(...)?` in both `set_session()` and `set_with_ttl()` methods. This satisfies the `FromRedisValue` trait bound and disambiguates the macro expansion. Removed unused imports (`async_trait`, `Bytes`).
 
-**Remaining Action:** Requires code fix to `pheno-dragonfly` Redis adapter to use compatible method signatures or pin to earlier redis version (if available).
+**Commit:** `a6f4b87` (PhenoObservability main) — "fix(pheno-dragonfly): resolve redis 0.27 macro expansion type mismatch"
 
-**Impact:** Blocks all tests in PhenoObservability workspace.
+**Result:** ✅ Compilation succeeds; 0 tests (library crate); no regressions.
 
 ---
 

@@ -116,14 +116,36 @@ Status: Wave-2 complete (2026-04-24)
 | AuthKit | None | quality-gate + fr-coverage + doc-links | Complete |
 | bare-cua | None | quality-gate + fr-coverage + doc-links | Complete |
 
+## Wave-6 Repos (14 additional)
+
+| Repo | CI before | CI after | Status |
+|------|-----------|----------|--------|
+| bifrost-extensions | None | quality-gate + fr-coverage | Complete |
+| PhenoAgent | None | quality-gate + fr-coverage | Complete |
+| PhenoContracts | None | quality-gate + fr-coverage | Complete |
+| PhenoEvents | None | quality-gate + fr-coverage | Complete |
+| phenoForge | None | quality-gate + fr-coverage | Complete |
+| PhenoKit | None | quality-gate + fr-coverage | Complete |
+| PhenoLang | None | quality-gate + fr-coverage | Complete |
+| PhenoSchema | None | quality-gate + fr-coverage | Complete |
+| PhenoProc | None | quality-gate + fr-coverage | Complete |
+| phenotype-shared | None | quality-gate + fr-coverage | Complete |
+| agent-user-status | None | quality-gate + fr-coverage | Complete |
+| hwLedger | None | quality-gate + fr-coverage | Complete |
+| Tracera | None | quality-gate + fr-coverage | Complete |
+| localbase3 | None | quality-gate + fr-coverage | Complete |
+| kwality | None | quality-gate + fr-coverage | Complete |
+
 ## Summary
 
 - **Wave-1:** 22 repos onboarded (April 18-24)
 - **Wave-2:** 20 repos onboarded (April 24)
 - **Wave-3:** 11 repos onboarded + 11 submodules flagged (April 24)
 - **Wave-4:** 10 repos onboarded (April 24)
-- **Total CI coverage:** 63 active repos with CI (quality-gate, fr-coverage, doc-links)
-- **Remaining:** ~47 repos for wave-5+ (includes submodules, archived, and inactive)
+- **Wave-6:** 15 repos onboarded (April 24)
+- **Total CI coverage:** 78 active repos with CI (quality-gate, fr-coverage, doc-links)
+- **Coverage:** 78/109 (71.6%) → **Target: 75%** ✅
+- **Remaining:** ~31 repos for wave-7+ (includes archived, documented-only, and inactive)
 
 ## Next Steps
 

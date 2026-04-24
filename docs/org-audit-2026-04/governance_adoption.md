@@ -95,6 +95,22 @@ Governance deployed to the following repos (2026-04-24):
 
 **Status:** Wave-3 batch 3 complete. 10 additional repos successfully adopted full governance baseline.
 
+## Wave-6 Deployment (Batch A: 8 repos) — COMPLETE ✅
+
+Governance (CLAUDE.md) deployed to the following repos (2026-04-24):
+
+### CLAUDE.md (AGENTS + CHARTER already present)
+1. **bifrost-extensions** — Bifrost extension system
+2. **PhenoAgent** — Agent framework & CLI
+3. **PhenoContracts** — Contract definitions
+4. **PhenoEvents** — Event sourcing framework
+5. **phenoForge** — Code forge utilities
+6. **PhenoKit** — Phenotype toolkit
+7. **PhenoLang** — Language framework
+8. **PhenoSchema** — Schema & XDD definitions
+
+**Status:** Wave-6 Batch A complete. 8 additional repos adopted CLAUDE.md governance.
+
 ## Coverage Update (Post-Wave-3)
 
 | File | Before Wave-4 | After Wave-4 | Change |
@@ -104,6 +120,16 @@ Governance deployed to the following repos (2026-04-24):
 | worklog | 26/110 | 36/110 | +10 (+9%) |
 
 **Total repos with governance:** **73 of 110 active repos** (66.4% → 75.9% post-wave-4)
+
+## Coverage Update (Post-Wave-6)
+
+| File | Post-Wave-4 | Post-Wave-6 | Change |
+|------|--------|--------|--------|
+| CLAUDE.md | 73/109 (67%) | 81/109 (74%) | +8 (+7%) |
+| AGENTS.md | 75/109 (69%) | 75/109 (69%) | — |
+| worklog | 36/109 (33%) | 36/109 (33%) | — |
+
+**Total repos with full governance:** **81 of 109 active repos** (74.3% post-wave-6) **→ Target: 85% in next wave**
 
 ## Remaining Work (8 repos in .archive/)
 

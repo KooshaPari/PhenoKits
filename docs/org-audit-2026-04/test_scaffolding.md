@@ -88,6 +88,21 @@
 | Observably | Python | `tests/test_smoke.py` | ✓ Scaffolded | pytest configured |
 | Paginary | Rust | `tests/smoke_test.rs` | ✓ Scaffolded | Workspace root |
 
+## Wave-4 (10 repos, COMPLETED)
+
+| Repo | Language | Test File | Status | Notes |
+|------|----------|-----------|--------|-------|
+| agent-user-status | Rust | `tests/smoke_test.rs` | ✓ Scaffolded | Workspace; traces to FR-ORG-AUDIT |
+| hwLedger | Rust | `tests/smoke_test.rs` | ✓ Scaffolded | Workspace; traces to FR-ORG-AUDIT |
+| Tracera | Rust | `tests/smoke_test.rs` | ✓ Scaffolded | Workspace; traces to FR-ORG-AUDIT |
+| kwality | Rust | `tests/smoke_test.rs` | ✓ Scaffolded | Workspace; traces to FR-ORG-AUDIT |
+| PhenoKit | Rust | `tests/smoke_test.rs` | ✓ Scaffolded | Workspace; traces to FR-ORG-AUDIT |
+| PhenoLang | Python | `tests/test_smoke.py` | ✓ Scaffolded | pytest; traces to FR-ORG-AUDIT |
+| phenoForge | Rust | `tests/smoke_test.rs` | ✓ Scaffolded | Workspace; traces to FR-ORG-AUDIT |
+| PhenoContracts | Rust | `tests/smoke_test.rs` | ✓ Scaffolded | Workspace; traces to FR-ORG-AUDIT |
+| PhenoEvents | Rust | `tests/smoke_test.rs` | ✓ Scaffolded | Workspace; traces to FR-ORG-AUDIT |
+| Benchora | Rust | `tests/smoke_test.rs` | ✓ Scaffolded | Workspace; traces to FR-ORG-AUDIT |
+
 ## Cumulative Summary
 
 | Wave | Repos | Languages | Status | Total Repos |
@@ -95,7 +110,8 @@
 | Wave-1 | 16 | Rust, Python, Go, TS/JS | ✓ Verified | 16 |
 | Wave-2 | 12 | Rust, Python, TS/JS | ✓ 11/12 verified | 28 |
 | Wave-3 | 10 | Rust, Python | ✓ 10/10 scaffolded | 38 |
-| **TOTAL** | **38** | **All** | **36/38 verified** | **94.7%** |
+| Wave-4 | 10 | Rust, Python | ✓ 10/10 scaffolded | 48 |
+| **TOTAL** | **48** | **All** | **46/48 verified** | **95.8%** |
 
 ## Wave-2 & Wave-3 Language Breakdown
 

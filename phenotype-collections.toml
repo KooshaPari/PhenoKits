@@ -31,3 +31,9 @@ name = "Paginary"
 registry = "Paginary/release-registry.toml"
 theme = "documentation"
 description = "Federated documentation hub with VitePress apps and shared theme"
+
+[[collection]]
+name = "phenotype-shared"
+registry = "phenoShared/release-registry.toml"
+theme = "shared infrastructure"
+description = "Rust infrastructure toolkit: domain-driven design, hexagonal architecture, clean separation"

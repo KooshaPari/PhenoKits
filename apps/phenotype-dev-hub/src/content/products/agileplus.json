@@ -1,0 +1,24 @@
+{
+  "name": "AgilePlus",
+  "slug": "agileplus",
+  "description": "Work management and agile planning platform with integrated observability and team collaboration",
+  "accent": "agileplus",
+  "icon": "⚡",
+  "status": "stable",
+  "tagline": "Work management platform",
+  "details": {
+    "overview": "AgilePlus is a modern work management system combining agile planning, team collaboration, and deep integration with development workflows.",
+    "features": [
+      "Kanban, Scrum, and custom workflows",
+      "Real-time collaboration and notifications",
+      "Git integration and CI/CD pipeline tracking",
+      "Time tracking and capacity planning",
+      "Custom dashboards and reporting"
+    ]
+  },
+  "links": {
+    "website": "https://agileplus.phenotype.dev",
+    "github": "https://github.com/kooshapari/AgilePlus",
+    "docs": "https://docs.agileplus.phenotype.dev"
+  }
+}

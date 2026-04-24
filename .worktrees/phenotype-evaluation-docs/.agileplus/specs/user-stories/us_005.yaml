@@ -1,0 +1,11 @@
+id: US-005
+title: CLI Interface Capability Story
+description: As a user, I want the system shall provide cli interface functionality..
+acceptance_criteria:
+- 'login: Log in to Harbor registry'
+- '_login_with_token: Validate and save a token-based login'
+- '_save_and_display_result: Save login result as credentials and display success
+  info'
+- '_display_org_names: Fetch and display the user''s org names after login'
+- 'logout: Log out and clear stored credentials'
+fr_id: FR-005

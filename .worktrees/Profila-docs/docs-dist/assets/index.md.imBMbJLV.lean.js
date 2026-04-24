@@ -1,0 +1,1 @@
+import{_ as t,o as a,c as r,ae as i}from"./chunks/framework.B6gjLfeO.js";const f=JSON.parse('{"title":"profiler","description":"","frontmatter":{},"headers":[],"relativePath":"index.md","filePath":"index.md"}'),o={name:"index.md"};function n(l,e,d,c,h,s){return a(),r("div",null,[...e[0]||(e[0]=[i("",6)])])}const m=t(o,[["render",n]]);export{f as __pageData,m as default};

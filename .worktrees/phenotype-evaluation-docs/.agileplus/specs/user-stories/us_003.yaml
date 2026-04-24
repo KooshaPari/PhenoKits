@@ -1,0 +1,10 @@
+id: US-003
+title: Task Execution Capability Story
+description: As a user, I want the system shall provide task execution functionality..
+acceptance_criteria:
+- '_load_task_instructions: Load task instructions from spider2-dbt'
+- '_prepare_task_directory: Prepare a Harbor task directory from template'
+- 'generate_task: Generate a Harbor task from a benchmark source identifier'
+- 'get_all_task_ids: Return all available task IDs (excluding known problematic tasks)'
+- 'get_task_info: Get information about a specific task'
+fr_id: FR-003

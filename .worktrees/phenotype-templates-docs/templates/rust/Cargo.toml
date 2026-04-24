@@ -1,0 +1,40 @@
+[package]
+name = "{{project_name}}"
+version = "0.1.0"
+edition = "2021"
+authors = ["{{author}} <{{email}}>"]
+description = "{{description}}"
+license = "MIT"
+repository = "https://github.com/{{org}}/{{project_name}}"
+keywords = ["{{keywords}}"]
+categories = ["{{categories}}"]
+rust-version = "1.80"
+
+[dependencies]
+# Core dependencies - add your own
+thiserror = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+tracing = "0.1"
+
+[dev-dependencies]
+# Testing
+tokio-test = "0.4"
+proptest = "1.0"
+criterion = { version = "0.5", features = ["html_reports"] }
+
+# Benchmarks
+[[bench]]
+name = "benchmark"
+harness = false
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+
+[profile.dev]
+opt-level = 0
+debug = true
+
+[workspace]

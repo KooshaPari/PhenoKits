@@ -1,0 +1,15 @@
+[package]
+name = "stashly-migrations"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+phenotype-bus = { path = "../../../phenotype-bus" }
+tokio = { workspace = true, features = ["full"] }
+sqlx = { version = "0.7", features = ["runtime-tokio", "sqlite"] }
+thiserror = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }

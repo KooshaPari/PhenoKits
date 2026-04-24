@@ -1,0 +1,56 @@
+id: FR-002
+title: Skill System Capability
+description: The system shall provide skill system functionality.
+priority: high
+status: implemented
+acceptance_criteria:
+- 'SkillCreated: Event fired when a skill is created'
+- 'SkillUpdated: Event fired when a skill is updated'
+- 'SkillDeleted: Event fired when a skill is deleted'
+- 'SkillDeprecated: Event fired when a skill is deprecated'
+- 'SkillArchived: Event fired when a skill is archived'
+related_entities:
+- SkillCreated
+- SkillUpdated
+- SkillDeleted
+- SkillDeprecated
+- SkillArchived
+- SkillNameSpecification
+- SkillCategorySpecification
+- SkillTagSpecification
+- SkillValidator
+- SkillCategory
+- SkillId
+- Skill
+- CreateSkillCommand
+- UpdateSkillCommand
+- DeleteSkillCommand
+- DeprecateSkillCommand
+- ArchiveSkillCommand
+- AddSkillTagCommand
+- RemoveSkillTagCommand
+- GetSkillQuery
+- ListSkillsQuery
+- SearchSkillsQuery
+- GetSkillTagsQuery
+- GetSkillByNameQuery
+- GetSkillCountQuery
+- ListSkillCategoriesQuery
+- CreateSkillCommand
+- UpdateSkillCommand
+- DeleteSkillCommand
+- DeprecateSkillCommand
+- ArchiveSkillCommand
+- ReactivateSkillCommand
+- AddSkillTagCommand
+- RemoveSkillTagCommand
+- SkillHandler
+- handle_create_skill
+- handle_update_skill
+- handle_delete_skill
+- handle_deprecate_skill
+- handle_archive_skill
+- handle_get_skill
+- handle_list_skills
+user_story_id: null
+adr_id: null

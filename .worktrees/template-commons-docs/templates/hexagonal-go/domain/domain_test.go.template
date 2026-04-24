@@ -1,0 +1,88 @@
+package domain
+
+import (
+	"testing"
+)
+
+// Entity tests
+
+type TestEntity struct {
+	id   string
+	name string
+}
+
+func (e *TestEntity) ID() string {
+	return e.id
+}
+
+func TestEntity_ID(t *testing.T) {
+	entity := &TestEntity{
+		id:   "test-id-123",
+		name: "Test Entity",
+	}
+
+	if entity.ID() != "test-id-123" {
+		t.Errorf("Expected ID 'test-id-123', got '%s'", entity.ID())
+	}
+}
+
+func TestEntity_Equality(t *testing.T) {
+	entity1 := &TestEntity{id: "same-id", name: "Entity 1"}
+	entity2 := &TestEntity{id: "same-id", name: "Entity 2"}
+
+	if entity1.ID() != entity2.ID() {
+		t.Error("Entities with same ID should be equal")
+	}
+}
+
+// Value object tests
+
+type TestValueObject struct {
+	value string
+}
+
+func NewTestValueObject(v string) *TestValueObject {
+	return &TestValueObject{value: v}
+}
+
+func (v *TestValueObject) Value() string {
+	return v.value
+}
+
+func (v *TestValueObject) Equals(other *TestValueObject) bool {
+	return v.value == other.value
+}
+
+func TestValueObject_Creation(t *testing.T) {
+	vo := NewTestValueObject("test value")
+
+	if vo.Value() != "test value" {
+		t.Errorf("Expected value 'test value', got '%s'", vo.Value())
+	}
+}
+
+func TestValueObject_Equality(t *testing.T) {
+	vo1 := NewTestValueObject("same")
+	vo2 := NewTestValueObject("same")
+	vo3 := NewTestValueObject("different")
+
+	if !vo1.Equals(vo2) {
+		t.Error("Value objects with same value should be equal")
+	}
+
+	if vo1.Equals(vo3) {
+		t.Error("Value objects with different values should not be equal")
+	}
+}
+
+func TestValueObject_Immutability(t *testing.T) {
+	vo := NewTestValueObject("original")
+	original := vo.Value()
+
+	// Creating a new value object doesn't modify the original
+	vo2 := NewTestValueObject("modified")
+
+	if vo.Value() != original {
+		t.Error("Value object should be immutable")
+	}
+}

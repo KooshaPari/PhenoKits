@@ -1,0 +1,15 @@
+{
+  "bundle_id": "site-operations-runbooks",
+  "title": "Site Operations Runbooks",
+  "updated_at": "2026-04-01T15:00:00Z",
+  "artifacts": {
+    "screenshot_gif": "/evidence/site-operations-runbooks/overview.gif",
+    "api_simulation": "/evidence/site-operations-runbooks/api-simulation.json",
+    "vhs_tape": "/evidence/site-operations-runbooks/api-simulation.vhs.tape"
+  },
+  "checks": [
+    "playwright",
+    "vhs",
+    "api simulation"
+  ]
+}

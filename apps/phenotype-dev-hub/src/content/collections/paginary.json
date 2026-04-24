@@ -1,0 +1,30 @@
+{
+  "name": "Paginary",
+  "slug": "paginary",
+  "tagline": "Progressive pagination and infinite scroll toolkit",
+  "accent": "paginary",
+  "icon": "📖",
+  "description": "Paginary is a comprehensive toolkit for building scalable pagination systems, infinite scroll UIs, and cursor-based navigation patterns.",
+  "members": [
+    {
+      "name": "Cursor Pagination",
+      "description": "Stateless pagination with cursor-based traversal"
+    },
+    {
+      "name": "Infinite Scroll",
+      "description": "Progressive loading and intersection observer integration"
+    },
+    {
+      "name": "Range Queries",
+      "description": "Efficient slicing and range-based data fetching"
+    },
+    {
+      "name": "Caching Layer",
+      "description": "Smart cache invalidation and prefetching"
+    }
+  ],
+  "links": {
+    "github": "https://github.com/kooshapari/paginary",
+    "docs": "https://paginary.phenotype.dev"
+  }
+}

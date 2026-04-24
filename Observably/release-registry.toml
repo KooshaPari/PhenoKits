@@ -1,0 +1,30 @@
+[collection]
+name = "Observably"
+version = "0.0.1"
+repo = "https://github.com/KooshaPari/phenotype-observability"
+description = "Independent observability crates for tracing, logging, metrics, and resilience"
+authors = ["Phenotype"]
+license = "Apache-2.0"
+theme = "observability"
+
+[[crate]]
+name = "observably-tracing"
+version = "0.0.1"
+status = "alpha"
+stability = "0.x"
+description = "Distributed tracing and span collection with telemetry backends"
+source = "FocalPoint/crates/focus-observability"
+
+[[crate]]
+name = "observably-logging"
+version = "0.0.1"
+status = "stub"
+stability = "0.x"
+description = "Structured logging with configurable sinks and filters"
+
+[[crate]]
+name = "observably-sentinel"
+version = "0.0.1"
+status = "stub"
+stability = "0.x"
+description = "Health checking, circuit breaking, and resilience patterns"

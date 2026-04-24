@@ -1,0 +1,59 @@
+name: Org Audit Weekly
+
+on:
+  schedule:
+    # Mondays 9am Eastern (14:00 UTC)
+    - cron: '0 14 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  org-audit:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build worklog-aggregator
+        working-directory: tooling/worklog-aggregator
+        run: cargo build --release
+
+      - name: Run worklog aggregator
+        working-directory: tooling/worklog-aggregator
+        run: |
+          ./target/release/worklog-aggregator \
+            --output "$GITHUB_WORKSPACE/docs/org-audit-$(date +%Y-%m)/worklog_index.md" \
+            --repos-root "$GITHUB_WORKSPACE"
+
+      - name: Run org audit
+        run: |
+          mkdir -p "docs/org-audit-$(date +%Y-%m)"
+          # If org-audit-aggregator exists, build and run it
+          if [ -d "tooling/org-audit-aggregator" ]; then
+            cd tooling/org-audit-aggregator
+            cargo build --release
+            ./target/release/org-audit-aggregator \
+              --output "$GITHUB_WORKSPACE/docs/org-audit-$(date +%Y-%m)/INDEX.md" \
+              --repos-root "$GITHUB_WORKSPACE"
+          fi
+
+      - name: Commit audit results
+        run: |
+          git config user.name "org-audit-bot"
+          git config user.email "audit@phenotype.org"
+          git add docs/org-audit-*/INDEX.md docs/org-audit-*/worklog_index.md
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore(org-audit): weekly audit results [skip ci]"
+            git push
+          fi
+        continue-on-error: true

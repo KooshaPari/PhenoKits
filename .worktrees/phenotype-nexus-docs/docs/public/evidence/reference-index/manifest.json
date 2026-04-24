@@ -1,0 +1,15 @@
+{
+  "bundle_id": "reference-index",
+  "title": "Reference evidence bundle",
+  "updated_at": "2026-04-01T12:00:00Z",
+  "artifacts": {
+    "screenshot_gif": "/evidence/reference-index/overview.gif",
+    "api_simulation": "/evidence/reference-index/api-simulation.json",
+    "vhs_tape": "/evidence/reference-index/api-simulation.vhs.tape"
+  },
+  "checks": [
+    "playwright",
+    "vhs",
+    "api simulation"
+  ]
+}

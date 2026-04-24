@@ -1,0 +1,8 @@
+{
+  "bundle": "reference-index",
+  "steps": [
+    "navigate guide",
+    "inspect reference"
+  ],
+  "duration_ms": 42
+}

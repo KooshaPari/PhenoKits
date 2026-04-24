@@ -1,0 +1,3 @@
+# Clippy configuration for sharecli
+
+avoid-breaking-exported-api = false

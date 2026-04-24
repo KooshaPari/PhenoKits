@@ -1,0 +1,40 @@
+# Coverage configuration for Python projects
+# See: https://coverage.readthedocs.io/en/latest/config.html
+
+[run]
+branch = True
+source = src
+omit =
+    */tests/*
+    */test_*.py
+    */__pycache__/*
+    */.venv/*
+    */venv/*
+    */__init__.py
+
+[report]
+precision = 2
+show_missing = True
+skip_covered = False
+sort = Cover
+
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    if __debug__:
+    if TYPE_CHECKING:
+    @abstractmethod
+    @abstract
+
+[html]
+directory = htmlcov
+
+[xml]
+output = coverage.xml
+
+[paths]
+source =
+    src/
+    */src/

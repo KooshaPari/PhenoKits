@@ -1,5 +1,7 @@
 # FR Scaffolding Tracker — 2026-04-24
 
+## Wave 1 (38 repos, COMPLETED)
+
 | Repo | FRs Created | Review Needed | Status |
 |------|-------------|---------------|--------|
 | agent-user-status | 8 | NO | CREATED |
@@ -40,3 +42,35 @@
 | thegent-dispatch | 3 | NO | CREATED |
 | thegent-workspace | 1 | NO | CREATED |
 | Tracely | 2 | NO | CREATED |
+
+## Wave 2 (20 repos, COMPLETED)
+
+| Repo | FRs Created | Review Needed | Status |
+|------|-------------|---------------|--------|
+| Apisync | 6 | NO | CREATED |
+| AtomsBot | 6 | NO | CREATED |
+| Benchora | 5 | NO | CREATED |
+| Eidolon | 7 | NO | CREATED |
+| KDesktopVirt | 5 | NO | CREATED |
+| Observably | 7 | NO | CREATED |
+| Paginary | 6 | NO | CREATED |
+| PhenoAgent | 7 | NO | CREATED |
+| PhenoContracts | 6 | NO | CREATED |
+| PhenoDevOps | 7 | NO | CREATED |
+| PhenoEvents | 6 | NO | CREATED |
+| phenoForge | 6 | NO | CREATED |
+| PhenoKit | 6 | NO | CREATED |
+| PhenoKits | 5 | NO | CREATED |
+| PhenoLang | 7 | NO | CREATED |
+| PhenoLibs | 6 | NO | CREATED |
+| PhenoMCP | 7 | NO | CREATED |
+| PhenoProc | 6 | NO | CREATED |
+| Tracera | 7 | NO | CREATED |
+| TestingKit | 7 | NO | CREATED |
+
+## Summary
+
+- **Wave 1:** 38 repos × avg 4.6 FRs = 175 FRs
+- **Wave 2:** 20 repos × avg 6.2 FRs = 124 FRs
+- **Org Total:** 58 repos × avg 5.1 FRs = **299 FRs**
+- **Review Needed:** 1 (netweave-final2 flagged in Wave 1)

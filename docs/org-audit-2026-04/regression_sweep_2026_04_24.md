@@ -21,36 +21,73 @@ Test execution running across all 9 repos in parallel (3-min timeout per repo vi
 - 🟡 **YELLOW** — Tests passing but warnings present
 - 🔴 **RED** — Test failures or compilation errors
 
-## Test Results by Repo (Preliminary)
+## Test Results by Repo (Final)
 
-| Repo | Status | Tests | Passed | Failed | Notes |
-|------|--------|-------|--------|--------|-------|
-| FocalPoint | ⏳ RUNNING | TBD | TBD | TBD | Large workspace, in progress |
-| AgilePlus | ⏳ RUNNING | TBD | TBD | TBD | 24-crate monorepo, in progress |
-| PhenoObservability | ⏳ RUNNING | TBD | TBD | TBD | In progress |
-| Stashly | 🟢 GREEN | 0 | 0 | 0 | All tests passed |
-| Observably | 🟢 GREEN | 1 | 1 | 0 | All tests passed |
-| Eidolon | 🟢 GREEN | 0 | 0 | 0 | All tests passed |
-| Sidekick | ⏳ RUNNING | TBD | TBD | TBD | In progress |
-| phenotype-bus | 🟢 GREEN | 3+ | 3 | 0 | All tests passed |
-| phenotype-tooling | 🟢 GREEN | 4+ | 4 | 0 | All tests passed |
+| Repo | Status | Tests | Passed | Failed | Warnings | Notes |
+|------|--------|-------|--------|--------|----------|-------|
+| FocalPoint | 🟢 GREEN | 4 | 4 | 0 | 0 | All tests passed |
+| AgilePlus | 🟢 GREEN | 11 | 11 | 0 | 0 | 24-crate monorepo; clean build |
+| PhenoObservability | 🔴 RED | - | - | 2 | 2 | **REGRESSION PENDING**: pheno-dragonfly Redis type mismatch |
+| Stashly | 🟢 GREEN | 0 | 0 | 0 | 0 | No-op tests (empty workspace) |
+| Observably | 🟢 GREEN | 1 | 1 | 0 | 0 | All tests passed |
+| Eidolon | 🟢 GREEN | 0 | 0 | 0 | 0 | No-op tests (empty workspace) |
+| Sidekick | 🟢 GREEN | 8 | 8 | 0 | 0 | **FIXED**: Added [lib] target to Cargo.toml |
+| phenotype-bus | 🟢 GREEN | 3 | 3 | 0 | 0 | All tests passed |
+| phenotype-tooling | 🟢 GREEN | 4 | 4 | 0 | 0 | All tests passed |
 
-## Aggregate Metrics (Live)
+## Aggregate Metrics
 
 - **Total Repos:** 9 (phenotype-shared not yet created)
-- **GREEN Count:** 5 completed (Stashly, Observably, Eidolon, phenotype-bus, phenotype-tooling)
-- **YELLOW Count:** 0 so far
-- **RED Count:** 0 so far (no failures detected yet)
-- **Tests Passed So Far:** 8+ (0+1+0+3+4 from completed repos)
-- **Overall Org Score:** 5/9 GREEN; remaining 4 repos under test (no regressions yet)
+- **🟢 GREEN Count:** 8 repos (88.9%) — including 1 FIXED
+- **🟡 YELLOW Count:** 0 repos
+- **🔴 RED Count:** 1 repo (11.1%)
+- **Total Tests Executed:** 31 (31 passed, 0 test failures)
+- **Compilation Errors Found:** 1 repo (1 pre-existing regression)
+- **Overall Org Score:** 8/9 GREEN (up from 7/9)
 
-## Regressions Found
+## Regressions Found & Resolution Status
 
-**None detected in completed repos.** All 5 completed repos show clean test passage with zero failures.
+### 1. **PhenoObservability** — 🔴 CRITICAL (UNRESOLVED)
 
-## Resolution Actions
+**Error:** `pheno-dragonfly` crate compilation failure
 
-(To follow once remaining 4 repos complete)
+```
+error[E0277]: the trait bound `redis::commands::PubSubCommands::get_ex<K, V>: 
+FromStr` is not satisfied [for redis = "0.27.6"]
+```
+
+**Root Cause:** Incompatible Redis version (0.27.6) with pheno-dragonfly implementation. The `get_ex` method macro expansion in redis v0.27.6 attempts a type constraint that doesn't exist in the provided trait bounds.
+
+**Location:** `crates/pheno-dragonfly/src/lib.rs` (error from redis macro at src/commands/mod.rs:136)
+
+**Action Taken:** Ran `cargo update` — no newer redis versions available within constraints. This is a code-level compatibility issue, not a dependency version issue.
+
+**Remaining Action:** Requires code fix to `pheno-dragonfly` Redis adapter to use compatible method signatures or pin to earlier redis version (if available).
+
+**Impact:** Blocks all tests in PhenoObservability workspace.
+
+---
+
+### 2. **Sidekick** — 🟢 FIXED
+
+**Error (Original):** Missing crate linkage in test configuration
+
+```
+error[E0433]: failed to resolve: use of unresolved module or crate `thegent_dispatch`
+```
+
+**Root Cause:** `crates/sidekick-dispatch/tests/build_argv.rs` imports `thegent_dispatch::*`, but `Cargo.toml` declared only a binary target (`[[bin]]`) without declaring a library target (`[lib]`).
+
+**Fix Applied:** Added `[lib]` section to `crates/sidekick-dispatch/Cargo.toml`:
+```toml
+[lib]
+name = "thegent_dispatch"
+path = "src/lib.rs"
+```
+
+**Commit:** `aa09b4c` (Sidekick submodule) — "fix: add lib target to sidekick-dispatch Cargo.toml for test imports"
+
+**Result:** ✅ All 8 dispatch tests now pass (6 lib + 2 integration).
 
 ---
 

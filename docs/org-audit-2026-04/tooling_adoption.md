@@ -74,15 +74,59 @@ Status: Wave-2 complete (2026-04-24)
 | netweave-final2 | None | quality-gate + fr-coverage + doc-links | Complete |
 | Conft | None | quality-gate + fr-coverage + doc-links | Complete |
 
+## Wave-3 Repos (22 additional)
+
+| Repo | CI before | CI after | Status |
+|------|-----------|----------|--------|
+| AgilePlus | Partial (existed) | quality-gate + fr-coverage + doc-links | Complete |
+| cliproxyapi-plusplus | None | quality-gate + fr-coverage + doc-links | Complete |
+| heliosApp | None | quality-gate + fr-coverage + doc-links | Complete |
+| PhenoKits | None | quality-gate + fr-coverage + doc-links | Complete |
+| PhenoObservability | Partial (existed) | quality-gate + fr-coverage + doc-links | Complete |
+| phenoSDK | Partial (existed) | quality-gate + fr-coverage + doc-links | Complete |
+| phenotype-infra | None | quality-gate + fr-coverage + doc-links | Complete |
+| argis-extensions | Partial (existed) | quality-gate + fr-coverage + doc-links | Complete |
+| bare-cua | Partial (existed) | quality-gate + fr-coverage + doc-links | Complete |
+| Civis | Partial (existed) | quality-gate + fr-coverage + doc-links | Complete |
+| DataKit | Partial (existed) | quality-gate + fr-coverage + doc-links | No Change |
+| PhenoLibs | Partial (existed) | quality-gate + fr-coverage + doc-links | No Change |
+| PhenoAgent | Partial (existed) | quality-gate + fr-coverage + doc-links | Submodule |
+| PhenoSchema | Partial (existed) | quality-gate + fr-coverage + doc-links | Submodule |
+| Apisync | None | quality-gate + fr-coverage + doc-links | Submodule |
+| Benchora | None | quality-gate + fr-coverage + doc-links | Submodule |
+| bifrost-extensions | Partial (existed) | quality-gate + fr-coverage + doc-links | Submodule |
+| HexaKit | None | quality-gate + fr-coverage + doc-links | Submodule |
+| Observably | None | quality-gate + fr-coverage + doc-links | Submodule |
+| PhenoEvents | None | quality-gate + fr-coverage + doc-links | Submodule |
+| phenoForge | None | quality-gate + fr-coverage + doc-links | Submodule |
+| phenotype-colab-extensions | None | quality-gate + fr-coverage + doc-links | Submodule |
+
+## Wave-4 Repos (10 additional)
+
+| Repo | CI before | CI after | Status |
+|------|-----------|----------|--------|
+| agent-user-status | None | quality-gate + fr-coverage + doc-links | Complete |
+| agentapi-plusplus | None | quality-gate + fr-coverage + doc-links | Complete |
+| AgentMCP | None | quality-gate + fr-coverage + doc-links | Complete |
+| agslag-docs | None | quality-gate + fr-coverage + doc-links | Complete |
+| Apisync | None | quality-gate + fr-coverage + doc-links | Complete |
+| AppGen | None | quality-gate + fr-coverage + doc-links | Complete |
+| argis-extensions | None | quality-gate + fr-coverage + doc-links | Complete |
+| AtomsBot | None | quality-gate + fr-coverage + doc-links | Complete |
+| AuthKit | None | quality-gate + fr-coverage + doc-links | Complete |
+| bare-cua | None | quality-gate + fr-coverage + doc-links | Complete |
+
 ## Summary
 
 - **Wave-1:** 22 repos onboarded (April 18-24)
 - **Wave-2:** 20 repos onboarded (April 24)
-- **Total CI coverage:** 42 active repos (quality-gate, fr-coverage, doc-links)
-- **Remaining:** ~65 repos flagged in UPLIFT_REPORT (wave-3+ pending)
+- **Wave-3:** 11 repos onboarded + 11 submodules flagged (April 24)
+- **Wave-4:** 10 repos onboarded (April 24)
+- **Total CI coverage:** 63 active repos with CI (quality-gate, fr-coverage, doc-links)
+- **Remaining:** ~47 repos for wave-5+ (includes submodules, archived, and inactive)
 
 ## Next Steps
 
-1. Monitor Wave-2 CI execution (note: GitHub Actions billing constraints apply)
-2. Plan Wave-3+ for remaining 65 repos (prioritize by LOC + project tier)
-3. Aggregate CI metrics across waves
+1. Deploy Wave-4 CI to remaining repos
+2. Plan Wave-5+ for submodules and documentation-only repos
+3. Aggregate CI metrics across all waves

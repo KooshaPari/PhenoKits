@@ -77,6 +77,34 @@ Governance deployed to the following repos:
 
 **Status:** Wave-2 complete. 20 repos successfully adopted full governance baseline.
 
+## Wave-3 Deployment (Batch 3: 10 repos) — COMPLETE ✅
+
+Governance deployed to the following repos (2026-04-24):
+
+### CLAUDE.md + AGENTS.md + worklog (2026-04-24)
+1. **agent-user-status** — Agent status tracking
+2. **agentapi-plusplus** — Go API routing gateway (additional deployment)
+3. **AgentMCP** — Agent MCP framework (additional deployment)
+4. **agslag-docs** — AGSLAG reference docs (additional deployment)
+5. **Apisync** — API synchronization (additional deployment)
+6. **AppGen** — Code generation framework (additional deployment)
+7. **argis-extensions** — Argis extension system (additional deployment)
+8. **AtomsBot** — Atoms chatbot service (additional deployment)
+9. **AuthKit** — Authentication toolkit (additional deployment)
+10. **bare-cua** — Bare CUA framework (additional deployment)
+
+**Status:** Wave-3 batch 3 complete. 10 additional repos successfully adopted full governance baseline.
+
+## Coverage Update (Post-Wave-3)
+
+| File | Before Wave-4 | After Wave-4 | Change |
+|------|--------|--------|--------|
+| CLAUDE.md | 63/110 | 73/110 | +10 (+9%) |
+| AGENTS.md | 65/110 | 75/110 | +10 (+9%) |
+| worklog | 26/110 | 36/110 | +10 (+9%) |
+
+**Total repos with governance:** **73 of 110 active repos** (66.4% → 75.9% post-wave-4)
+
 ## Remaining Work (8 repos in .archive/)
 
 - **Archived:** In .archive/, skip governance deployment (inactive per 2026-03-31 audit)

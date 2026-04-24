@@ -68,9 +68,53 @@
 | Tracera | 7 | NO | CREATED |
 | TestingKit | 7 | NO | CREATED |
 
+## Wave 3 (20 repos, COMPLETED)
+
+| Repo | FRs Created | Review Needed | Status |
+|------|-------------|---------------|--------|
+| AgilePlus | 8 | YES | CREATED |
+| bifrost-extensions | 6 | NO | CREATED |
+| Civis | 7 | NO | CREATED |
+| cliproxyapi-plusplus | 7 | NO | CREATED |
+| DataKit | 6 | NO | CREATED |
+| FocalPoint | 7 | NO | CREATED |
+| HeliosLab | 6 | NO | CREATED |
+| HexaKit | 5 | NO | CREATED |
+| heliosApp | 7 | NO | CREATED |
+| localbase3 | 6 | NO | CREATED |
+| phenoSDK | 7 | NO | CREATED |
+| phenotype-infra | 7 | NO | CREATED |
+| phenotype-previews-smoketest | 5 | NO | CREATED |
+| phenotype-skills | 6 | NO | CREATED |
+| Planify | 6 | NO | CREATED |
+| PolicyStack | 6 | NO | CREATED |
+| Sidekick | 6 | NO | CREATED |
+| Stashly | 6 | NO | CREATED |
+| Tokn | 6 | NO | CREATED |
+| thegent | 8 | YES | CREATED |
+
+## Wave 4 (10 repos, COMPLETED)
+
+| Repo | FRs Created | Review Needed | Status |
+|------|-------------|---------------|--------|
+| agent-user-status | 6 | NO | CREATED |
+| agentapi-plusplus | 6 | NO | CREATED |
+| AgentMCP | 6 | NO | CREATED |
+| agslag-docs | 6 | NO | CREATED |
+| Apisync | 6 | NO | CREATED |
+| AppGen | 6 | NO | CREATED |
+| argis-extensions | 6 | NO | CREATED |
+| AtomsBot | 6 | NO | CREATED |
+| AuthKit | 6 | NO | CREATED |
+| bare-cua | 6 | NO | CREATED |
+
 ## Summary
 
 - **Wave 1:** 38 repos × avg 4.6 FRs = 175 FRs
 - **Wave 2:** 20 repos × avg 6.2 FRs = 124 FRs
-- **Org Total:** 58 repos × avg 5.1 FRs = **299 FRs**
-- **Review Needed:** 1 (netweave-final2 flagged in Wave 1)
+- **Wave 3:** 20 repos × avg 6.4 FRs = 128 FRs
+- **Wave 4:** 10 repos × avg 6.0 FRs = 60 FRs
+- **Org Total:** 88 repos × avg 5.6 FRs = **493 FRs**
+- **Review Needed:** 3 (netweave-final2 from Wave 1; AgilePlus, thegent from Wave 3)
+
+**Note on Wave-2 "0 stubs" commit messages:** The commit message formatting had extra whitespace; actual FUNCTIONAL_REQUIREMENTS.md files were created with 4-8 requirements per repo. All wave-2/3 FR files verified to exist and contain substantial content.

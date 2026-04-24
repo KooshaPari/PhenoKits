@@ -18,10 +18,21 @@ All repositories listed below have been moved to `.archive/` for cold storage pe
 | **phenodocs** | 1,482,103 | 14 LOC; consolidate to docs-hub | `4d9eaac` | `mv .archive/phenodocs .` |
 | **phenoEvaluation** | 117,066 | 348 LOC; consolidate to Conft/QuadSGM | `03cb21b` | `mv .archive/phenoEvaluation .` |
 
+## Wave 2 (2026-04-24 LOC-Verified)
+
+| Repo | LOC | Reason | Last Commit | Restore |
+|------|-----|--------|-------------|---------|
+| **canvasApp** | 18,800 | 80% overlap with FocalPoint connector-canvas | `50b9c5a` | `mv .archive/canvasApp .` |
+| **DevHex** | 329 | Minimal stub; superseded | `514af05` | `mv .archive/DevHex .` |
+| **go-nippon** | 0 | Docs-only; no implementation | `b069da7` | `mv .archive/go-nippon .` |
+| **GDK** | 7,600 | Stub with minimal content | `fffd427` | `mv .archive/GDK .` |
+
 ## Summary
 
-- **Total repos archived:** 11
-- **Combined LOC reclaimed:** ~2,377,885 (moved, not deleted)
+- **Total repos archived:** 15 (11 Wave 1 + 4 Wave 2)
+- **Combined LOC reclaimed:** ~2,402,614 (moved, not deleted)
+  - Wave 1: ~2,377,885 LOC
+  - Wave 2: ~26,729 LOC
 - **Archive location:** `.archive/<repo-name>/`
 - **Reversible:** Yes — each repo includes `DEPRECATION.md` with restore instructions
 

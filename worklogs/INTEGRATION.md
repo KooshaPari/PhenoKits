@@ -6,6 +6,59 @@ for category conventions and `worklogs/AGENT_ONBOARDING.md` for writing guidance
 
 ---
 
+## [phenotype-dev-hub] 2026-04-24 — Docs Federation Across 5 Product Docsites
+
+**Scope**: Wire documentation federation to FocalPoint, AgilePlus, Tracera, Paginary,
+and Sidekick product docsites via phenotype-dev-hub (Astro static site).
+
+**Implementation**:
+1. **Dynamic Docs Router** (`src/pages/docs/[product]/[...slug].astro`, 165 LOC)
+   - Routes `/docs/{product}/*` to canonical docsite endpoints (e.g., focalpoint.phenotype.dev/docs)
+   - 1-second auto-redirect with JS fallback for accessibility
+   - Docs index with all 5 products linked
+   - Meta tags for SEO (title, description, canonical URL)
+
+2. **Global Search Component** (`src/components/GlobalSearchBar.astro`, 103 LOC)
+   - Search input with product selector dropdown
+   - Keyboard shortcuts: Cmd/Ctrl+K to focus, Escape to blur
+   - Routes searches to `{product}.phenotype.dev/search?q={query}`
+   - Integrates with per-product search endpoints (VitePress, Algolia, or custom)
+
+3. **Vercel Configuration** (`vercel.json` rewrites, 25 LOC)
+   - Optional URL rewrite layer for transparent proxying
+   - Forwards `/docs/{product}/*` to external docsite endpoints
+   - Fallback: JS redirect handles auto-routing
+
+4. **Documentation** (480 LOC)
+   - `docs/federation.md`: Architecture, routing layer, user journey, deployment, future enhancements
+   - `docs/search-integration.md`: Search endpoints, implementation details, adding new products, analytics
+
+**Products Federated** (5 stable + beta):
+- FocalPoint (Astro) → focalpoint.phenotype.dev/docs [stable]
+- AgilePlus (VitePress) → agileplus.phenotype.dev/docs [stable]
+- Tracera (VitePress) → tracera.phenotype.dev/docs [beta]
+- Paginary (VitePress) → paginary.phenotype.dev/docs [stable]
+- Sidekick → sidekick.phenotype.dev/docs [beta]
+
+**Build Status**: ✅ Passes Astro build (15 pages generated, 671ms total)
+
+**Routes Generated**:
+```
+/docs/focalpoint/
+/docs/agileplus/
+/docs/tracera/
+/docs/paginary/
+/docs/sidekick/
+```
+
+**Commits**:
+- `1a0e24e` — `feat(dev-hub): docs federation across 5+ product sites + global search links`
+- `d7f1c6c` — `fix(dev-hub): resolve getStaticPaths scoping in docs routing`
+
+**Future Enhancements**: Unified search index (Algolia/Meilisearch), cross-product search, faceted search, analytics dashboard.
+
+---
+
 ## [AgilePlus ↔ Tasken] 2026-04-24 — Satellite Integration Bridge (Phase 1 Scaffolding)
 
 **Scope**: Bidirectional sync bridge between Tasken (task execution framework with scheduling/DAG/plugins)

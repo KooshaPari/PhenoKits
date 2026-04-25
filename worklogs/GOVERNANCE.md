@@ -1555,3 +1555,48 @@ gh pr merge KooshaPari/tracera#342 --admin --squash
 
 **Tags:** `[cross-repo]` `[GOVERNANCE]` `[Phenotype-org]`
 
+
+## 2026-04-25 Batch A-K Repo Audit — Cross-Repo Governance Gap Identified
+
+**Agent:** Haiku 4.5 (Batch Audit Task)  
+**Repos:** agent-devops-setups, agent-user-status, Apisync, AuthKit, Benchora, BytePort, cheap-llm-mcp, DataKit, DevHex, Dino  
+**Status:** CRITICAL GOVERNANCE GAP IDENTIFIED
+
+### Findings
+
+**Worklog Infrastructure (CRITICAL):**
+- 0/10 repos have `worklogs/` directory
+- Violates cross-project reuse protocol — no audit trails for decisions/research
+- Org-wide issue, not isolated to A-K batch
+
+**Governance Completion by Repo:**
+- 7/10 have CLAUDE.md (70%)
+- 6/10 have AGENTS.md (60%)
+- 5/10 have FUNCTIONAL_REQUIREMENTS.md (50%)
+- All 10 lack worklogs/ (0%)
+
+**Build Status:**
+- 3 Rust repos fail: Apisync (apikit), AuthKit (authvault), Benchora (doc/lib target)
+- 2 Go repos untested (DevHex go.mod structure)
+- 2 Python repos untested (cheap-llm-mcp, agent-user-status)
+- 1 Node repo untested (agent-devops-setups)
+- 1 Unknown (BytePort, DataKit)
+
+### Immediate Repairs Needed
+
+1. Batch worklog template deployment (all repos)
+2. Fix Cargo build failures (Apisync, AuthKit, Benchora) — 3 x 20 min
+3. Add CLAUDE.md + AGENTS.md to 5 repos
+4. Create FUNCTIONAL_REQUIREMENTS.md for 5 repos
+5. Pre-commit governance enforcement hook
+
+### Recommendations
+
+- Run parallel L-Z batch audit to identify org-wide patterns
+- Deploy governance template automation (script + hook)
+- Consider CI gate requiring CLAUDE.md + AGENTS.md + worklogs/ + passing build before merge
+- Track in AgilePlus as cross-org initiative
+
+### Report Location
+`docs/org-audit-2026-04/batch_AK_2026_04_25.md`
+

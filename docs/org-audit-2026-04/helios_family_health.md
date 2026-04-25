@@ -35,9 +35,10 @@
 
 **heliosBench**
 - Build: Python package (no explicit build step)
-- Tests: `pytest tests/smoke_test.py` → 18 passing tests ✓
-- Status: Real test coverage (replaced skip placeholders)
-- PR: https://github.com/KooshaPari/heliosBench/pull/122
+- Tests: `pytest tests/smoke_test.py` → 32 passing tests ✓ (expanded 18→32)
+- Coverage: ResourceMonitor (stress, partial samples), LeakDetector (edge cases: single-point, all-zero, descending trends, leak analysis), Task registry (filter combinations, distribution), BenchmarkResult (aggregation, metrics), JSON serialization round-trip
+- Status: Comprehensive test coverage; real vs placeholder distinction clear
+- Commit: `test(bench): expand to 32 tests across runner/monitor/leak/export`
 
 ### Broken Repos (1/6)
 

@@ -1,5 +1,6 @@
 [workspace]
-members = [
+members = []
+exclude = [
     "templates",
     "template-domain",
     "template-program-ops",

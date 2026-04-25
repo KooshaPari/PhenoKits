@@ -137,22 +137,21 @@ func (s *Server) convertToChatRequest(req *ChatCompletionRequest) *schemas.ChatR
 		})
 	}
 
-	params := &schemas.ChatParameters{}
-	if req.MaxTokens != nil {
-		params.MaxCompletionTokens = *req.MaxTokens
-	}
-	if req.Temperature != nil {
-		params.Temperature = *req.Temperature
-	}
-	if req.TopP != nil {
-		params.TopP = *req.TopP
-	}
-
-	return &schemas.ChatRequest{
+	chatReq := &schemas.ChatRequest{
 		Messages: messages,
 		Model:    req.Model,
-		Params:   params,
 	}
+	if req.MaxTokens != nil {
+		chatReq.MaxTokens = *req.MaxTokens
+	}
+	if req.Temperature != nil {
+		chatReq.Temperature = *req.Temperature
+	}
+	if req.TopP != nil {
+		chatReq.TopP = *req.TopP
+	}
+
+	return chatReq
 }
 
 // convertFromChatResponse converts Bifrost response to OpenAI response

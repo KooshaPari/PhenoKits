@@ -155,12 +155,12 @@ func (cf *ContextFolding) summarizeOld(
 	var summaryMsg *schemas.ChatMessage
 	if cf.slmClients != nil && cf.slmClients.Summarizer != nil {
 		oldContent := cf.messagesToText(old)
-		if resp, err := cf.slmClients.Summarize(ctx, &slm.SummarizeRequest{
+		if summary, err := cf.slmClients.Summarize(ctx, &slm.SummarizeRequest{
 			Text:          oldContent,
 			Mode:          "conversation_segment",
 			DesiredLength: length,
-		}); err == nil {
-			content := "[Previous conversation summary]\n" + resp.Summary
+		}); err == nil && summary != "" {
+			content := "[Previous conversation summary]\n" + summary
 			summaryMsg = &schemas.ChatMessage{
 				Role:    string(schemas.ChatMessageRoleSystem),
 				Content: content,

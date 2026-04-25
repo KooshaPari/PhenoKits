@@ -33,7 +33,7 @@ func (tr *ToolRouter) filterTools(
 	}
 
 	// If no profile, try to get one from SLM
-	if len(profile.Preferred) == 0 && tr.slmClients != nil {
+	if !profile.Preferred && tr.slmClients != nil {
 		profile = tr.classifyTools(ctx, req)
 	}
 
@@ -102,12 +102,12 @@ func (tr *ToolRouter) classifyTools(ctx context.Context, req *schemas.BifrostReq
 
 	// Build profile from classification - use Preferred field
 	profile := slm.ToolProfile{
-		Preferred: toolNames, // For now, include all tools
+		Preferred: len(toolNames) > 0, // Mark as preferred if we have tools
 	}
 
 	// Use role from classification if available
-	if resp.Role != "" {
-		profile.AllowedCategories = []string{resp.Role}
+	if resp != "" { // resp is a string (Role)
+		profile.AllowedCategories = []string{resp}
 	}
 
 	return profile
@@ -115,14 +115,14 @@ func (tr *ToolRouter) classifyTools(ctx context.Context, req *schemas.BifrostReq
 
 // applyProfile reorders tools based on profile
 func (tr *ToolRouter) applyProfile(tools []schemas.ChatTool, profile slm.ToolProfile) []schemas.ChatTool {
-	if len(profile.Preferred) == 0 {
+	if !profile.Preferred {
 		return tools
 	}
 
-	// Create priority map from Preferred field
+	// Create priority map from AllowedCategories
 	priority := make(map[string]int)
-	for i, name := range profile.Preferred {
-		priority[name] = i
+	for i, cat := range profile.AllowedCategories {
+		priority[cat] = i
 	}
 
 	// Separate prioritized and other tools

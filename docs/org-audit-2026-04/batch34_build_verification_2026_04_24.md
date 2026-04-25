@@ -13,20 +13,20 @@
 | agent-devops-setups | TS | npm install | 0 | **GREEN** | - |
 | Apisync | Unknown | - | - | NO_BUILD | - |
 | Benchora | Unknown | - | - | NO_BUILD | - |
-| Configra | Rust | cargo build --release | 101 | BROKEN | COMPILE_ERR |
+| Configra | Rust | cargo build --release | 101 | BROKEN | FFI_CONFIG_ERR |
 | DevHex | Go | go build ./... | 1 | BROKEN | MISSING_DEP |
 | foqos-private | Unknown | - | - | NO_BUILD | - |
-| GDK | Rust | cargo build --release | 101 | BROKEN | COMPILE_ERR |
-| helios-cli | Rust | cargo build --release | 101 | BROKEN | COMPILE_ERR |
+| GDK | Rust | cargo build --release | 101 | BROKEN | LOCKFILE_ERR |
+| helios-cli | Rust | cargo build --release | 101 | BROKEN | WORKSPACE_ERR |
 | helios-router | Rust | cargo build --release | 0 | **GREEN** | - |
-| HexaKit | Rust | cargo build --release | 101 | BROKEN | COMPILE_ERR |
+| HexaKit | Rust | cargo build --release | 101 | BROKEN | WORKSPACE_ERR |
 | Httpora | Python | pytest --collect-only | 1 | BROKEN | IMPORT_ERR |
 | MCPForge | Go | go build ./... | 0 | **GREEN** | - |
-| Metron | Rust | cargo build --release | 101 | BROKEN | COMPILE_ERR |
+| Metron | Rust | cargo build --release | 101 | BROKEN | WORKSPACE_ERR |
 | nanovms | Go | go build ./... | 1 | BROKEN | SYNTAX_ERR |
 | ObservabilityKit | Unknown | - | - | NO_BUILD | - |
 | Parpoura | TS | npm install | 0 | **GREEN** | - |
-| phenoAI | Rust | cargo build --release | 101 | BROKEN | COMPILE_ERR |
+| phenoAI | Rust | cargo build --release | 101 | BROKEN | TOML_SYNTAX_ERR |
 | PhenoCompose | Go | go build ./... | 1 | BROKEN | SYNTAX_ERR |
 | phenoData | Rust | cargo build --release | 124 | BROKEN | TIMEOUT (>30s) |
 | PhenoLang | Unknown | - | - | NO_BUILD | - |
@@ -36,7 +36,7 @@
 | phenotype-omlx | Python | pytest --collect-only | 2 | BROKEN | IMPORT_ERR |
 | phenotype-registry | Unknown | - | - | NO_BUILD | - |
 | Stashly | Rust | cargo build --release | 124 | BROKEN | TIMEOUT (>30s) |
-| Tasken | Rust | cargo build --release | 101 | BROKEN | COMPILE_ERR |
+| Tasken | Rust | cargo build --release | 101 | BROKEN | WORKSPACE_ERR |
 | Tracera | TS | npm install | 0 | **GREEN** | - |
 | vibeproxy | Unknown | - | - | NO_BUILD | - |
 | vibeproxy-monitoring-unified | Unknown | - | - | NO_BUILD | - |
@@ -51,7 +51,7 @@
 - **GREEN (passing builds):** 7 (21%)
   - agent-devops-setups, helios-router, MCPForge, Parpoura, phenoResearchEngine, PhenoRuntime, Tracera
 - **BROKEN (build failures):** 15 (45%)
-  - Rust compile errors: Configra, GDK, helios-cli, HexaKit, Metron, phenoAI, Tasken (7)
+  - Rust failures (diverse causes): Configra (FFI config), GDK (Cargo.lock), helios-cli/HexaKit/Metron/Tasken (workspace), phenoAI (TOML syntax) (7)
   - Go import/syntax errors: DevHex, PhenoCompose, nanovms (3)
   - Python import errors: Httpora, phenotype-omlx (2)
   - Timeouts (>30s): phenoData, Stashly (2)
@@ -81,9 +81,16 @@
 ## Deep Blockers (Not Fixed)
 
 ### Rust Compile Errors (7 repos)
-- **Root cause:** Missing type definitions (e.g., `FeatureFlagPy` in Configra)
-- **Impact:** Broken FFI bindings or incomplete dependency updates
-- **Mitigation:** Requires type audits per repo; not fixable in <50 LOC
+- **Root cause:** NOT uniform — each repo has different failures:
+  - **Configra**: 63 compilation errors (FFI binding issues + missing imports); fixed import; deeper refactoring needed
+  - **GDK**: Cargo.lock corruption (`foldhash` specified twice) — requires `cargo update` or lock file repair
+  - **helios-cli**: Virtual workspace with zero members — Cargo.toml defines no packages
+  - **HexaKit**: Missing workspace member path (`phenotype-bdd` crate not found)
+  - **Metron**: Workspace member not registered in parent `/repos/Cargo.toml`
+  - **phenoAI**: Invalid TOML syntax in crate `Cargo.toml` (malformed feature flag)
+  - **Tasken**: Workspace member not registered in parent `/repos/Cargo.toml`
+- **Impact:** Workspace/Cargo configuration errors; not a shared FFI type issue
+- **Mitigation**: No blanket fix; each requires targeted repair
 
 ### Go Syntax Errors (nanovms, PhenoCompose)
 - **nanovms:** Makefile.go contains illegal UTF-8 character '#' (U+0023 context unclear)
@@ -111,6 +118,30 @@
 
 ---
 
+## Root Cause Triage (2026-04-24 Deep Dive)
+
+**Initial Hypothesis:** "Missing type definitions in shared FFI crate (e.g. `FeatureFlagPy`)"
+
+**Actual Findings:** NOT uniform. Each of 7 Rust failures has distinct root cause:
+
+| Repo | Error Type | Root Cause | Fix Scope |
+|------|-----------|-----------|-----------|
+| Configra | FFI_CONFIG_ERR | 63+ compilation errors post-import fix; deep refactoring needed | >50 LOC; defer |
+| GDK | LOCKFILE_ERR | Cargo.lock corruption (`foldhash` listed twice) | ~10 LOC (lock repair) |
+| helios-cli | WORKSPACE_ERR | Virtual workspace defines no crates | ~5 LOC (Cargo.toml cleanup) |
+| HexaKit | WORKSPACE_ERR | Missing workspace member (`phenotype-bdd` not found) | ~5 LOC (remove/add path) |
+| Metron | WORKSPACE_ERR | Child not registered in `/repos/Cargo.toml` workspace | ~5 LOC (register member) |
+| phenoAI | TOML_SYNTAX_ERR | Invalid TOML in crate `Cargo.toml` (feature flag syntax) | ~5 LOC (fix TOML) |
+| Tasken | WORKSPACE_ERR | Child not registered in `/repos/Cargo.toml` workspace | ~5 LOC (register member) |
+
+**Applied Fix:**
+- ✅ Configra: Added missing `FeatureFlagPy` import (1 LOC); commit `2f5d7ef`
+
+**Residual Blockers:**
+- Configra: 60+ deeper compilation errors (FFI binding issues); exceeds budget
+- GDK, helios-cli, HexaKit, phenoAI, Metron, Tasken: Each fixable in ~5-10 LOC individually; requires workspace audit pass
+
 ## Files Updated
 
 - `/repos/docs/org-audit-2026-04/batch34_build_verification_2026_04_24.md` (this report)
+- Configra: `crates/pheno-ffi-python/src/domain/entities/mod.rs` (import fix)

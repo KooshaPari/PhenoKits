@@ -1,9 +1,10 @@
 # Cargo Audit Report — 2026-04-24
 
 **Audit Date:** 2026-04-24  
-**Repositories Audited:** 20  
-**Total Vulnerabilities Found:** 20  
-**Repositories Affected:** 9
+**Repositories Audited:** 25  
+**Total Vulnerabilities Found:** 22  
+**Repositories Affected:** 11
+**Adoption Status:** cargo-deny baseline deployed to 24/24 active Rust repos (100%)
 
 ## Summary
 
@@ -31,19 +32,28 @@
 | hwLedger                       | 2   |
 | phenotype-journeys             | 1   |
 
-**Repositories with No Vulnerabilities:** 11
+**Repositories with No Vulnerabilities:** 14
 
 - Civis
 - Eidolon
+- GDK
 - PhenoProc
 - PlayCua
 - Sidekick
 - Tokn
 - bare-cua
+- helios-cli
 - phenotype-bus
 - phenotype-tooling
+- phenoUtils
 - rich-cli-kit
 - thegent-dispatch
+
+**New Vulnerabilities Found (Post-Baseline Deployment):**
+
+### Configra
+- **RUSTSEC-2024-0436** — paste (unmaintained)
+- **RUSTSEC-2025-0020** — pyo3 (buffer overflow risk in `PyString::from_object`)
 
 ---
 ## Top 10 Most-Impacted Crates

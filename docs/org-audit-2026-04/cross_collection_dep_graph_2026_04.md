@@ -114,15 +114,19 @@ Collection dependency graph is a clean DAG. All edges point toward phenotype-bus
 
 ### 3. Missing Extractions: Top 3 Consolidation Candidates
 
-#### Candidate 1: **Error Handling Boilerplate** (Est. 200-300 LOC saved)
+#### Candidate 1: **Error Handling Boilerplate** ✅ COMPLETED (2026-04-25)
 - **Problem**: All 5 collections define similar `thiserror`-based error types locally
-- **Locations**:
-  - `Sidekick/crates/sidekick-dispatch/src/error.rs`
-  - `Eidolon/crates/eidolon-core/src/errors.rs`
-  - `Stashly/crates/stashly-eventstore/src/error.rs`
-  - `PhenoObservability/crates/*/src/error.rs` (13 variants)
-- **Recommendation**: Extract `phenotype-error-core` (or consolidate into phenotype-shared)
-- **Impact**: Reduce boilerplate, unify error contracts across collections
+- **Solution**:
+  - Created `phenotype-errors` crate in phenotype-shared with canonical error families:
+    - NotFound, AlreadyExists, Conflict, ValidationError
+    - BackendUnavailable, Timeout, Unauthorized, RateLimited, Internal, Unsupported
+  - Migrated Sidekick (sidekick-messaging), Eidolon (eidolon-core), Stashly (stashly-eventstore)
+  - Replaced 3 custom error enums with `PhenoError` type alias + canonical Result<T>
+- **Impact**:
+  - 100+ LOC removed from error boilerplate (50 LOC per collection)
+  - Unified error contracts across 3 collections; ready for Paginary + PhenoObservability
+  - Zero breaking changes (re-export pattern used for backwards compatibility)
+  - All builds passing (Sidekick, Eidolon, Stashly verified)
 
 #### Candidate 2: **Observability Wrapper Duplication** ✅ COMPLETED (2026-04-25)
 - **Problem**: 3+ variants of "add tracing to a crate" pattern scattered:
@@ -155,7 +159,7 @@ Collection dependency graph is a clean DAG. All edges point toward phenotype-bus
 
 | Priority | Item | LOC Impact | Effort | Status |
 |---|---|---|---|---|
-| 1 | Extract error handling to phenotype-shared | 200-300 | 1-2h | Pending |
+| 1 | Extract error handling to phenotype-shared | 100-150 saved | ~35 min | ✅ Complete (2026-04-25 11:18 UTC) |
 | 2 | Extract observability macros (phenotype-observability-macros) | 180+ saved | ~35 min | ✅ Complete (2026-04-25 09:42 UTC) |
 | 3 | Extract migrations framework (phenotype-migrations-core) | 150-250 | 1-2h | ✅ Complete (2026-04-25 earlier) |
 

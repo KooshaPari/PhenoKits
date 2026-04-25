@@ -29,9 +29,10 @@
 - Status: Production-ready
 
 **HeliosLab**
-- Build: `cargo check --workspace` ✓
-- Tests: `cargo test --workspace` ✓
-- Status: Production-ready
+- Build: `cargo check --workspace` ✓ (2026-04-25: pyo3 v0.22.6 arm64 compatible)
+- Tests: `cargo test --workspace` ✓ (0 tests; FFI harness builds clean)
+- Status: Production-ready (PyO3 arm64 resolved via Cargo version compatibility)
+- Note: Cargo resolver auto-selected compatible pyo3 v0.22.6; no linker config needed
 
 **heliosBench**
 - Build: Python package (no explicit build step)

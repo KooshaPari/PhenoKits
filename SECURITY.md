@@ -1,24 +1,32 @@
 # Security Policy
 
-## Supported Versions
-
-| Version | Supported          |
-| ------- | ------------------ |
-| 0.1.x   | :white_check_mark: |
-
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability, please report it responsibly:
+Use one of the following channels:
 
-1. **DO NOT** create a public GitHub issue for security vulnerabilities.
-2. Send a private report via GitHub's [Private vulnerability reporting](https://github.com/KooshaPari/phenotype-shared/security/advisories/new)
+1. Preferred: GitHub Security Advisories for this repository.
+2. Fallback: open a private issue in the owning organization and tag `@KooshaPari`.
 
-## Security Best Practices
+Do not disclose exploit details publicly before triage.
 
-When using this library:
+## Response Expectations
 
-- Keep dependencies up to date
-- Review code that uses `unsafe`
-- Validate all inputs
-- Use TLS for network connections
-- Never log sensitive information
+- Initial acknowledgment target: 2 business days.
+- Triage target: 5 business days.
+- Remediation timeline: severity-based and communicated in advisory thread.
+
+## Supported Versions
+
+This repository follows latest-main support for template contracts.
+
+| Version | Supported |
+| --- | --- |
+| latest `main` | Yes |
+| older commits/tags | No |
+
+## Repository Security Rules
+
+1. No secrets in repository history.
+2. Reconcile and manifest contracts must fail loudly on invalid state.
+3. Release only from green CI checks.
+4. Contract changes must include manifest version updates.

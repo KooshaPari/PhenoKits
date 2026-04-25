@@ -1,7 +1,6 @@
-# Repository governance
-# Primary maintainer for this repository
-* @KooshaPari
+# Default owners — @KooshaPari reviews all changes
+*       @KooshaPari
 
-# Documentation
-docs/ @KooshaPari
-*.md @KooshaPari
+# Per-language drill-down (add more owners as team grows)
+*.rs    @KooshaPari
+*.py    @KooshaPari

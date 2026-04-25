@@ -1,7 +1,0 @@
-# Phenotype Design Codeowners
-# Primary maintainer
-* @KooshaPari
-
-# Design and documentation ownership
-/docs/ @KooshaPari
-/.github/workflows/ @KooshaPari

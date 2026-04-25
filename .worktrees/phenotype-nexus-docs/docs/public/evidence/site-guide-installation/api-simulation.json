@@ -1,8 +1,0 @@
-{
-  "bundle": "site-guide-installation",
-  "steps": [
-    "render doc",
-    "check evidence"
-  ],
-  "duration_ms": 55
-}

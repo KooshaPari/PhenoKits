@@ -1,50 +1,47 @@
-# Contributing to phenotype-shared
+# Contributing to template-commons
 
-Thank you for your interest in contributing to phenotype-shared!
+Thank you for your interest in contributing to template-commons.
+
+## Layer Contract
+
+- **layer_type**: commons
+- **layer_name**: template-commons
+- **versioning**: semver
 
 ## Development Setup
 
-1. **Prerequisites**
-   - Rust 1.75 or later
-   - Cargo
+```bash
+# Clone the repository
+git clone https://github.com/Phenotype-Enterprise/template-commons
+cd template-commons
 
-2. **Clone the repository**
-   ```bash
-   git clone https://github.com/KooshaPari/phenotype-shared
-   cd phenotype-shared
-   ```
+# Install dependencies (if any)
+pip install -e .
 
-3. **Run tests**
-   ```bash
-   cargo test --workspace
-   ```
+# Run checks before release
+task check
+```
 
-4. **Run linter**
-   ```bash
-   cargo clippy --workspace -- -D warnings
-   ```
+## Making Changes
 
-5. **Format code**
-   ```bash
-   cargo fmt
-   ```
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feat/my-feature`
+3. Make your changes following the layer contract
+4. Run `task check` to verify compliance
+5. Update version following semver
+6. Update CHANGELOG.md
+7. Create PR with description of changes
 
-## Pull Request Process
+## Versioning Policy
 
-1. Fork the repository and create a feature branch from `main`.
-2. Follow the commit message format: `<type>(<scope>): <description>`
-   - Types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `ci`
-3. Ensure all tests pass, clippy is clean, and code is formatted.
-4. Update documentation if adding new features.
-5. Submit a pull request with a clear description of changes.
+- Follow Semantic Versioning (semver)
+- Patch version for bug fixes
+- Minor version for backwards-compatible additions
+- Major version for breaking changes
 
-## Code Standards
+## Release Process
 
-- Full type annotations required
-- Document all public APIs
-- No `unsafe` code without justification
-- Keep files under 350 lines (hard limit 500)
-
-## Crate Structure
-
-Each crate in `crates/` should be independently consumable with no inter-crate dependencies.
+1. Update CHANGELOG.md with version and date
+2. Create git tag: `git tag v*.*.*`
+3. Push tag: `git push origin --tags`
+4. CI will publish to package registry

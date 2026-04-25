@@ -1,6 +1,0 @@
-id: ADR-003
-title: Task Execution Implementation
-context: Task Execution requires 6 code entities
-decision: Use python for Task Execution
-consequences: Consistent codebase in python
-status: accepted

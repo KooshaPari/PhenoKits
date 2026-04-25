@@ -1,9 +1,0 @@
-{
-  "bundle": "guide-index-zh-TW",
-  "locale": "zh-TW",
-  "steps": [
-    "nexus guide",
-    "api surface"
-  ],
-  "duration_ms": 37
-}

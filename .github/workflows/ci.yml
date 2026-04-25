@@ -1,37 +1,13 @@
+# Generated CI workflow - calls reusable phenotype workflow
 name: CI
 
 on:
   push:
-    branches: [main, feature/*, bugfix/*, docs/*, release/*, hotfix/*]
+    branches: [main, master]
   pull_request:
-    branches: [main]
+    branches: [main, master]
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        rust-version: ['1.70', 'stable']
-    
-    steps:
-      - uses: actions/checkout@v4
-
-      
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: ${{ matrix.rust-version }}
-
-      - name: Build
-        run: cargo build --verbose
-
-      - name: Run tests
-        run: cargo test --verbose
-
-      - name: Run clippy
-        run: cargo clippy -- -D warnings
-      
-
-  phenotype-validate:
-    uses: KooshaPari/phenotypeActions/.github/workflows/validate-governance.yml@main
+  ci:
+    uses: KooshaPari/phenotype-infrakit/.github/workflows/ci.yaml@main
+    secrets: inherit

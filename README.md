@@ -1,181 +1,115 @@
-# phenotype-shared
+# PhenoKits
 
-Rust infrastructure toolkit extracted from the Phenotype ecosystem. The workspace now provides shared domain, application, port, and infrastructure crates that support hexagonal and clean architecture across the broader polyrepo.
+**Multi-category artifact platform for the Phenotype software organization.**
 
-## Crates
+## Overview
 
-| Crate | Description |
-|-------|-------------|
-| [`phenotype-domain`](crates/phenotype-domain) | DDD value objects, entities, aggregates, events, and domain errors |
-| [`phenotype-application`](crates/phenotype-application) | CQRS commands, queries, DTOs, and application handlers |
-| [`phenotype-port-interfaces`](crates/phenotype-port-interfaces) | Hexagonal inbound/outbound port traits and shared contracts |
-| [`phenotype-event-sourcing`](crates/phenotype-event-sourcing) | Append-only event store with hash-chain verification and snapshot management |
-| [`phenotype-cache-adapter`](crates/phenotype-cache-adapter) | Two-tier cache with TTL expiration and observability hooks |
-| [`phenotype-policy-engine`](crates/phenotype-policy-engine) | Rule-based policy evaluation engine with TOML config loading |
-| [`phenotype-state-machine`](crates/phenotype-state-machine) | Generic finite state machine with transition guards and history tracking |
-| [`phenotype-postgres-adapter`](crates/phenotype-postgres-adapter) | PostgreSQL persistence adapter |
-| [`phenotype-redis-adapter`](crates/phenotype-redis-adapter) | Redis persistence / cache adapter |
-| [`phenotype-http-adapter`](crates/phenotype-http-adapter) | HTTP adapter and transport utilities |
+PhenoKits organizes artifacts into 12 distinct categories, each with clear mutability rules and agent interaction patterns.
+
+## Categories
+
+| # | Category | Purpose | Mutability |
+|---|----------|---------|------------|
+| 1 | [`templates/`](templates/) | Scaffolding for new projects | Editable |
+| 2 | [`configs/`](configs/) | Parameterized configs | Parameters only |
+| 3 | [`libs/`](libs/) | Multi-language libraries | Import/extend |
+| 4 | [`secrets/`](secrets/) | Secret management patterns | Locked |
+| 5 | [`governance/`](governance/) | ADRs, RFCs, standards | Varies |
+| 6 | [`security/`](security/) | Scanning, policies, hardening | Locked |
+| 7 | [`observability/`](observability/) | Logging, metrics, tracing | Configurable |
+| 8 | [`docs/`](docs/) | API docs, runbooks, guides | Editable |
+| 9 | [`scripts/`](scripts/) | Build, release, quality scripts | Executable |
+| 10 | [`schemas/`](schemas/) | Type definitions, API specs | Locked |
+| 11 | [`policies/`](policies/) | OPA, GitHub, compliance | Enforced |
+| 12 | [`credentials/`](credentials/) | Auth configs, patterns | Locked |
+
+## Quick Reference
+
+### Agent Interaction Matrix
+
+| Category | Agent Reads | Agent Writes | Agent Enforces |
+|----------|-------------|--------------|----------------|
+| Templates | Yes | Yes (instantiation) | No |
+| Configs | Yes | Parameters only | Yes (validation) |
+| Libs | Yes | No | No |
+| Secrets | Yes | No | No |
+| Governance | Yes | Yes (ADRs) | No |
+| Security | Yes | Yes | Yes (scanning) |
+| Observability | Yes | Yes | Yes (monitoring) |
+| Docs | Yes | Yes | No |
+| Scripts | Yes | Yes | No |
+| Schemas | Yes | Yes (code gen) | Yes (type checking) |
+| Policies | Yes | Yes | Yes (OPA, gates) |
+| Credentials | Yes | No | Yes (rotation) |
+
+## Directory Structure
+
+```
+PhenoKits/
+├── templates/           # 1. Scaffolding
+│   ├── hexagonal/      # Hexagonal architecture templates
+│   ├── clean-rust/     # Clean architecture Rust template
+│   └── phenotype-api/  # Phenotype API template
+├── configs/            # 2. Parameterized configs
+│   ├── tooling/        # Linters, formatters
+│   ├── cicd/           # CI/CD pipelines
+│   ├── infra/          # Docker, Kubernetes
+│   └── observability/  # Prometheus, Grafana
+├── libs/               # 3. Libraries
+│   ├── rust/          # Canonical Rust cores
+│   ├── python/        # Python bindings
+│   ├── typescript/    # TypeScript bindings
+│   └── go/            # Go bindings
+├── secrets/            # 4. Secret management
+├── governance/         # 5. ADRs, RFCs, standards
+├── security/           # 6. Security configs
+├── observability/      # 7. Logging, metrics
+├── docs/               # 8. Documentation
+├── scripts/            # 9. Automation scripts
+├── schemas/            # 10. Type definitions
+├── policies/           # 11. Enforcement policies
+└── credentials/        # 12. Auth configs
+```
 
 ## Quick Start
 
-Add any crate as a git dependency:
-
-```toml
-[dependencies]
-phenotype-domain = { git = "https://github.com/KooshaPari/phenotype-shared" }
-phenotype-application = { git = "https://github.com/KooshaPari/phenotype-shared" }
-phenotype-port-interfaces = { git = "https://github.com/KooshaPari/phenotype-shared" }
-phenotype-event-sourcing = { git = "https://github.com/KooshaPari/phenotype-shared" }
-phenotype-cache-adapter = { git = "https://github.com/KooshaPari/phenotype-shared" }
-phenotype-policy-engine = { git = "https://github.com/KooshaPari/phenotype-shared" }
-phenotype-state-machine = { git = "https://github.com/KooshaPari/phenotype-shared" }
-phenotype-postgres-adapter = { git = "https://github.com/KooshaPari/phenotype-shared" }
-phenotype-redis-adapter = { git = "https://github.com/KooshaPari/phenotype-shared" }
-phenotype-http-adapter = { git = "https://github.com/KooshaPari/phenotype-shared" }
-```
-
-## Usage Examples
-
-### Event Sourcing
-
-```rust
-use phenotype_event_sourcing::{EventEnvelope, EventStore};
-use phenotype_event_sourcing::memory::InMemoryEventStore;
-use serde::{Serialize, Deserialize};
-
-#[derive(Serialize, Deserialize)]
-struct UserCreated { user_id: String, email: String }
-
-let store = InMemoryEventStore::new();
-let event = EventEnvelope::new(
-    UserCreated { user_id: "u-1".into(), email: "a@b.com".into() },
-    "system",
-);
-let seq = store.append(&event, "UserCreated", "u-1").unwrap();
-assert_eq!(seq, 1);
-
-// Retrieve events
-let events = store.get_events::<UserCreated>("UserCreated", "u-1").unwrap();
-assert_eq!(events.len(), 1);
-```
-
-### Cache
-
-```rust
-use phenotype_cache_adapter::TieredCache;
-use std::time::Duration;
-
-let cache = TieredCache::new(100, Duration::from_secs(300), None);
-cache.insert("key".to_string(), "value".to_string());
-assert_eq!(cache.get(&"key".to_string()), Some("value".to_string()));
-```
-
-### Policy Engine
-
-```rust
-use phenotype_policy_engine::{PolicyEngine, PolicyContext};
-
-let engine = PolicyEngine::new();
-engine.load_toml_str(r#"
-[[rules]]
-name = "require-auth"
-action = "require"
-field = "auth_token"
-"#).unwrap();
-
-let mut ctx = PolicyContext::new();
-ctx.set("auth_token", "abc123");
-let result = engine.evaluate(&ctx).unwrap();
-assert!(result.passed());
-```
-
-### State Machine
-
-```rust
-use phenotype_state_machine::{State, StateMachine};
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
-enum Status { Draft, Review, Approved, Done }
-
-impl State for Status {
-    fn ordinal(&self) -> u32 {
-        match self { Self::Draft => 0, Self::Review => 1, Self::Approved => 2, Self::Done => 3 }
-    }
-}
-
-let mut sm = StateMachine::new(Status::Draft);
-sm.transition(Status::Review).unwrap();
-assert_eq!(sm.current(), &Status::Review);
-```
-
-## Development
+### For Agents
 
 ```bash
-cargo fmt --check
-cargo clippy --workspace -- -D warnings
-cargo test --workspace
+# 1. Clone PhenoKits
+git clone https://github.com/KooshaPari/PhenoKits.git
+cd PhenoKits
+
+# 2. Read agent patterns
+cat docs/AGENT_PATTERNS.md
+
+# 3. Apply a config
+python3 scripts/utility/parameterize.py \
+    configs/params.example.json \
+    configs/cicd/github-actions/ci.yml
+
+# 4. Scaffold a project
+pheno new --template hexagonal-rust --name my-service --org MyOrg
 ```
 
-## Architecture
+### For Developers
 
-The workspace is organized as a layered hexagonal stack:
+```bash
+# 1. Apply org configs
+cp -r configs/tooling/pre-commit/* .git/hooks/
 
-- **Domain**: `phenotype-domain` owns value objects, entities, aggregates, events, and domain errors.
-- **Application**: `phenotype-application` coordinates commands, queries, DTOs, and handlers.
-- **Ports**: `phenotype-port-interfaces` holds technology-agnostic inbound and outbound contracts.
-- **Infrastructure**: event sourcing, cache, policy, state machine, database, Redis, and HTTP adapters live below the core layers.
+# 2. Set up CI
+cp configs/cicd/github-actions/* .github/workflows/
 
-```
-phenotype-shared/
-  Cargo.toml
-  crates/
-    phenotype-domain/
-    phenotype-application/
-    phenotype-port-interfaces/
-    phenotype-event-sourcing/
-    phenotype-cache-adapter/
-    phenotype-policy-engine/
-    phenotype-state-machine/
-    phenotype-postgres-adapter/
-    phenotype-redis-adapter/
-    phenotype-http-adapter/
+# 3. Configure observability
+cp configs/observability/prometheus.yml ./
 ```
 
-## Consolidation opportunities
+## Related
 
-### Governance baseline PR scope
-
-The initial governance PR for `phenotype-shared` should stay intentionally small and canonical:
-
-- add a repo-level quality gate workflow that runs format, lint, build, and tests
-- add an ADR stub for governance, branch protection, and canonical repo policy
-- add lightweight policy-gate checks for top-level repo layout and required governance files
-- add architecture lint placeholders for boundary and dependency drift
-- keep repo-specific behavior local; only extract cross-cutting rules into shared code
-
-### Ports and shared contracts
-
-- `phenotype-shared/crates/phenotype-port-interfaces` is the canonical home for domain-agnostic traits and value objects.
-- Repo-local port layers such as `phench/src/phench/application/ports.py` and `worktree-manager/src/worktree_manager/ports/mod.rs` should keep their names and responsibilities aligned with the shared port vocabulary.
-- Prefer extracting only truly generic contracts into the shared ports crate; keep workflow- or repo-specific ports local.
-
-### Extraction priorities
-
-- **First**: pagination primitives and response wrappers shared across application/query boundaries.
-- **Next**: error mapping helpers, keeping domain-specific errors local.
-- **Then**: reusable infrastructure primitives that already repeat across repos.
-
-### Repo structure and worktree placement
-
-- Keep canonical top-level buckets explicit: `apps/`, `libs/`, `infrastructure/`, `governance/`, `tooling/`, `templates/`.
-- Keep active worktrees under `repos/worktrees/<project>/<category>/<wtree>` so canonical repo roots stay clean.
-- Prefer shallow, discoverable top-level directories over deeply nested ad hoc layouts.
-
-### Errors and failure taxonomy
-
-- Keep domain-specific exceptions local to each crate or package, such as `phench/src/phench/domain/exceptions.py` and `worktree-manager/src/worktree_manager/domain/errors.rs`.
-- Extract only cross-cutting, technology-neutral error categories into shared layers, such as validation/storage/not-found/permission state errors.
-- Avoid creating parallel generic error enums in multiple repositories unless they serve different bounded contexts.
-
-MIT
+- [RESTRUCTURING_PLAN.md](docs/RESTRUCTURING_PLAN.md) - Full restructuring plan
+- [RESTRUCTURING_ADR.md](docs/RESTRUCTURING_ADR.md) - Decision record
+- [AGENT_PATTERNS.md](docs/AGENT_PATTERNS.md) - Agent consumption patterns
+- [HexaKit/](HexaKit/) - Template CLI and registry
+- [PhenoKit](https://github.com/KooshaPari/PhenoKit) - Core SDK
+- [PhenoSpecs](https://github.com/KooshaPari/PhenoSpecs) - Specifications

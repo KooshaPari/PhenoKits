@@ -1,8 +1,0 @@
-{
-  "bundle": "site-operations-runbooks",
-  "steps": [
-    "render doc",
-    "check evidence"
-  ],
-  "duration_ms": 55
-}

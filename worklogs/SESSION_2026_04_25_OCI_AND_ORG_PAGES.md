@@ -81,3 +81,37 @@ worklog focuses on the second half of the day, after ~13:30 local.
   `restore-rulesets.rs` for post-billing recovery.
 - **Tier-3 path microfrontends > subdomains**: confirmed cleaner DNS posture;
   see `path-microfrontends-tier3.md`.
+
+## Update — Evening to Close
+
+Late-evening + final loops captured here; appends to the day's session record.
+
+### 1. Recurring fleet sweeps
+- ~200+ PRs merged across the day via repeated cross-org sweeps (Dependabot
+  harvests, lockfile rebases, manifest unblockers, CI fixes).
+
+### 2. Org-pages governance hardening
+- 6 landing repos hardened with `dependabot.yml` + `ci.yml` + `LICENSE` +
+  GitHub topics: brought to par with Tier-1 governance baseline so future
+  scaffolds inherit the pattern.
+
+### 3. iac/ workspace integration (3 PRs merged)
+- `tailscale-keygen` folded into the Cargo workspace.
+- Dependabot cargo coverage extended to `iac/`.
+- CI workflow added for `iac/` crates.
+
+### 4. Bootstrap binary patched
+- `phenotype-infra` PR #34: bootstrap now emits governance files
+  (dependabot/ci/LICENSE/topics) by default for new landing repos.
+
+### 5. Cloud routine scheduled
+- Monday Dependabot harvest: `trig_01W7Zjoker6d88VMupekB3Kh`.
+
+### 6. agentapi-plusplus CVE reduction
+- 31 → 6 H/C (80.6% reduction); beat the 70% target.
+- Residual 6 are transitive — will auto-close on next rescan.
+
+### 7. Org cargo audit final pass
+- 29 total CVEs, 8 HIGH remaining.
+- Top remaining targets: PhenoLang, AuthKit, HexaKit, AgilePlus,
+  PhenoRuntime.

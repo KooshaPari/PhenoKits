@@ -53,3 +53,23 @@ extract Tracera first (cleanest boundary), then HexaKit.
 - `projects.kooshapari.com` LIVE
 - Tier-3 path microfrontends pattern proven on agileplus-landing
 - MEMORY.md compaction: 490 → 33 lines + 12 topic files
+
+## Update — Evening Close (2026-04-25)
+
+### Cloud routines now scheduled (3)
+- `trig_01WyavEsSwm8ouHmtNTD7E7k` — Sunday observability triad
+- `trig_01DAEAKGCw6KtYLRYBxVMzGN` — Sunday branch cleanup
+- `trig_01W7Zjoker6d88VMupekB3Kh` — Monday Dependabot harvest
+
+### Resolved during session
+- 7 manifest blockers cleared
+- 7 lockfile commits landed
+- 30+ HIGH CVEs closed
+
+### Remaining blockers (user-required only)
+- Vercel deploy hook
+- OCI lottery hit
+- helios-cli alerts admin toggle
+
+### Residual H/C
+- 6 H/C remaining on agentapi-plusplus (transitive; auto-closes on rescan)

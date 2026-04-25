@@ -33,7 +33,87 @@ impl std::fmt::Display for RuleType {
     }
 }
 
-/// A policy rule with pattern matching.
+/// Matcher kind enumeration for flexible pattern matching.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum MatcherKind {
+    /// Glob pattern matching (e.g., "*.rs").
+    Glob,
+    /// Prefix matching (e.g., "dev_").
+    Prefix,
+    /// Exact string matching.
+    Exact,
+    /// Regular expression matching.
+    Regex,
+}
+
+impl MatcherKind {
+    /// Returns a string representation.
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            MatcherKind::Glob => "glob",
+            MatcherKind::Prefix => "prefix",
+            MatcherKind::Exact => "exact",
+            MatcherKind::Regex => "regex",
+        }
+    }
+}
+
+impl std::fmt::Display for MatcherKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.as_str())
+    }
+}
+
+impl Default for MatcherKind {
+    fn default() -> Self {
+        MatcherKind::Regex
+    }
+}
+
+/// Action to take when a rule pattern does not match.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum OnMismatchAction {
+    /// Continue evaluation (ignore mismatch).
+    Continue,
+    /// Log a warning but continue.
+    Warn,
+    /// Stop and fail immediately.
+    Fail,
+}
+
+impl OnMismatchAction {
+    /// Returns a string representation.
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            OnMismatchAction::Continue => "continue",
+            OnMismatchAction::Warn => "warn",
+            OnMismatchAction::Fail => "fail",
+        }
+    }
+}
+
+impl std::fmt::Display for OnMismatchAction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.as_str())
+    }
+}
+
+impl Default for OnMismatchAction {
+    fn default() -> Self {
+        OnMismatchAction::Continue
+    }
+}
+
+/// Metadata for a rule (rule_id, source).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RuleMetadata {
+    /// Unique rule identifier.
+    pub rule_id: String,
+    /// Source of the rule (e.g., "policy_lib.py", "system").
+    pub source: String,
+}
+
+/// A policy rule with pattern matching and metadata.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Rule {
     /// The type of rule (Allow, Deny, Require).
@@ -44,6 +124,12 @@ pub struct Rule {
     pub pattern: String,
     /// Optional human-readable description of the rule.
     pub description: Option<String>,
+    /// Matcher kind used for pattern matching.
+    pub matcher_kind: MatcherKind,
+    /// Action to take on mismatch.
+    pub on_mismatch: OnMismatchAction,
+    /// Optional metadata (rule_id, source).
+    pub metadata: Option<RuleMetadata>,
 }
 
 impl Rule {
@@ -54,6 +140,9 @@ impl Rule {
             fact: fact.into(),
             pattern: pattern.into(),
             description: None,
+            matcher_kind: MatcherKind::Regex,
+            on_mismatch: OnMismatchAction::Continue,
+            metadata: None,
         }
     }
 
@@ -61,6 +150,23 @@ impl Rule {
     pub fn with_description(mut self, description: impl Into<String>) -> Self {
         self.description = Some(description.into());
         self
+    }
+
+    /// Sets the matcher kind.
+    pub fn with_matcher(mut self, matcher_kind: MatcherKind) -> Self {
+        self.matcher_kind = matcher_kind;
+        self
+    }
+
+    /// Sets the on_mismatch action.
+    pub fn with_on_mismatch(mut self, action: OnMismatchAction) -> Self {
+        self.on_mismatch = action;
+        self
+    }
+
+    /// Sets the rule metadata.
+    pub fn set_metadata(&mut self, metadata: RuleMetadata) {
+        self.metadata = Some(metadata);
     }
 
     /// Evaluates this rule against a context.
@@ -196,5 +302,110 @@ mod tests {
 
         let result = rule.evaluate(&ctx);
         assert!(result.is_err());
+    }
+
+    // Traces to: FR-POLICY-RULE-MATCHER-001 — Glob matcher kind
+    #[test]
+    fn test_rule_with_glob_matcher() {
+        let rule = Rule::new(RuleType::Allow, "filename", "*.rs").with_matcher(MatcherKind::Glob);
+        assert_eq!(rule.matcher_kind, MatcherKind::Glob);
+    }
+
+    // Traces to: FR-POLICY-RULE-MATCHER-002 — Prefix matcher kind
+    #[test]
+    fn test_rule_with_prefix_matcher() {
+        let rule = Rule::new(RuleType::Allow, "var", "dev_").with_matcher(MatcherKind::Prefix);
+        assert_eq!(rule.matcher_kind, MatcherKind::Prefix);
+    }
+
+    // Traces to: FR-POLICY-RULE-MATCHER-003 — Exact matcher kind
+    #[test]
+    fn test_rule_with_exact_matcher() {
+        let rule = Rule::new(RuleType::Allow, "env", "production").with_matcher(MatcherKind::Exact);
+        assert_eq!(rule.matcher_kind, MatcherKind::Exact);
+    }
+
+    // Traces to: FR-POLICY-RULE-MATCHER-004 — Regex matcher kind (default)
+    #[test]
+    fn test_rule_default_regex_matcher() {
+        let rule = Rule::new(RuleType::Allow, "field", "^value$");
+        assert_eq!(rule.matcher_kind, MatcherKind::Regex);
+    }
+
+    // Traces to: FR-POLICY-RULE-MISMATCH-001 — Continue on mismatch
+    #[test]
+    fn test_rule_on_mismatch_continue() {
+        let rule = Rule::new(RuleType::Allow, "field", "^value$")
+            .with_on_mismatch(OnMismatchAction::Continue);
+        assert_eq!(rule.on_mismatch, OnMismatchAction::Continue);
+    }
+
+    // Traces to: FR-POLICY-RULE-MISMATCH-002 — Warn on mismatch
+    #[test]
+    fn test_rule_on_mismatch_warn() {
+        let rule = Rule::new(RuleType::Allow, "field", "^value$")
+            .with_on_mismatch(OnMismatchAction::Warn);
+        assert_eq!(rule.on_mismatch, OnMismatchAction::Warn);
+    }
+
+    // Traces to: FR-POLICY-RULE-MISMATCH-003 — Fail on mismatch
+    #[test]
+    fn test_rule_on_mismatch_fail() {
+        let rule = Rule::new(RuleType::Allow, "field", "^value$")
+            .with_on_mismatch(OnMismatchAction::Fail);
+        assert_eq!(rule.on_mismatch, OnMismatchAction::Fail);
+    }
+
+    // Traces to: FR-POLICY-RULE-METADATA-001 — Rule metadata
+    #[test]
+    fn test_rule_with_metadata() {
+        let mut rule = Rule::new(RuleType::Allow, "status", "^active$");
+        let metadata = RuleMetadata {
+            rule_id: "rule-123".to_string(),
+            source: "policy_lib".to_string(),
+        };
+        rule.set_metadata(metadata);
+
+        assert!(rule.metadata.is_some());
+        let m = rule.metadata.unwrap();
+        assert_eq!(m.rule_id, "rule-123");
+        assert_eq!(m.source, "policy_lib");
+    }
+
+    // Traces to: FR-POLICY-RULE-COMPLEX-001 — Rule with all metadata fields
+    #[test]
+    fn test_rule_full_configuration() {
+        let mut rule = Rule::new(RuleType::Require, "env", "^(prod|staging)$")
+            .with_description("Environment must be prod or staging")
+            .with_matcher(MatcherKind::Regex)
+            .with_on_mismatch(OnMismatchAction::Fail);
+
+        rule.set_metadata(RuleMetadata {
+            rule_id: "env-deploy-001".to_string(),
+            source: "deploy_policy".to_string(),
+        });
+
+        assert_eq!(rule.rule_type, RuleType::Require);
+        assert_eq!(rule.matcher_kind, MatcherKind::Regex);
+        assert_eq!(rule.on_mismatch, OnMismatchAction::Fail);
+        assert!(rule.description.is_some());
+        assert!(rule.metadata.is_some());
+    }
+
+    // Traces to: FR-POLICY-RULE-DISPLAY-001 — OnMismatchAction display
+    #[test]
+    fn test_on_mismatch_action_display() {
+        assert_eq!(OnMismatchAction::Continue.as_str(), "continue");
+        assert_eq!(OnMismatchAction::Warn.as_str(), "warn");
+        assert_eq!(OnMismatchAction::Fail.as_str(), "fail");
+    }
+
+    // Traces to: FR-POLICY-RULE-DISPLAY-002 — MatcherKind display
+    #[test]
+    fn test_matcher_kind_display() {
+        assert_eq!(MatcherKind::Glob.as_str(), "glob");
+        assert_eq!(MatcherKind::Prefix.as_str(), "prefix");
+        assert_eq!(MatcherKind::Exact.as_str(), "exact");
+        assert_eq!(MatcherKind::Regex.as_str(), "regex");
     }
 }

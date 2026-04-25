@@ -77,7 +77,7 @@ Phase 2 Design.
 
 | FR ID | Requirement | Acceptance Criteria |
 |-------|-------------|---------------------|
-| FR-01 | Candidate consumer set picked from top-active Phenotype-org repos | Phase 1 Discovery (plan.md) selects exactly 5 candidates from {AgilePlus, thegent, hwLedger, BytePort, PhenoKits} and records selection rationale in `discovery.md`. |
+| FR-01 | Candidate consumer set picked from top-active Phenotype-org repos | Phase 1 Discovery (plan.md) selects at least 5 candidates from {AgilePlus, thegent, hwLedger, BytePort, PhenoKits} (may add up to 1 substitute from {Tracely, FocalPoint, Metron, BlueScript} if needed to satisfy FR-09) and records selection rationale in `discovery.md`. |
 | FR-02 | Per-consumer migration delta documented before any code | Phase 2 Design (plan.md) produces, per (consumer × crate) pair, a side-by-side comparison of the consumer's local types vs. the canonical type, plus a written migration delta. No PR opens before this artifact exists. |
 | FR-03 | AgilePlus adopts `phenotype-error-core` | AgilePlus crate(s) currently defining bespoke error enums add a `[dependencies]` entry for `phenotype-error-core`, replace ≥1 local error enum with a canonical type, and `cargo build --workspace` + `cargo test --workspace` pass. |
 | FR-04 | AgilePlus adopts `phenotype-config-core` | One AgilePlus crate replaces a bespoke config loader with `UnifiedConfigLoader` from `phenotype-config-core`. Build + test green. |

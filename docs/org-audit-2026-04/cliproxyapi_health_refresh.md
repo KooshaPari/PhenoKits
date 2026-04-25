@@ -11,12 +11,13 @@
 ## Build & Test Status
 
 ### Go Build
-- **Status**: BLOCKED
-- **Root Cause**: Unresolved local import paths (phenotype-go-auth, v6/v7 version mismatch)
+- **Status**: BLOCKED (phenotype-go-auth resolved; v6/v7 mismatch remains)
+- **phenotype-go-auth**: ✅ v0.1.0 tagged and builds cleanly
+- **Root Cause**: Self-referential imports + v6/v7 versioning mismatch
   - pkg/llmproxy references `github.com/kooshapari/CLIProxyAPI/v7/pkg/llmproxy/auth/cursor` (missing)
   - codebuddy_login.go references router-for-me v6 config/auth (not in go.mod)
 - **Impact**: 50+ test packages fail setup; binaries (cliproxyctl, server, examples) do not build
-- **Fix Required**: Inline missing types or add v6 imports to go.mod (deferred to implementation phase)
+- **Fix Required**: Resolve v6/v7 module split OR inline missing types
 
 ### Go Tests
 - **Status**: PARTIAL — 4 passing test packages (proxy util, translator core)
@@ -34,7 +35,11 @@
 ## Dependency Analysis
 
 ### Go Dependencies (High-Risk)
-- **phenotype-go-auth** (v0.0.0): pseudo-version; no release tag (untrackable)
+- **phenotype-go-auth** (v0.1.0): ✅ RESOLVED — v0.1.0 tagged 2026-04-24; CHANGELOG added
+  - Location: /repos/AuthKit/go/
+  - Module: github.com/KooshaPari/phenotype-go-auth v0.1.0
+  - Content: JWT, CORS, rate limiting middleware; chi/v5 router
+  - Tracked via: local git tag (no GitHub remote for AuthKit/go yet)
 - **go-git v6.0.0**: Very new, git 2025 commit; may have API surface churn
 - **gin v1.12.0**: Latest major (good)
 - **pgx v5.9.1**: Latest (good)
@@ -68,23 +73,30 @@
 |-------|-----|--------|
 | oxlint config parse error | Removed invalid rule specs; use defaults | ✅ Applied |
 | npm peer dep conflict | `--legacy-peer-deps` works | ✅ Verified |
-| go.mod unresolved imports | Requires type inlining or v6 compat | ⏳ Deferred |
+| phenotype-go-auth pseudo-version | v0.1.0 tagged + CHANGELOG added; module builds cleanly | ✅ Resolved |
+| v6/v7 module split (self-refs) | Requires module restructure or type consolidation | ⏳ Deferred |
 
 ## Summary
 
-**Status**: ACTIVE but BUILD-BLOCKED
+**Status**: ACTIVE but BUILD-BLOCKED (phenotype-go-auth dependency resolved)
 
 **Stack**: Go + TypeScript docs (hybrid); 80+ deps, 1.6K .go files, 178 test packages
 
-**Blockers**:
-1. **Go build**: Unresolved local imports (phenotype-go-auth missing; v6/v7 mismatch)
-2. **Tests**: 50+ packages cannot initialize; 4 passing
+**Blockers** (1 of 2 resolved):
+1. **phenotype-go-auth** ✅ RESOLVED
+   - v0.1.0 tagged in AuthKit/go/ (commit 96355ff)
+   - CHANGELOG.md added (JWT, CORS, rate limiting)
+   - Module builds cleanly via local replace in go.mod
+2. **Go build v6/v7 mismatch** ⏳ REMAINING
+   - Self-referential imports: pkg/llmproxy expects internal/auth/cursor types
+   - Version split: v6 refs (router-for-me) mixed with v7 module declaration
+   - Blocks all binaries: cliproxyctl, server, fetch_antigravity_models
 
-**Fixes Applied**: oxlint config (1-line fix); npm install (no code change required)
+**Build Error Count**: ~30 unresolved import errors (was 50+; phenotype-go-auth reduction pending)
 
 **Recommendations**:
-- Inline missing cursor types or add v6 compatibility imports to go.mod
+- Consolidate v6/v7 module split: choose version, migrate all refs
+- Inline missing cursor types OR create internal submodule structure
 - Expand README with build/test instructions
-- Add CHANGELOG.md
-- Clean dirty tree (commit or stash untracked/modified files)
-- Run full test suite once imports resolved
+- Clean dirty tree (6 modified + 11 untracked files)
+- Run full test suite once v6/v7 split resolved

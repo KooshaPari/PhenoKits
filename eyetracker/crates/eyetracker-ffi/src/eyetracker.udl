@@ -1,0 +1,53 @@
+namespace eyetracker {
+};
+
+dictionary Point2D {
+    f32 x;
+    f32 y;
+};
+
+dictionary GazePoint {
+    f32 x;
+    f32 y;
+    f32 confidence;
+    i64 timestamp_ms;
+};
+
+dictionary Fixation {
+    Point2D center;
+    i64 duration_ms;
+    i64 start_time_ms;
+};
+
+dictionary FaceLandmarks {
+    Point2D left_eye;
+    Point2D right_eye;
+    Point2D nose;
+    Point2D left_cheek;
+    Point2D right_cheek;
+};
+
+dictionary ScreenInfo {
+    u32 width_px;
+    u32 height_px;
+    f32 dpi;
+};
+
+dictionary CameraIntrinsics {
+    f32 focal_length_x;
+    f32 focal_length_y;
+    f32 principal_point_x;
+    f32 principal_point_y;
+    u32 width;
+    u32 height;
+};
+
+interface GazeEstimator {
+    constructor(CameraIntrinsics camera, ScreenInfo screen);
+    GazePoint estimate_gaze(FaceLandmarks landmarks, i64 timestamp_ms);
+};
+
+interface FixationDetector {
+    constructor(f32 velocity_threshold, i64 dwell_time_ms);
+    Fixation? process(GazePoint gaze);
+};

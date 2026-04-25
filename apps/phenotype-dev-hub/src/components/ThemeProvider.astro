@@ -1,0 +1,33 @@
+---
+/**
+ * ThemeProvider — initializes dark/light mode with localStorage persistence.
+ * Loads saved preference and applies it before the page renders to prevent FOUC.
+ * Falls back to system preference via prefers-color-scheme.
+ */
+---
+
+<script>
+  // Initialize theme before page renders
+  function initializeTheme() {
+    const stored = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const isDark = stored === 'dark' || (stored === null && prefersDark);
+
+    document.documentElement.classList.toggle('dark', isDark);
+  }
+
+  // Run immediately
+  initializeTheme();
+
+  // Listen for system preference changes
+  window
+    .matchMedia('(prefers-color-scheme: dark)')
+    .addEventListener('change', (e) => {
+      const stored = localStorage.getItem('theme');
+      if (stored === null) {
+        document.documentElement.classList.toggle('dark', e.matches);
+      }
+    });
+</script>
+
+<slot />

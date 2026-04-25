@@ -21,7 +21,7 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: $123matrix.rust-version125
+          toolchain: ${{ matrix.rust-version }}
 
       - name: Build
         run: cargo build --verbose
@@ -34,5 +34,4 @@ jobs:
       
 
   phenotype-validate:
-    runs-on: ubuntu-latest
     uses: KooshaPari/phenotypeActions/.github/workflows/validate-governance.yml@main

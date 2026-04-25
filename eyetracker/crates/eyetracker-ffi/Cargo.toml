@@ -1,0 +1,25 @@
+[package]
+name = "eyetracker-ffi"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+crate-type = ["cdylib", "staticlib"]
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+uniffi = { version = "0.27", features = ["build"] }
+eyetracker-domain = { path = "../eyetracker-domain" }
+eyetracker-math = { path = "../eyetracker-math" }
+eyetracker-calibration = { path = "../eyetracker-calibration" }
+eyetracker-estimator = { path = "../eyetracker-estimator" }
+eyetracker-storage = { path = "../eyetracker-storage" }
+
+[build-dependencies]
+uniffi = { version = "0.27", features = ["build"] }
+
+[lib]
+name = "eyetracker_ffi"
+path = "src/lib.rs"

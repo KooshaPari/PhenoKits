@@ -105,6 +105,53 @@ Explore Stashly and other Phenotype collections at the [Collections Showcase](ht
 - **[Paginary](../Paginary)** — Knowledge collection (specs, tutorials, handbooks)
 - **[phenotype-shared](../phenoShared)** — Rust infrastructure toolkit (domain, application, ports)
 
+## Governance & Development
+
+**AgilePlus Tracking**: All work tracked in `/repos/AgilePlus`. Review `CLAUDE.md` for development standards and policies.
+
+**Quality Checks**:
+```bash
+cargo test --workspace               # Complete test suite
+cargo clippy --workspace -- -D warnings  # Zero warnings required
+cargo fmt --check                   # Format validation
+```
+
+**Crate Publishing**: Each crate independently published to crates.io with `stashly-*` prefix for granular dependency management.
+
+**Cross-Collection Integration**: Stashly uses phenotype-bus to consume events from Sidekick (dispatch), Observably (tracing), and Eidolon (automation) for persistence and state management.
+
+## Usage Patterns
+
+**Event Sourcing Workflow**:
+```rust
+// Subscribe to domain events
+let mut rx = domain_bus.subscribe();
+// Store in event store
+event_store.append(&event).await?;
+// Replay for audit/replay
+let history = event_store.all().await?;
+```
+
+**State Machine with Guards**:
+```rust
+// Define states and transitions
+let mut fsm = StateMachine::new(initial_state);
+// Guard transitions with context
+fsm.transition(next_state, context)?;
+```
+
+## Related Phenotype Collections
+
+- **[Sidekick](../Sidekick)** — Agent dispatch
+- **[Eidolon](../Eidolon)** — Device automation
+- **[Observably](../Observably)** — Distributed tracing
+- **[Paginary](../Paginary)** — Knowledge collection
+- **[phenotype-shared](../phenotype-shared)** — Shared infrastructure
+
 ## License
 
 Apache-2.0
+
+**Status**: Active collection (expanding Phase 2)  
+**Collections Showcase**: https://dev.phenotype.io/collections  
+**Last Updated**: 2026-04-24

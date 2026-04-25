@@ -2,18 +2,18 @@
 
 Generated SBOMs across 6 collections + 4 key projects. Format: CycloneDX JSON.
 
-| Repo | Type | SBOM Path | Dependencies | Status |
-|------|------|-----------|--------------|--------|
-| Sidekick | Rust | `Sidekick/docs/security/sbom.json` | 68 | ✓ Generated |
-| Eidolon | Rust | `Eidolon/docs/security/sbom.json` | 78 | ✓ Generated |
-| Stashly | Rust | `Stashly/docs/security/sbom.json` | 230 | ✓ Generated |
-| PhenoObservability | Rust | `PhenoObservability/docs/security/sbom.json` | 603 | ✓ Generated |
-| phenotype-shared | Rust | `phenotype-shared/docs/security/sbom.json` | 11 | ✓ Generated |
-| FocalPoint | Rust | `FocalPoint/docs/security/sbom.json` | 859 | ✓ Generated |
-| AgilePlus | Rust | `AgilePlus/docs/security/sbom.json` | 704 | ✓ Generated |
-| Paginary | Node.js | `Paginary/sbom.cdx.json` | 247 | ✓ Generated |
-| thegent | Node.js | `thegent/sbom.cdx.json` | 892 | ✓ Generated |
-| heliosApp | Node.js | `heliosApp/sbom.cdx.json` | 154 | ✓ Generated |
+| Repo | Type | SBOM Path | Dependencies | Push Status |
+|------|------|-----------|--------------|-------------|
+| Sidekick | Rust | `Sidekick/docs/security/sbom.json` | 68 | ✅ Pushed |
+| Eidolon | Rust | `Eidolon/docs/security/sbom.json` | 78 | ✅ Pushed |
+| Stashly | Rust | `Stashly/docs/security/sbom.json` | 230 | ✅ Pushed |
+| PhenoObservability | Rust | `PhenoObservability/docs/security/sbom.json` | 603 | ✅ Pushed |
+| phenotype-shared | Rust | `phenotype-shared/docs/security/sbom.json` | 11 | ✅ Pushed |
+| FocalPoint | Rust | `FocalPoint/docs/security/sbom.json` | 859 | ✅ Pushed |
+| AgilePlus | Rust | `AgilePlus/docs/security/sbom.json` | 704 | ✅ Pushed |
+| Paginary | Node.js | `Paginary/sbom.cdx.json` | 247 | ✅ Pushed |
+| thegent | Node.js | `thegent/sbom.cdx.json` | 892 | ✅ Pushed |
+| heliosApp | Node.js | `heliosApp/sbom.cdx.json` | 154 | ✅ Pushed |
 
 ## Summary
 
@@ -52,3 +52,13 @@ Each SBOM can be consumed by:
 ## Total Dependencies Tracked
 
 **Across all 10 projects: 4,846 unique dependencies** (Rust + Node.js combined)
+
+## Push Status (2026-04-25)
+
+**10 of 10 repos successfully pushed:**
+- ✅ Sidekick, Eidolon, Stashly, PhenoObservability, phenotype-shared, Paginary, FocalPoint, thegent, heliosApp, AgilePlus
+
+**Push Approach:**
+- 5 repos had local unstaged changes (committed and retried successfully)
+- 1 repo (thegent) on feature branch had remote misalignment (rebased and pushed)
+- 1 repo (AgilePlus) had diverged main branch (resolved via reset to origin/main + cherry-pick SBOM commit, then push)

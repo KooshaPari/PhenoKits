@@ -1,0 +1,13 @@
+[package]
+name = "eyetracker-estimator"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+serde.workspace = true
+thiserror.workspace = true
+eyetracker-domain = { path = "../eyetracker-domain" }
+eyetracker-math = { path = "../eyetracker-math" }
+eyetracker-calibration = { path = "../eyetracker-calibration" }

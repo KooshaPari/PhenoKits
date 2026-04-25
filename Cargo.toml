@@ -8,6 +8,7 @@ members = [
     "crates/phenotype-event-sourcing",
     "crates/phenotype-http-adapter",
     "crates/phenotype-policy-engine",
+    "crates/phenotype-policy-engine-py",
     "crates/phenotype-port-interfaces",
     "crates/phenotype-postgres-adapter",
     "crates/phenotype-redis-adapter",

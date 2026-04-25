@@ -1,0 +1,18 @@
+[package]
+name = "phenotype-policy-engine-py"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+
+[dependencies]
+phenotype-policy-engine = { path = "../phenotype-policy-engine" }
+pyo3 = { version = "0.22", features = ["abi3-py38"] }
+
+[lib]
+name = "policy_engine_py"
+crate-type = ["cdylib"]
+
+[package.metadata.maturin]
+python-source = "src/python"
+module-name = "policy_engine_py._core"
+include = ["src/python"]

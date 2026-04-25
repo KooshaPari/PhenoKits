@@ -69,11 +69,38 @@ while let Ok(event) = rx.recv().await {
 
 See `../../phenotype-bus/README.md` and `../../docs/org-audit-2026-04/collection_build_matrix.md` for integration details.
 
-## Provenance
+## Governance & Contributing
+
+**Development & AgilePlus**: All work tracked in `/repos/AgilePlus`. Check `CLAUDE.md` for governance policies and development standards.
+
+**Workspace Commands**:
+```bash
+cargo build --workspace              # Build all crates
+cargo test --workspace               # Run all tests
+cargo clippy --workspace -- -D warnings  # Lint enforcement
+cargo fmt --check                   # Format verification
+```
+
+**Quality Gates**: All code must pass clippy (zero warnings), format, and tests before committing.
+
+## Provenance & Integration
 
 - **observably-tracing**: Extracted from `FocalPoint/crates/focus-observability`
 - Source repos retained; these are copies for productized distribution.
+- Integration via **phenotype-bus**: See `../../phenotype-bus/README.md` for cross-collection event patterns.
+
+## Related Phenotype Collections
+
+- **[Sidekick](../Sidekick)** — Agent dispatch & presence tracking
+- **[Stashly](../Stashly)** — State, events, caching
+- **[Eidolon](../Eidolon)** — Device automation
+- **[Paginary](../Paginary)** — Specifications & handbooks
+- **[phenotype-shared](../phenotype-shared)** — Shared Rust toolkit
 
 ## License
 
 Apache-2.0
+
+**Status**: Active collection (Phase 2 expansion planned)  
+**Maintained by**: Phenotype Org  
+**Last Updated**: 2026-04-24

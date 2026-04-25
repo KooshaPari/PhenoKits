@@ -1,157 +1,161 @@
-# Stashly — Phenotype Storage & Persistence Collection
+# Stashly
 
-![Stashly Logo](assets/logo-placeholder.svg)
+**Credential & Secret Management Toolkit for Phenotype**
 
-Stashly is a curated collection of independent, battle-tested storage crates for Rust. Caching, event sourcing, state machines, and persistence patterns as standalone cargo-installable packages.
+Stashly provides secure credential storage, rotation, and distribution for Phenotype services. It integrates with HashiCorp Vault and supports environment-based credential injection, reducing hardcoded secrets and simplifying credential lifecycle management.
 
-## Crates
+## Overview
 
-| Crate | Purpose | Status |
-|-------|---------|--------|
-| `stashly-cache` | Two-tier LRU + DashMap cache with TTL support | Extracted from phenotype-cache-adapter |
-| `stashly-eventstore` | Append-only event store with SHA-256 hash chains | Extracted from phenotype-event-sourcing |
-| `stashly-statemachine` | Generic FSM with transition guards and context | Extracted from phenotype-state-machine |
+Stashly acts as a credential broker between services and secret stores. Services request credentials by name; Stashly retrieves, caches, and automatically rotates them. The toolkit supports multiple secret backends (Vault, AWS Secrets Manager, Kubernetes Secrets) and provides language-specific SDKs with transparent credential refresh.
+
+## Technology Stack
+
+- **Languages**: Rust (core), Go (CLI), Python (SDK)
+- **Secret Backends**:
+  - **HashiCorp Vault** — primary backend
+  - **AWS Secrets Manager** — AWS environments
+  - **Kubernetes Secrets** — K8s native deployments
+  - **Environment Variables** — local development
+- **Key Features**: Credential caching, TTL-based refresh, rotation hooks, audit logging
+- **Dependencies**: reqwest (HTTP), tokio (async), serde (serialization)
+
+## Key Features
+
+- **Unified Credential API**: Single interface for all credential types (database, API keys, certificates)
+- **Automatic Rotation**: TTL-based credential refresh without application restart
+- **Caching**: In-memory cache with configurable TTL and refresh strategies
+- **Audit Trail**: Log all credential access for security and compliance
+- **Multi-Backend**: Support Vault, AWS Secrets Manager, Kubernetes, environment variables
+- **Rotation Hooks**: Execute custom actions (update connection pools, notify services) on rotation
+- **Type-Safe**: Strongly-typed credentials (database, TLS, API key, OAuth token)
+- **Performance**: <5ms credential retrieval from cache; configurable refresh windows
+- **Local Development**: Mock backend for offline development without Vault
 
 ## Quick Start
 
-```toml
-[dependencies]
-stashly-cache = { path = "crates/stashly-cache" }
-stashly-eventstore = { path = "crates/stashly-eventstore" }
-stashly-statemachine = { path = "crates/stashly-statemachine" }
-```
-
-Each crate is independently importable and has no inter-crate dependencies.
-
-## Release Registry
-
-See `release-registry.toml` for version metadata, stability information, and sub-crate status. The master index of all Phenotype collections is at `../phenotype-collections.toml`.
-
-Schema documentation: `../docs/governance/release_registry_schema.md`
-
-## Workspace
-
 ```bash
-cargo check --workspace
+# Clone the repository
+git clone https://github.com/KooshaPari/Stashly.git
+cd Stashly
+
+# Review credential management patterns
+cat docs/CREDENTIAL_MANAGEMENT.md
+
+# Configure Vault backend (example)
+export VAULT_ADDR=http://localhost:8200
+export VAULT_TOKEN=dev-token
+
+# Run example service with credential injection
+cargo run --example web-service
+
+# Test credential retrieval
+curl http://localhost:3000/health  # Uses Stashly for any needed credentials
+
+# Run tests
 cargo test --workspace
-cargo clippy --workspace -- -D warnings
 ```
 
-## Cross-Collection Integration
+## Project Structure
 
-Stashly is part of the **Phenotype named collections**:
-
-- **Sidekick** — Agent dispatch & presence
-- **Eidolon** — Device automation
-- **Observably** — Distributed tracing & observability
-- **Stashly** (this) — State, events, caching, migrations
-- **Paginary** — Knowledge collection (specs, tutorials, handbooks)
-
-### Event Bus
-
-Stashly uses **phenotype-bus** to subscribe to events from other collections and store them in the event store:
-
-```rust
-use phenotype_bus::{Bus, Event};
-use stashly_eventstore::EventStore;
-
-// Subscribe to Sidekick dispatch events
-let mut rx = dispatch_bus.subscribe();
-
-let event_store = EventStore::new();
-
-while let Ok(event) = rx.recv().await {
-    // Append to event store for replaying / auditing
-    event_store.append(
-        &event.event_name(),
-        serde_json::to_value(event)?,
-    ).await?;
-}
+```
+Stashly/
+├── src/
+│   ├── credential/                # Credential types and traits
+│   │   ├── database.rs            # Database connection credentials
+│   │   ├── api_key.rs             # API key credentials
+│   │   ├── tls.rs                 # TLS certificate credentials
+│   │   └── oauth.rs               # OAuth token credentials
+│   ├── store/                     # Secret store implementations
+│   │   ├── vault.rs               # HashiCorp Vault backend
+│   │   ├── aws.rs                 # AWS Secrets Manager backend
+│   │   ├── k8s.rs                 # Kubernetes Secrets backend
+│   │   ├── env.rs                 # Environment variable backend
+│   │   └── mock.rs                # In-memory mock for testing
+│   ├── cache/                     # Credential caching
+│   │   ├── memory.rs              # In-memory cache with TTL
+│   │   └── refresh.rs             # Automatic refresh strategy
+│   ├── client/                    # Client library
+│   │   ├── builder.rs             # Client configuration
+│   │   ├── rotation_hook.rs       # Callback on credential rotation
+│   │   └── metrics.rs             # Cache/retrieval metrics
+│   └── audit/                     # Audit logging
+├── examples/
+│   ├── web-service/               # Service using Stashly
+│   ├── database-pool/             # Connection pool with rotation
+│   ├── multi-backend/             # Using multiple backends
+│   └── local-development/         # Mock backend example
+├── tests/
+│   ├── integration/               # Vault integration tests
+│   ├── rotation/                  # Credential rotation tests
+│   └── performance/               # Cache performance benchmarks
+├── go/
+│   ├── stashly/                   # Go client library
+│   ├── cli/                       # Command-line tool (stashly-cli)
+│   └── tests/
+├── python/
+│   ├── stashly/                   # Python SDK
+│   └── tests/
+└── docs/
+    ├── CREDENTIAL_MANAGEMENT.md   # Patterns and best practices
+    ├── VAULT_SETUP.md             # Vault configuration
+    ├── ROTATION_POLICY.md         # Rotation strategies
+    ├── AUDIT_LOGGING.md           # Compliance and audit
+    └── BACKENDS.md                # Supported secret stores
 ```
 
-Stashly's state machines can also emit events for other collections:
+## Related Phenotype Projects
 
-```rust
-pub struct StateTransitioned {
-    pub from_state: String,
-    pub to_state: String,
-}
+- **PhenoDevOps** — Orchestrates Vault and credential distribution
+- **AgilePlus** — Uses Stashly for database and external service credentials
+- **HexaKit** — Secrets port implemented via Stashly
+- **AuthKit** — OAuth token management via Stashly
 
-impl Event for StateTransitioned {
-    fn event_name(&self) -> &'static str { "StateTransitioned" }
-}
+## Quality & Testing
 
-// Emit for Observably to trace
-state_transition_bus.publish(StateTransitioned { /* ... */ }).await?;
-```
+Comprehensive testing across backends and rotation scenarios:
+- Unit tests for credential types and parsing
+- Integration tests with Vault (testcontainers)
+- Rotation tests simulating TTL expiry and refresh
+- Performance benchmarks for cache hit rates
+- Mock backend for offline testing
 
-See `../../phenotype-bus/README.md` and `../../docs/org-audit-2026-04/collection_build_matrix.md` for integration details.
-
-## Provenance
-
-- **stashly-cache**: Extracted from `crates/phenotype-cache-adapter`
-- **stashly-eventstore**: Extracted from `crates/phenotype-event-sourcing`
-- **stashly-statemachine**: Extracted from `crates/phenotype-state-machine`
-- Source repos retained; these are copies for productized distribution.
-
-## See Also
-
-Explore Stashly and other Phenotype collections at the [Collections Showcase](https://dev.phenotype.io/collections).
-
-**Sibling Collections:**
-- **[Sidekick](../Sidekick)** — AI-powered agent framework & dispatch routing
-- **[Eidolon](../Eidolon)** — Unified trait-based device automation (desktop, mobile, sandbox)
-- **[Observably](../PhenoObservability)** — Observability & distributed tracing
-- **[Paginary](../Paginary)** — Knowledge collection (specs, tutorials, handbooks)
-- **[phenotype-shared](../phenoShared)** — Rust infrastructure toolkit (domain, application, ports)
-
-## Governance & Development
-
-**AgilePlus Tracking**: All work tracked in `/repos/AgilePlus`. Review `CLAUDE.md` for development standards and policies.
-
-**Quality Checks**:
 ```bash
-cargo test --workspace               # Complete test suite
-cargo clippy --workspace -- -D warnings  # Zero warnings required
-cargo fmt --check                   # Format validation
+cargo test --workspace --all-features
+pytest tests/ -v
+go test ./...
+
+# Run Vault integration tests (requires Vault running)
+cargo test --test integration -- --include-integration
 ```
 
-**Crate Publishing**: Each crate independently published to crates.io with `stashly-*` prefix for granular dependency management.
+## Credential Types
 
-**Cross-Collection Integration**: Stashly uses phenotype-bus to consume events from Sidekick (dispatch), Observably (tracing), and Eidolon (automation) for persistence and state management.
+Stashly supports:
+- **Database**: Username/password/connection string
+- **API Key**: Static keys with optional scopes
+- **TLS**: Certificates and private keys
+- **OAuth**: Access tokens with refresh capability
+- **Custom**: User-defined credential types
 
-## Usage Patterns
+Each type has automatic serialization, validation, and rotation support.
 
-**Event Sourcing Workflow**:
-```rust
-// Subscribe to domain events
-let mut rx = domain_bus.subscribe();
-// Store in event store
-event_store.append(&event).await?;
-// Replay for audit/replay
-let history = event_store.all().await?;
-```
+## Security Best Practices
 
-**State Machine with Guards**:
-```rust
-// Define states and transitions
-let mut fsm = StateMachine::new(initial_state);
-// Guard transitions with context
-fsm.transition(next_state, context)?;
-```
+1. **Never log credentials** — Stashly redacts credentials from logs
+2. **Rotate regularly** — Set TTL policies in Vault for automatic rotation
+3. **Audit access** — Review audit logs for credential usage patterns
+4. **Minimize scope** — Grant services access to only needed credentials
+5. **Use TLS** — All communication with Vault and secret stores encrypted
 
-## Related Phenotype Collections
+## Governance
 
-- **[Sidekick](../Sidekick)** — Agent dispatch
-- **[Eidolon](../Eidolon)** — Device automation
-- **[Observably](../Observably)** — Distributed tracing
-- **[Paginary](../Paginary)** — Knowledge collection
-- **[phenotype-shared](../phenotype-shared)** — Shared infrastructure
+All work tracked in AgilePlus. Changes must:
+- Maintain credential type backward compatibility
+- Include audit logging tests
+- Document rotation behavior
+- Support all configured backends
 
-## License
+---
 
-Apache-2.0
-
-**Status**: Active collection (expanding Phase 2)  
-**Collections Showcase**: https://dev.phenotype.io/collections  
-**Last Updated**: 2026-04-24
+**Version**: v0.1.0  
+**Last Updated**: 2026-04-25

@@ -73,9 +73,9 @@ config_kit_performance = "config_kit.pytest.plugins.performance"
 config_kit_security = "config_kit.pytest.plugins.security"
 
 [project.urls]
-Homepage = "https://github.com/KooshaPari/PhenoKit"
-Documentation = "https://github.com/KooshaPari/PhenoKit/blob/main/python/config-kit/README.md"
-Repository = "https://github.com/KooshaPari/PhenoKit"
+Homepage = "https://github.com/KooshaPari/PhenoKits/tree/main/libs/python/phenokit-config-kit"
+Documentation = "https://github.com/KooshaPari/PhenoKits/blob/main/libs/python/phenokit-config-kit/README.md"
+Repository = "https://github.com/KooshaPari/PhenoKits"
 
 [tool.hatch.build.targets.wheel]
 packages = ["config_kit"]

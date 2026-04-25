@@ -131,3 +131,61 @@ implementation PR.
 
 - depends-on: `cross-project-reuse-audit-2026-04-25.md` (this ADR resolves its §"Three-canonical-home problem")
 - enables: 4 implementation work packages (one per crate) — sequential within a host workspace, parallel across workspaces.
+
+## Verification 2026-04-25 (post-discrepancy)
+
+**Original verdict (`phenoShared` is canonical) — CONFIRMED.** The supposed contradiction with later "reality-check" claims at commit `e4101c0e8` (asserting `phenotype-shared` had 12 workspace members on `origin/main` and was therefore active, contradicting the "dormant" framing) is **a phantom dispute**: `KooshaPari/phenotype-shared` and `KooshaPari/phenoShared` are **the same GitHub repository**. The repo was renamed `phenotype-shared` → `phenoShared` and GitHub silently redirects API calls under the old name to the new one.
+
+### Direct API evidence (2026-04-25)
+
+```
+gh api repos/KooshaPari/phenotype-shared --jq '{full_name, html_url, id}'
+→ {full_name: "KooshaPari/phenoShared", html_url: "https://github.com/KooshaPari/phenoShared", id: 1190541801}
+
+gh api repos/KooshaPari/phenoShared --jq '{full_name, html_url, id}'
+→ {full_name: "KooshaPari/phenoShared", html_url: "https://github.com/KooshaPari/phenoShared", id: 1190541801}
+```
+
+Identical `id`, identical `full_name`. Both names resolve to the same repo (id `1190541801`, created 2026-03-24).
+
+### Side-by-side (both names → one repo)
+
+| Dimension | `phenotype-shared` (alias) | `phenoShared` (canonical name) |
+|---|---|---|
+| GitHub repo id | 1190541801 | 1190541801 |
+| Default branch | `main` | `main` |
+| Last commit on `main` | `0756e815d` (2026-04-25T19:17:44Z, "chore(cargo): commit Cargo.lock for Dependabot + audit coverage (#101)") | same |
+| Workspace members | 12 (`ffi_utils`, `phenotype-application`, `phenotype-cache-adapter`, `phenotype-domain`, `phenotype-event-sourcing`, `phenotype-http-adapter`, `phenotype-nanovms-client`, `phenotype-policy-engine`, `phenotype-port-interfaces`, `phenotype-postgres-adapter`, `phenotype-redis-adapter`, `phenotype-state-machine`) | same |
+| Target crate `lib.rs` sizes | event-sourcing 1236 B, cache-adapter 28 B, policy-engine 1362 B, state-machine 28 B | identical (same blobs) |
+| PRs #92–#101 | identical list, all merged | identical list |
+
+**API-drift comparison:** moot — same repo, same blobs.
+
+### Conclusion
+
+- **TRUE canonical:** `KooshaPari/phenoShared` (`https://github.com/KooshaPari/phenoShared`).
+- **`phenotype-shared` is an alias** (the previous repository name); it is NOT a separate dormant repo. The remote `pheno` configured locally as `git@github.com:KooshaPari/phenoShared.git` is correct.
+- The original ADR verdict stands. The note "remote `main` has empty `members = []`" in the original Background table was based on a stale snapshot taken before `phenoShared` had been populated; that historical observation is no longer true on `main` and should not be cited as evidence of dormancy.
+
+### Spec PRs to revisit
+
+- **PR #406 (heliosApp consolidation):** assumed-correct on canonical home. No directional change required, but any wording that names the repo `phenotype-shared` should be updated to `phenoShared` for clarity.
+- **PR #32 (phenotype-shared workspace expansion):** PR is filed against the renamed repo (now `phenoShared`); no canonical-home change needed. Title may be updated to reflect the rename, but is non-blocking.
+
+### Action items
+
+1. Org-hygiene task (out of scope for this ADR): consider redirecting or removing the `phenotype-shared` redirect alias to eliminate future name-collision confusion in audits. Tracked separately.
+2. Update any other governance doc that treats `phenotype-shared` and `phenoShared` as distinct repositories — e.g. `dormant-repos-audit-2026-04-25.md`, `org-cargo-audit-2026-04-25.md`, `cross-project-reuse-audit-2026-04-25.md`, `dependabot-rust-coverage.md`, `alert-sync-policy.md` — to refer to the single canonical repo by its current name (`phenoShared`).
+3. The "Background" table row marking `phenotype-shared` as "dormant" with `members = []` is retained for historical context but should be read as "the repo's earlier state before being populated under its previous name."
+
+### Reproducible verification
+
+```bash
+gh api repos/KooshaPari/phenotype-shared --jq '{full_name, id, default_branch, pushed_at}'
+gh api repos/KooshaPari/phenoShared      --jq '{full_name, id, default_branch, pushed_at}'
+# both → same id 1190541801, same full_name "KooshaPari/phenoShared"
+
+gh api repos/KooshaPari/phenoShared/contents/Cargo.toml --jq '.content' | base64 -d   # 12 members
+gh api repos/KooshaPari/phenoShared/contents/crates --jq '.[].name'                    # 12 crate dirs
+gh api repos/KooshaPari/phenoShared/commits/main --jq '{sha,date:.commit.committer.date,msg:.commit.message[:80]}'
+```

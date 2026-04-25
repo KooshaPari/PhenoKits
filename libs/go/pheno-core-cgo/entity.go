@@ -37,7 +37,7 @@ func (e *EntityId) Validate() bool {
 	cns := C.CString(e.Namespace)
 	defer C.free(unsafe.Pointer(cid))
 	defer C.free(unsafe.Pointer(cns))
-	
+
 	return bool(C.entity_id_validate(cid, cns))
 }
 
@@ -47,13 +47,13 @@ func (e *EntityId) ToJSON() (string, error) {
 	cns := C.CString(e.Namespace)
 	defer C.free(unsafe.Pointer(cid))
 	defer C.free(unsafe.Pointer(cns))
-	
+
 	jsonPtr := C.entity_id_to_json(cid, cns)
 	if jsonPtr == nil {
 		return "", fmt.Errorf("failed to serialize EntityId")
 	}
 	defer C.entity_id_free(jsonPtr)
-	
+
 	return C.GoString(jsonPtr), nil
 }
 

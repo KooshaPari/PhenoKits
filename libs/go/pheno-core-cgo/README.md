@@ -12,14 +12,14 @@ Go CGO bindings for Rust `phenotype-core`.
 
 ```bash
 # Generate C headers from Rust
-cd PhenoKit/rust/phenotype-core
-cbindgen --lang c --crate phenotype-core --output ../../go/pheno-core-cgo/phenotype_core.h
+cd PhenoProc/crates/phenotype-core
+cbindgen --lang c --crate phenotype-core --output ../../PhenoKits/libs/go/pheno-core-cgo/phenotype_core.h
 
 # Build the Rust library as cdylib
 cargo build --release
 
 # Build Go package
-cd PhenoKit/go/pheno-core-cgo
+cd PhenoKits/libs/go/pheno-core-cgo
 go build
 ```
 
@@ -32,7 +32,7 @@ import (
     "fmt"
     "log"
     
-    phenocore "github.com/KooshaPari/PhenoKit/go/pheno-core-cgo"
+    phenocore "github.com/KooshaPari/pheno-core-cgo"
 )
 
 func main() {

@@ -1,8 +1,8 @@
 /**
- * @phenotype/core - TypeScript SDK for Phenotype Core
- * 
+ * phenotype-core-ts - TypeScript SDK for Phenotype Core
+ *
  * This package provides TypeScript/JavaScript bindings for the
- * Phenotype Core library, with WASM acceleration where available.
+ * Phenotype Core library.
  */
 
 // Core types
@@ -21,10 +21,3 @@ export {
   Configuration,
   ConfigStore
 } from './config';
-
-// Re-export WASM bindings when available
-export {
-  WasmEntityId,
-  WasmConfig,
-  validateEntity as validateEntityWasm
-} from '@phenotype/core-wasm';

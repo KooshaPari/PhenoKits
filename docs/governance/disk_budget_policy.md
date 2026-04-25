@@ -79,6 +79,17 @@ echo "Caches purged. Run 'df -h /System/Volumes/Data | tail -1' to confirm."
 0 2 1-7 * * if [ $(date +\%A) = "Monday" ]; then rm -rf ~/Library/Caches/Homebrew/* && npm cache clean --force && rm -rf ~/.cargo/registry/cache; fi
 ```
 
+## Lesson Learned: 2026-04-25 Storm Recovery
+
+During multi-agent parallel dispatch:
+
+- **Initial state**: 117 MB free (95% full)
+- **Culprit**: Homebrew cache (`~/Library/Caches/Homebrew`) accumulated 12+ GB of bottled binaries
+- **Recovery**: Single `rm -rf ~/Library/Caches/Homebrew/* && npm cache clean --force` freed 46 GB
+- **Action**: Monthly cache purge is **CRITICAL** for agent-driven environments
+
+**Recommendation**: Add monthly cache purge to workspace initialization script before large dispatch waves. Consider integrating a pre-dispatch cache check into `agent-orchestrator` disk-check logic.
+
 ## Concurrency Rule
 
 Do not stack more than four concurrent pre-push `workspace-verify` runs or cargo

@@ -358,3 +358,211 @@ This addendum captures the work between v2 and the current rate-limit-pause chec
 ---
 
 *v3 addendum generated 2026-04-24 during GitHub API rate-limit pause. Cumulative ~700 PRs merged; +235 since v2.*
+
+---
+
+## 13. v4 Addendum — Governance-Pattern Branch Coordination
+
+Pane-0 coordination note: the requested scope is the `docs/governance-session-patterns`
+branch. The local ref for that branch exists, but checkout failed because the shelf git
+object database is missing tree `7f5431e7c468ad3f29c211af71e3be97a36b1e37` and
+`origin` no longer advertises that exact branch. The intended commit content was still
+readable from local commit `a981a960f` (`docs(governance): codify session-learned
+patterns`), so the governance-pattern doc set was applied forward onto the current
+working tree for git-based handoff.
+
+Files restored/applied:
+
+- `CLAUDE.md` pointer to disk and coordination policies
+- `docs/governance/README.md`
+- `docs/governance/disk_budget_policy.md`
+- `docs/governance/enospc_playbook.md`
+- `docs/governance/long_push_pattern.md`
+- `docs/governance/multi_session_coordination.md`
+
+Active pending TaskList IDs from operator prompt:
+
+- `#72` — Tracera merge strategy decision; still requires canonical-vs-worktree
+  decision before destructive convergence.
+- `#76` — PhenoAgent + PhenoSchema destructive cleanup; still requires explicit user
+  approval before deleting stashes/worktree state.
+- `#162`, `#187`, `#191`, `#205` — active external TaskList IDs supplied by the
+  operator; no checked-in local worklog entry with these IDs was found during this
+  handoff pass, so pane-0 should resolve them from the live TaskList source before
+  mutating.
+
+Validation:
+
+- `git diff --check -- CLAUDE.md docs/governance/*` passes.
+- Disk headroom is currently above the earlier blocker floor: `/System/Volumes/Data`
+  reports `51Gi` free.
+
+---
+
+## 14. v5 Addendum - AgilePlus Microfrontend + Tracera Merge DAG
+
+Continuation from v2/v3/v4 scope, with the operator narrowing the next pass to
+AgilePlus local microfrontend/runtime and the Tracera merge boundary. The v2
+reference commit is `65cd1b856` (`docs(worklogs): v2 addendum for 2026-04-24
+session`).
+
+### 14.1 Live Findings
+
+- Tracera governance validation currently passes: `python3 Tracera/validate_governance.py`
+  reports 13/13 checks passed on branch `pre-extract/tracera-sprawl-commit`.
+- AgilePlus should remain the methodology/OpenSpec/work-package authority.
+  Tracera should consume that state as the traceability/Jira-replacement layer,
+  not subsume it as a generic tracker mirror.
+- AgilePlus local Plane is now treated as self-hosted infrastructure. Local
+  provisioning produced `.agileplus/runtime/plane-sync.env` with a local
+  workspace/project/API token; do not require Plane Cloud credentials for the
+  critical path.
+- The active AgilePlus local UI remains the Rust dashboard. The React/Vite tree
+  under `crates/agileplus-dashboard/web` is still scaffold/component work until
+  it has a real package shell and build/test/storybook gates.
+
+### 14.2 Extended DAG
+
+```text
+P0 local Plane substrate
+  -> P1 Plane API smoke
+  -> A1 AgilePlus projection/export contract
+  -> T1 Tracera receiver contract tests
+  -> T2 Tracera main merge strategy
+  -> F1 dashboard/MFE promotion decision
+```
+
+| Node | Owner surface | Dependencies | Exit evidence |
+|---|---|---|---|
+| P0 | AgilePlus local runtime | Docker/OrbStack healthy, ports resolved, Plane DB provisioned | `local-ports.env` and redacted `plane-sync.env` exist |
+| P1 | AgilePlus Plane adapter | P0 | authenticated local Plane API smoke against workspace `agileplus` and project `AGP` |
+| A1 | AgilePlus methodology/OpenSpec export | P1 | contract covers project, feature, work package, evidence, audit log, and event records |
+| T1 | Tracera receiver | A1 | receiver-side tests accept canonical AgilePlus payloads and reject malformed/unlinked payloads |
+| T2 | Tracera merge strategy #72 | T1 | governance gate passes, branch/PR split documented, stale branch notes corrected, repo-state blockers resolved |
+| F1 | AgilePlus dashboard/MFE | P1, A1 | either keep React scaffold/archive status or promote after manifest, lockfile, TS config, app entrypoints, and gates pass |
+
+### 14.3 Pending Task Routing
+
+| Task | Route | Reason |
+|---|---|---|
+| `#72 Tracera:main merge strategy` | Critical path after T1 | Merge should land only after the AgilePlus-to-Tracera receiver contract is tested. |
+| `#76 PhenoAgent/PhenoSchema cleanup` | Side lane | Treat as retirement/migration cleanup; do not mix destructive cleanup with Tracera merge branch. |
+| `#162 compute-mesh` | Side lane | Runner/mesh capacity affects CI throughput, not the AgilePlus-Tracera contract itself. |
+| `#187 AgilePlus tier-1 chain` | Critical path | This is the AgilePlus runtime/dashboard/projection chain that feeds Tracera. |
+| `#191 PhenoLang branch` | Guarded side lane | Resolve default branch/DSL compatibility separately unless it changes exported contract shape. |
+| `#205 orphan-crate deletion` | Guarded side lane | Delete only after live consumers/import paths are proven clear. |
+
+### 14.4 Next Executable WBS
+
+1. Finish P1: start or smoke the self-hosted Plane API using
+   `.agileplus/runtime/plane-sync.env`; record redacted evidence only.
+2. Finish A1: write the AgilePlus-to-Tracera import/export contract spec and
+   fixtures.
+3. Finish T1: add Tracera receiver tests for canonical and malformed AgilePlus
+   payloads.
+4. Finish T2: prepare the Tracera `main` merge plan as a branch split that
+   keeps unrelated PhenoAgent/PhenoSchema, compute-mesh, PhenoLang, and
+   orphan-crate cleanup out of the merge.
+5. Finish F1 only after A1/T1: either promote the React dashboard scaffold to a
+   real local microfrontend with runnable gates, or keep it explicitly scaffolded
+   while the Rust dashboard remains production local UI.
+
+### 14.5 Tracera Merge Blockers
+
+- Governance is green, but repo-state is not clean enough for destructive
+  convergence: the live Tracera checkout is `pre-extract/tracera-sprawl-commit`,
+  while stale docs still mention older branch names.
+- Root shelf git operations can fail on the bad submodule/worktree
+  `.worktrees/integration-015-helioscli-nanovms`; use Tracera-local commands or
+  `--ignore-submodules=all` until that is repaired.
+- Treat the Tracera merge as sidecar/cherry-pick/import work until branch
+  provenance is resolved. Do not replace trees wholesale just because governance
+  validation passes.
+
+---
+
+## 15. v6 Addendum - PhenoLibs Option A Migration Execution
+
+Executed approved Option A from `docs/governance/phenolibs-migration-proposal.md` with
+one PR per target repository and duplicate/straight-migration checks before import.
+
+### 15.1 Open PRs
+
+| Target | PR | Migrated content | Validation |
+|---|---|---|---|
+| PhenoProc | https://github.com/KooshaPari/PhenoProc/pull/13 | `rust/phenotype-core-py` and `rust/phenotype-core-wasm` -> `crates/` with subtree history | `cargo fmt --check -p phenotype-core-py -p phenotype-core-wasm`; `PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1 cargo check -p phenotype-core-py -p phenotype-core-wasm`; `git diff --check -- Cargo.toml crates/phenotype-core-py crates/phenotype-core-wasm` |
+| PhenoKits | https://github.com/KooshaPari/PhenoKits/pull/24 | `go/pheno-core-cgo` -> `libs/go/pheno-core-cgo`; `typescript/packages/core` -> `libs/typescript/phenotype-core-ts`; `python/cli-kit`, `python/cli-builder-kit`, `python/config-kit` -> `libs/python/` with subtree history | `go build ./...`; `npm run typecheck`; `npm run build`; `PYTHONPATH=libs/python/pheno-cli-builder/src python3 -m pytest -q libs/python/pheno-cli-builder/tests`; `python3 -m compileall -q ...`; `git diff --check` |
+| pheno | https://github.com/KooshaPari/pheno/pull/77 | `python/core-utils` -> `python/pheno-core-utils` with subtree history | `python3 -m compileall -q python/pheno-core-utils/src`; editable install in `/tmp/pheno-core-utils-venv`; import smoke for `PoolManager`, `DatabaseManager`, `ReadinessChecker`, `VendorManager`; `git diff --check -- python/pheno-core-utils` |
+
+### 15.2 Skipped Python Packages
+
+Skipped because equivalent content already exists in `pheno-core` or `pheno-mcp`:
+
+- `python/pheno-errors`
+- `python/pheno-config`
+- `python/pheno-exceptions`
+- duplicate portions of `python/pheno-ports` for observability/tool-registry surfaces
+
+Skipped as unsafe straight-directory migrations because static review found unresolved
+legacy `pheno.*` namespace imports that the current `pheno/python` target does not
+provide:
+
+- `python/pheno-async`
+- `python/pheno-adapters`
+- `python/pheno-analytics`
+- `python/pheno-deployment`
+- `python/pheno-dev`
+- `python/pheno-domain`
+- `python/pheno-optimization`
+- `python/pheno-patterns`
+- `python/pheno-plugins`
+- `python/pheno-ports`
+- `python/pheno-process`
+- `python/pheno-providers`
+
+### 15.3 Notes
+
+- The `pheno-core-utils` source had a real syntax issue (`await` in a synchronous
+  asyncpg pool setup hook). The migrated package fixes the hook declarations to
+  `async def` before opening the PR.
+- `PhenoKits` PR #24 started as Go/TS and was extended with the proposal's Python
+  CLI/tooling bucket, preserving a single target-repo PR.
+- No destructive cleanup of the retired `PhenoLibs` source was performed.
+
+---
+
+## §13. Late-session sweep + cluster triage (post-rate-limit-reset, 2026-04-25 ~01:00Z)
+
+### Massive merge sweep
+- **Aggressive billing-aware merge sweep** (#262): 138 open non-draft PRs scanned; ~57 merged
+- **Final conflict-rebase sweep** (#263): 5 more cleared via hygiene-file --theirs (lockfiles, dependabot.yml, CODEOWNERS); 32 left as real-code conflicts
+- **Inline supersede triage on AgilePlus** (#265): closed 3 obvious dupes (#290 superseded by #292; #304+#312 by #326)
+- **thegent supersede triage** (#264): closed 3 (#919 twin of #920, #921 twin of #922, #917 subset of #918); 5 survivors with sequence: #911→#914→#918→#920→#922
+- **MSRV+Scorecard fleet bootstrap** (#256/#257): 10/10 Rust repos got `.github/workflows/scorecard.yml`; 8/8 unpinned Cargo.toml got `rust-version = "1.75"` (PhenoRuntime fixed via PR#16 inline after agent crash)
+
+### API outage & recovery
+- Two long-running agents crashed with **API 529 (Anthropic overloaded)** after ~1-2hr each (#261 final-sweep, #257 MSRV bootstrap)
+- Pre-crash work was already complete and persisted; verified via post-hoc API checks
+- Fewer parallel agents + faster turnover preferred going forward
+
+### coagent tool delivery
+- `~/.local/bin/coagent` (~120 LOC bash, single file)
+- `~/.local/bin/coagent-mcp.py` (MCP adapter, ~70 LOC python)
+- Migrated 2 user codex sessions (019dbfc6 + 019dbb08) into coagent panes after killing stale `mac-messages-mcp` × 52 procs
+- Ghostty window opened pre-attached to socket: `tmux -S /tmp/coagent.sock attach -t co`
+- Codex panes now dispatchable from Claude via `coagent pane co <0|1> <cmd>`
+
+### Final session totals
+- **PRs merged**: ~778 across 70+ repos
+- **PRs closed (superseded/dead)**: 35
+- **Issues auto-closed**: 24
+- **Branches pruned**: 97
+- **GH repos created**: 6 (phenotype-tooling, phenotype-infra, Conft, PhenoAgent, PlatformKit, PolicyStack)
+- **Open PR remainder**: ~60 (predominantly real conflicts, Graphite-managed gt/birch branches need graphite CLI)
+
+### Outstanding for user / next session
+- AgilePlus UUID-graph cluster leader #326 needs Graphite CLI for rebase (gh can't handle gt/birch tracking)
+- thegent platform-sync survivors #911 + #914 + #918 + #920 + #922 need manual sequenced landing
+- Tracera:main merge strategy (#72) — still user decision (subtree replace vs sidecar vs cherry-pick)
+- Compute mesh (#162) OCI Ampere capacity-blocked indefinitely; PAYG upgrade unlocks per Reddit/community consensus
+

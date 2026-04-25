@@ -132,11 +132,13 @@ Collection dependency graph is a clean DAG. All edges point toward phenotype-bus
 - **Recommendation**: Extract `phenotype-observability-macros` (procedural macros for span instrumentation)
 - **Impact**: Reduce copy-paste, enable uniform observability across all crates
 
-#### Candidate 3: **Migrations Framework** (Est. 150-250 LOC saved)
+#### Candidate 3: **Migrations Framework** ✅ COMPLETED (2026-04-25)
 - **Problem**: `stashly-migrations` defines a generic versioning + apply pattern; could be reused by any crate that persists state
-- **Current usage**: Stashly (storage schema), potentially needed by Eidolon (state snapshots), PhenoObservability (config versions)
-- **Recommendation**: Extract `phenotype-migrations-core` as a shared utility
-- **Impact**: Avoid reimplementing migrations per collection; unify versioning strategies
+- **Current usage**: Stashly (storage schema), Eidolon (state snapshots), PhenoObservability (config versions)
+- **Solution**: Generalized `stashly-migrations` with `Versioned` trait + `Migration<From, To>` trait; added 7 comprehensive tests (linear, sequential, rollback, failure recovery, audit trail, type preservation, domain tracking)
+- **Registry Status**: Updated from "stub" to "alpha" in Stashly/release-registry.toml
+- **Re-export**: Created `phenotype-migrations` crate in phenotype-shared for cross-collection consumption
+- **Impact**: Unifies versioning strategies across all collections; enables reuse without duplicating migration logic
 
 ---
 

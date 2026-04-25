@@ -2,6 +2,8 @@
 resolver = "2"
 members = [
     "crates/ffi_utils",
+    "crates/phenotype-errors",
+    "crates/phenotype-migrations",
 ]
 
 [workspace.package]

@@ -1,4 +1,6 @@
 ---
+import ThemeProvider from '../components/ThemeProvider.astro';
+
 export interface Props {
   title?: string;
   description?: string;
@@ -53,9 +55,70 @@ const {
       p, h1, h2, h3, h4, h5, h6 {
         overflow-wrap: break-word;
       }
+
+      /* Light mode overrides */
+      .light {
+        --bg-primary: #f8f7f6;
+        --bg-secondary: #ffffff;
+        --bg-tertiary: #f3f2f1;
+        --text-primary: #1a1a1a;
+        --text-secondary: #555555;
+        --border: #e0e0e0;
+      }
+
+      .light {
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+      }
+
+      .light body {
+        @apply bg-white text-slate-950;
+      }
+
+      .light .bg-slate-950 {
+        @apply bg-white;
+      }
+
+      .light .bg-slate-900 {
+        @apply bg-slate-100;
+      }
+
+      .light .bg-slate-800 {
+        @apply bg-slate-200;
+      }
+
+      .light .bg-slate-700 {
+        @apply bg-slate-300;
+      }
+
+      .light .text-white {
+        @apply text-slate-950;
+      }
+
+      .light .text-slate-100 {
+        @apply text-slate-900;
+      }
+
+      .light .text-slate-300 {
+        @apply text-slate-700;
+      }
+
+      .light .text-slate-400 {
+        @apply text-slate-600;
+      }
+
+      .light .border-slate-700 {
+        @apply border-slate-300;
+      }
+
+      .light .border-slate-800 {
+        @apply border-slate-200;
+      }
     </style>
   </head>
-  <body class="bg-slate-950 text-slate-100">
-    <slot />
+  <body class="bg-slate-950 text-slate-100 dark:bg-slate-950 dark:text-slate-100">
+    <ThemeProvider>
+      <slot />
+    </ThemeProvider>
   </body>
 </html>

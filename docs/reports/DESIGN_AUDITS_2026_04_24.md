@@ -20,14 +20,24 @@ Completed Impeccable-style design audits on 4 Phenotype org user-facing sites. A
 ## Site-by-Site Summary
 
 ### 1. phenotype-dev-hub (Astro 5 + Tailwind CSS 4)
-**Health Score: 10/20** | **Status:** Deployment-ready but design quality issues
+**Health Score: 10/20 → 14/20 (UPDATED)** | **Status:** P0 Design Issues RESOLVED
 
-**Top 5 Issues:**
-1. [P0] Dynamic Tailwind class interpolation (`bg-${accent}-900`) breaks production CSS purge — unsafe
-2. [P0] Dark-only theme; no light mode support — violates accessibility principle of user control
+**Top 5 Issues (Updated 2026-04-24):**
+1. [RESOLVED] ✅ Dynamic Tailwind class interpolation — replaced with typed `colorClasses` Record, literal class strings
+2. [RESOLVED] ✅ Dark-only theme — added Tailwind `darkMode: 'class'` + localStorage-persistent theme toggle
 3. [P1] Missing ARIA labels and semantic HTML — screen readers cannot navigate cards
 4. [P1] No focus-visible indicators — keyboard users cannot see which element is focused
 5. [P1] Status badges use color-only coding (green=stable, yellow=beta) — inaccessible to colorblind users
+
+**P0 Resolution Summary:**
+- Created `/src/lib/colorClasses.ts` with typed accent color map (all 9 collections/products)
+- Updated `CollectionCard.astro` and `ProductCard.astro` to use literal class strings
+- Added `ThemeProvider.astro` (initializes theme with system preference fallback)
+- Added `ThemeToggle.astro` (sun/moon icon toggle with localStorage persistence)
+- Updated `tailwind.config.mjs`: `darkMode: 'class'` + added missing color-900 shades
+- Updated `astro.config.mjs`: configured Vite @ path alias for clean imports
+- Light mode CSS overrides added to `Layout.astro` global styles
+- Build verified: `bun run build` completed with **zero warnings**, all Tailwind classes preserved in output
 
 **Critical Patterns:**
 - Hard-coded dark theme throughout (bg-slate-800, text-white) — requires component edits for light mode
@@ -39,8 +49,8 @@ Completed Impeccable-style design audits on 4 Phenotype org user-facing sites. A
 - Responsive grid likely mobile-friendly (structure suggests proper breakpoints)
 - Component architecture cleanly separated (ProductCard, CollectionCard, Hero)
 
-**Recommended Action Path:**
-1. `/normalize` — extract tokens to CSS variables, implement light/dark mode toggle
+**Recommended Action Path (Remaining Items):**
+1. ~~`/normalize`~~ **DONE** — Dark/light mode toggle implemented with localStorage persistence
 2. `/harden` — add ARIA labels (aria-label, aria-describedby), semantic heading hierarchy
 3. `/polish` — add focus-visible rings to cards and buttons
 4. `/clarify` — add text prefixes to status badges (✓ Stable, ⚠ Beta)

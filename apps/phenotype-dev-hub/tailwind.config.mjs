@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -49,17 +50,20 @@ export default {
         agileplus: {
           500: '#8b5cf6',
           600: '#7c3aed',
-          700: '#6d28d9'
+          700: '#6d28d9',
+          900: '#4c1d95'
         },
         tracera: {
           500: '#ec4899',
           600: '#db2777',
-          700: '#be185d'
+          700: '#be185d',
+          900: '#500724'
         },
         hwledger: {
           500: '#06b6d4',
           600: '#0891b2',
-          700: '#0e7490'
+          700: '#0e7490',
+          900: '#0c4a6e'
         }
       },
       fontFamily: {

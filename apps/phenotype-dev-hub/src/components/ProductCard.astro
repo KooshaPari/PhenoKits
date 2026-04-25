@@ -1,4 +1,6 @@
 ---
+import { getColorClasses } from '@/lib/colorClasses';
+
 export interface Props {
   slug: string;
   name: string;
@@ -9,6 +11,7 @@ export interface Props {
 }
 
 const { slug, name, description, accent, icon, status } = Astro.props;
+const colors = getColorClasses(accent);
 
 const statusColors: Record<string, string> = {
   stable: 'bg-green-900/30 text-green-400',
@@ -23,7 +26,7 @@ const statusColors: Record<string, string> = {
 >
   <div class="relative z-10">
     <div class="flex items-start justify-between">
-      <div class={`inline-flex rounded-lg bg-${accent}-900/30 p-3 text-2xl`}>
+      <div class={`inline-flex rounded-lg ${colors.bgDark} p-3 text-2xl`}>
         {icon}
       </div>
       {status && (
@@ -41,5 +44,5 @@ const statusColors: Record<string, string> = {
       </svg>
     </div>
   </div>
-  <div class={`absolute -right-8 -top-8 h-32 w-32 rounded-full bg-${accent}-500/20 opacity-0 transition-opacity group-hover:opacity-100`}></div>
+  <div class={`absolute -right-8 -top-8 h-32 w-32 rounded-full ${colors.bgAccent} opacity-0 transition-opacity group-hover:opacity-100`}></div>
 </a>

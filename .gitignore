@@ -27,7 +27,6 @@ logs/
 *.orig
 
 # Lock files (except workspace)
-Cargo.lock
 package-lock.json
 yarn.lock
 bun.lock

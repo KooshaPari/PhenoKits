@@ -47,25 +47,25 @@ pub trait EventCommandPort<T: serde::Serialize + for<'de> serde::Deserialize<'de
     fn append_event(
         &self,
         cmd: AppendEventCommand<T>,
-    ) -> Result<i64, EventSourcingError>;
+    ) -> Result<i64, PhenoError>;
 
     /// Get all events for an aggregate.
     fn get_events(
         &self,
         query: GetEventsQuery,
-    ) -> Result<Vec<EventEnvelope<T>>, EventSourcingError>;
+    ) -> Result<Vec<EventEnvelope<T>>, PhenoError>;
 
     /// Get events since a specific sequence.
     fn get_events_since(
         &self,
         query: GetEventsSinceQuery,
-    ) -> Result<Vec<EventEnvelope<T>>, EventSourcingError>;
+    ) -> Result<Vec<EventEnvelope<T>>, PhenoError>;
 
     /// Get events within a time range.
     fn get_events_by_time_range(
         &self,
         query: GetEventsByTimeRangeQuery,
-    ) -> Result<Vec<EventEnvelope<T>>, EventSourcingError>;
+    ) -> Result<Vec<EventEnvelope<T>>, PhenoError>;
 }
 
 /// Inbound port for chain verification.
@@ -75,15 +75,15 @@ pub trait ChainVerificationPort: Send + Sync {
         &self,
         aggregate_type: &str,
         aggregate_id: &str,
-    ) -> Result<(), EventSourcingError>;
+    ) -> Result<(), PhenoError>;
 
     /// Get the latest sequence number for an aggregate.
     fn get_latest_sequence(
         &self,
         aggregate_type: &str,
         aggregate_id: &str,
-    ) -> Result<i64, EventSourcingError>;
+    ) -> Result<i64, PhenoError>;
 }
 
 /// Re-export common error types.
-pub use super::super::super::error::EventSourcingError;
+pub use super::super::super::error::PhenoError;

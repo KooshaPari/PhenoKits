@@ -4,7 +4,7 @@ use chrono::{DateTime, Utc};
 use hex::FromHex;
 use sha2::{Digest, Sha256};
 
-use crate::error::HashError;
+use crate::error::PhenoError;
 
 /// Compute SHA-256 hash for an event.
 ///
@@ -22,7 +22,7 @@ pub fn compute_hash(
     payload: &serde_json::Value,
     actor: &str,
     prev_hash: &str,
-) -> Result<String, HashError> {
+) -> crate::error::Result<String> {
     let mut hasher = Sha256::new();
 
     // UUID bytes (16 bytes)
@@ -39,7 +39,7 @@ pub fn compute_hash(
 
     // Payload (JSON)
     let payload_json =
-        serde_json::to_string(payload).map_err(|_| HashError::InvalidHashLength(0))?;
+        serde_json::to_string(payload).map_err(|e| PhenoError::Internal(e.to_string()))?;
     hasher.update((payload_json.len() as u32).to_be_bytes());
     hasher.update(payload_json.as_bytes());
 
@@ -49,9 +49,12 @@ pub fn compute_hash(
 
     // Previous hash (decode from hex)
     let prev_bytes = <Vec<u8>>::from_hex(prev_hash)
-        .map_err(|_| HashError::InvalidHashLength(prev_hash.len()))?;
+        .map_err(|_| PhenoError::ValidationError("invalid hash format".to_string()))?;
     if prev_bytes.len() != 32 {
-        return Err(HashError::InvalidHashLength(prev_bytes.len()));
+        return Err(PhenoError::ValidationError(format!(
+            "invalid hash length: expected 32, got {}",
+            prev_bytes.len()
+        )));
     }
     hasher.update(&prev_bytes);
 
@@ -62,7 +65,7 @@ pub fn compute_hash(
 /// Verify the integrity of an event chain.
 ///
 /// Ensures each event's hash is correctly computed and chains to its predecessor.
-pub fn verify_chain(events: &[(String, String)]) -> Result<(), HashError> {
+pub fn verify_chain(events: &[(String, String)]) -> crate::error::Result<()> {
     if events.is_empty() {
         return Ok(());
     }
@@ -70,7 +73,7 @@ pub fn verify_chain(events: &[(String, String)]) -> Result<(), HashError> {
     // First event must chain from zero hash
     let zero_hash = "0".repeat(64);
     if events[0].1 != zero_hash {
-        return Err(HashError::ChainBroken { sequence: 1 });
+        return Err(PhenoError::Conflict(format!("chain broken at sequence 1")));
     }
 
     // Verify sequence continuity and hashes
@@ -80,7 +83,7 @@ pub fn verify_chain(events: &[(String, String)]) -> Result<(), HashError> {
         }
         let seq = (i + 1) as i64;
         if prev_hash != &events[i - 1].0 {
-            return Err(HashError::ChainBroken { sequence: seq });
+            return Err(PhenoError::Conflict(format!("chain broken at sequence {}", seq)));
         }
     }
 

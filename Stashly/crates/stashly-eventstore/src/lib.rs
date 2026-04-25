@@ -34,7 +34,7 @@ pub mod memory;
 pub mod snapshot;
 pub mod store;
 
-pub use error::{EventSourcingError, EventStoreError, HashError, Result};
+pub use error::{EventSourcingResult, PhenoError, Result};
 pub use event::EventEnvelope;
 pub use hash::{compute_hash, detect_gaps, verify_chain};
 pub use memory::InMemoryEventStore;

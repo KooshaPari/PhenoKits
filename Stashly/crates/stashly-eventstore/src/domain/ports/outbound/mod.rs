@@ -124,4 +124,4 @@ pub enum RepositoryError {
 }
 
 /// Re-export for convenience.
-pub use super::super::super::error::EventSourcingError;
+pub use super::super::super::error::PhenoError;

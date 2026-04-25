@@ -6,6 +6,7 @@ license.workspace = true
 
 [dependencies]
 phenotype-bus = { path = "../../../phenotype-bus" }
+phenotype-errors = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 chrono = { workspace = true }

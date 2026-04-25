@@ -4,7 +4,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::sync::RwLock;
 
-use crate::error::{EventStoreError, Result};
+use crate::error::{PhenoError, Result};
 use crate::event::EventEnvelope;
 use crate::hash;
 use crate::store::EventStore;
@@ -74,7 +74,7 @@ impl EventStore for InMemoryEventStore {
         let mut store = self
             .events
             .write()
-            .map_err(|_| EventStoreError::StorageError("Lock poisoned".into()))?;
+            .map_err(|_| PhenoError::BackendUnavailable("Lock poisoned".into()))?;
 
         // Get or create the aggregate's event list
         let aggregate_map = store
@@ -98,7 +98,7 @@ impl EventStore for InMemoryEventStore {
 
         // Serialize payload
         let payload_json = serde_json::to_value(&event.payload)
-            .map_err(|e| EventStoreError::StorageError(e.to_string()))?;
+            .map_err(|e| PhenoError::BackendUnavailable(e.to_string()))?;
 
         // Compute hash
         let hash = hash::compute_hash(
@@ -109,7 +109,7 @@ impl EventStore for InMemoryEventStore {
             &event.actor,
             &prev_hash,
         )
-        .map_err(|e| EventStoreError::InvalidHash(e.to_string()))?;
+        .map_err(|e| PhenoError::Conflict(e.to_string()))?;
 
         // Store the event
         events.push(StoredEvent {
@@ -134,20 +134,20 @@ impl EventStore for InMemoryEventStore {
         let store = self
             .events
             .read()
-            .map_err(|_| EventStoreError::StorageError("Lock poisoned".into()))?;
+            .map_err(|_| PhenoError::BackendUnavailable("Lock poisoned".into()))?;
 
         let events = store
             .get(aggregate_type)
             .and_then(|m| m.get(aggregate_id))
             .ok_or_else(|| {
-                EventStoreError::NotFound(format!("{}/{}", aggregate_type, aggregate_id))
+                PhenoError::NotFound(format!("{}/{}", aggregate_type, aggregate_id))
             })?;
 
         events
             .iter()
             .map(|se| {
                 let payload: T = serde_json::from_value(se.payload_json.clone())
-                    .map_err(|e| EventStoreError::StorageError(e.to_string()))?;
+                    .map_err(|e| PhenoError::BackendUnavailable(e.to_string()))?;
                 Ok(EventEnvelope {
                     id: se.id,
                     timestamp: se.timestamp,
@@ -170,13 +170,13 @@ impl EventStore for InMemoryEventStore {
         let store = self
             .events
             .read()
-            .map_err(|_| EventStoreError::StorageError("Lock poisoned".into()))?;
+            .map_err(|_| PhenoError::BackendUnavailable("Lock poisoned".into()))?;
 
         let events = store
             .get(aggregate_type)
             .and_then(|m| m.get(aggregate_id))
             .ok_or_else(|| {
-                EventStoreError::NotFound(format!("{}/{}", aggregate_type, aggregate_id))
+                PhenoError::NotFound(format!("{}/{}", aggregate_type, aggregate_id))
             })?;
 
         events
@@ -184,7 +184,7 @@ impl EventStore for InMemoryEventStore {
             .filter(|se| se.sequence > sequence)
             .map(|se| {
                 let payload: T = serde_json::from_value(se.payload_json.clone())
-                    .map_err(|e| EventStoreError::StorageError(e.to_string()))?;
+                    .map_err(|e| PhenoError::BackendUnavailable(e.to_string()))?;
                 Ok(EventEnvelope {
                     id: se.id,
                     timestamp: se.timestamp,
@@ -208,13 +208,13 @@ impl EventStore for InMemoryEventStore {
         let store = self
             .events
             .read()
-            .map_err(|_| EventStoreError::StorageError("Lock poisoned".into()))?;
+            .map_err(|_| PhenoError::BackendUnavailable("Lock poisoned".into()))?;
 
         let events = store
             .get(aggregate_type)
             .and_then(|m| m.get(aggregate_id))
             .ok_or_else(|| {
-                EventStoreError::NotFound(format!("{}/{}", aggregate_type, aggregate_id))
+                PhenoError::NotFound(format!("{}/{}", aggregate_type, aggregate_id))
             })?;
 
         events
@@ -222,7 +222,7 @@ impl EventStore for InMemoryEventStore {
             .filter(|se| se.timestamp >= from && se.timestamp <= to)
             .map(|se| {
                 let payload: T = serde_json::from_value(se.payload_json.clone())
-                    .map_err(|e| EventStoreError::StorageError(e.to_string()))?;
+                    .map_err(|e| PhenoError::BackendUnavailable(e.to_string()))?;
                 Ok(EventEnvelope {
                     id: se.id,
                     timestamp: se.timestamp,
@@ -240,7 +240,7 @@ impl EventStore for InMemoryEventStore {
         let store = self
             .events
             .read()
-            .map_err(|_| EventStoreError::StorageError("Lock poisoned".into()))?;
+            .map_err(|_| PhenoError::BackendUnavailable("Lock poisoned".into()))?;
 
         Ok(store
             .get(aggregate_type)
@@ -253,13 +253,13 @@ impl EventStore for InMemoryEventStore {
         let store = self
             .events
             .read()
-            .map_err(|_| EventStoreError::StorageError("Lock poisoned".into()))?;
+            .map_err(|_| PhenoError::BackendUnavailable("Lock poisoned".into()))?;
 
         let events = store
             .get(aggregate_type)
             .and_then(|m| m.get(aggregate_id))
             .ok_or_else(|| {
-                EventStoreError::NotFound(format!("{}/{}", aggregate_type, aggregate_id))
+                PhenoError::NotFound(format!("{}/{}", aggregate_type, aggregate_id))
             })?;
 
         // Verify hash chain
@@ -268,7 +268,7 @@ impl EventStore for InMemoryEventStore {
             .map(|e| (e.hash.clone(), e.prev_hash.clone()))
             .collect();
 
-        Ok(hash::verify_chain(&chain).map_err(|e| EventStoreError::InvalidHash(e.to_string()))?)
+        Ok(hash::verify_chain(&chain).map_err(|e| PhenoError::Conflict(e.to_string()))?)
     }
 }
 

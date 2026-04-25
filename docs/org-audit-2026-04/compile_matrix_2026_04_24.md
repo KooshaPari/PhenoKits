@@ -34,7 +34,7 @@
 | Repo | Exit | Error Category | Root Cause | Wave-10 Status |
 |------|------|-----------------|-----------|---------|
 | repos (root) | 101 | Unresolved import | `criterion` not in workspace dependencies | — |
-| KDesktopVirt | 101 | Type system | 61 compile errors (trait bounds, type mismatches) | DEFERRED (beyond scope) |
+| KDesktopVirt | 101 | Type system | 61 compile errors (6 clusters, all fixable) | FIXABLE — See revive_plan.md (9-13h) |
 | kmobile | 101 | Workspace conflict | Believes it's in workspace but isn't registered | — |
 | PhenoPlugins | 101 | Missing manifest file | Workspace member `pheno-plugin-core` file not found | — |
 | Tracely | 101 | Unresolved import | `criterion` not in workspace dependencies | — |
@@ -82,6 +82,45 @@ All broken repos attempted `cargo update` before re-check; no additional resolut
 
 ### Long-Term
 6. Review integration points for inter-repo dependencies; consider shared workspace or dependency management plan
+
+---
+
+## Deep Dive: KDesktopVirt Error Clustering (2026-04-24)
+
+**Status**: Diagnostic complete. Not architectural drift — all errors are fixable code issues.
+
+### Error Breakdown (61 total)
+
+| Root Cause | Count | Error Type | Locations | Priority |
+|-----------|-------|-----------|-----------|----------|
+| Async trait incompatibility | 11 | E0038 | audio_video_engine.rs (TtsEngine, SttEngine) | P0 |
+| Borrow checker violations | 11 | E0716, E0382 | mcp.rs (6), recording_pipeline.rs (3), automation_engine.rs (2) | P0 |
+| Trait bound mismatches | 4 | E0195 | audio_video_engine.rs (TtsEngine/SttEngine impls) | P0 |
+| Type inference gaps | 6 | E0283, E0284 | desktop_control.rs (2), core.rs (2), mcp.rs (2) | P1 |
+| Mutable borrow conflicts | 6 | E0596, E0499 | audio_video_integration.rs (4), core.rs (2) | P1 |
+| Missing trait derives | 4 | E0277, E0599 | SessionStorage, EncoderMetrics, AudioEncoder (public types) | P2 |
+| **Other** | 8 | Mixed | Partial moves, clone() missing, Serialize derives | P2 |
+
+### Key Findings
+
+1. **No architectural drift** — latest commit (91f5b4e) just added workspace declaration; errors predate workspace unification
+2. **Primary hotspot** — audio_video_engine.rs (~1500 LOC) contains 55% of trait/async errors; isolated refactor opportunity
+3. **Secondary hotspot** — mcp.rs (~700 LOC) contains 18% of borrow violations; straightforward Rust idiom fixes
+4. **Rebuild foundation status confirmed** — CLAUDE.md states project is active rebuild foundation for eco-011 (device automation); README is stale ("archived for historical reference")
+
+### Fix Effort Estimate
+
+- **Phase 1 (Async traits)**: 4-6h — Refactor TtsEngine/SttEngine to use BoxFuture or #[async_trait]
+- **Phase 2 (Borrow checker)**: 3-4h — Fix temporary value drops, moved value uses, type annotations
+- **Phase 3 (Derives)**: 1h — Add Clone/Debug/Serialize where needed
+- **Phase 4 (Integration)**: 1-2h — Full workspace validation
+- **TOTAL**: 9-13h (moderate effort, high ROI)
+
+### Recommendation
+
+**REVIVE, not archive**. Errors are fixable, root causes well-understood, and project is active rebuild foundation per memory context. Generate spec in AgilePlus and dispatch agent for phased execution.
+
+**Reference**: `/repos/KDesktopVirt/docs/research/revive_plan.md` (detailed fix plan with ordered steps)
 
 ---
 

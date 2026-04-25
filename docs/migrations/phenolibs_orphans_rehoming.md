@@ -1,9 +1,9 @@
 # PhenoLibs Orphans — Rehoming Map
 
 **Audit Date:** 2026-04-24  
-**Status:** PHASE 1 COMPLETE (8 packages rehomed; 11 remaining)  
-**Total Orphans:** 23 (19 Python, 2 Rust, 1 Go, 1 TypeScript)  
-**Rehomed Count:** 5 (2026-04-25) → 12,252 LOC  
+**Status:** PHASE 3 IN PROGRESS (13 packages rehomed; 6 remaining)  
+**Total Orphans:** 23 (6 remaining: pheno-core, config-kit, pheno-adapters, pheno-deployment, pheno-patterns, pheno-process)  
+**Rehomed Count:** 10 (Phase 3: 5 packages, 8,950 LOC added 2026-04-25) → 21,202 LOC total  
 **Archived Count:** 3 (pheno-dev, pheno-optimization, pheno-shared) → 19,330 LOC
 
 ## Executive Summary
@@ -22,11 +22,11 @@
 | pheno-errors | 700 | Core Error Handling | `/repos/pheno/python/` | REHOMED ✓ (2026-04-25) | 0 |
 | pheno-exceptions | 1,340 | Core Exception Types | `/repos/pheno/python/` | REHOMED ✓ (2026-04-25) | 0 |
 | pheno-async | 2,548 | Core Async Utilities | `/repos/pheno/python/` | REHOMED ✓ (2026-04-25) | 0 |
-| pheno-config | 831 | Core Config Loading | `/repos/pheno/python/` | Config abstraction; augments pheno-core's configuration needs. | 0 |
-| core-utils | 2,875 | Core Utilities | `/repos/pheno/python/` | General-purpose utilities (vendor mgmt, DB connection, deployment checks); belongs in pheno core layer. | 0 |
+| pheno-config | 831 | Core Config Loading | `/repos/pheno/python/` | REHOMED ✓ (2026-04-25) | 0 |
+| core-utils | 2,875 | Core Utilities | `/repos/pheno/python/` | REHOMED ✓ (2026-04-25) | 0 |
 | pheno-core | 1,630 | Core Semantics | `/repos/pheno/python/` | Already listed in pheno/; verify upstream migration. If missing, rehome. | 0 |
 | cli-kit | 2,362 | CLI Infrastructure | `/repos/PhenoKits/libs/python/pheno_cli` | REHOMED ✓ (2026-04-25) → renamed `pheno_cli` | 0 |
-| cli-builder-kit | 231 | CLI Infrastructure | `/repos/PhenoKits/libs/python/` | Lightweight CLI helper (231 LOC); merge into `cli-kit` if similar, else fold into `phenotype-py-kit`. | 0 |
+| cli-builder-kit | 231 | CLI Infrastructure | `/repos/PhenoKits/libs/python/` | REHOMED ✓ (2026-04-25) → `pheno_cli_builder` | 0 |
 | config-kit | 3,135 | CLI Config | `/repos/PhenoKits/libs/python/` | Config management for CLI workflows; pairs with cli-kit in PhenoKits narrative. | 0 |
 | pheno-adapters | 7,534 | Domain Adapters | `/repos/PhenoKits/libs/python/pheno_adapters` | Adapter pattern implementations; consolidates into PhenoKits (already exists as `pheno_adapters`). Merge or deduplicate. | 0 |
 | pheno-deployment | 7,493 | Deployment Domain | `/repos/PhenoKits/libs/python/` | Deployment orchestration; domain-specific but generic enough for PhenoKits; OR archive if covered by pheno-dev. | 0 |
@@ -34,14 +34,14 @@
 | pheno-analytics | 5,302 | Observability | `/repos/PhenoKits/libs/python/pheno_analytics` | REHOMED ✓ (2026-04-25) | 0 |
 | pheno-optimization | 2,028 | Optimization Algorithms | **ARCHIVED ✓ (2026-04-24)** | Optimization/tuning; niche domain. Likely superseded by modern ML frameworks. Verified zero callers; moved to `.archive/`. | 0 |
 | pheno-patterns | 6,652 | Design Patterns | `/repos/PhenoKits/libs/python/` | Architectural patterns (DDD, hexagonal, etc.); consolidates pattern library into PhenoKits. | 0 |
-| pheno-plugins | 302 | Plugin System | `/repos/PhenoKits/libs/python/` | Plugin/extension framework; generic enough for PhenoKits; OR fold into phenotype-shared if shared across Rust too. | 0 |
+| pheno-plugins | 302 | Plugin System | `/repos/PhenoKits/libs/python/` | REHOMED ✓ (2026-04-25) | 0 |
 | pheno-ports | 3,338 | Hexagonal Ports | `/repos/phenotype-shared/` | Port abstractions for hexagonal arch; likely duplicates phenotype-port-interfaces in phenotype-shared. Audit + deduplicate. | 0 |
 | pheno-domain | 3,641 | Domain-Driven Design | `/repos/phenotype-shared/` | DDD primitives; duplicates phenotype-domain in phenotype-shared. Audit + deduplicate. | 0 |
 | pheno-process | 1,657 | Process Management | `/repos/PhenoKits/libs/python/` | Process/lifecycle abstractions; complements PhenoKits' existing scope. | 0 |
 | pheno-providers | 1,218 | Provider Registry | `/repos/PhenoKits/libs/python/` | Registry/provider pattern; generic infrastructure for PhenoKits. | 0 |
 | pheno-resources | 3,289 | Resource Management | `/repos/PhenoKits/libs/python/` | Resource allocation, budgets, tracking; domain-agnostic; PhenoKits home. | 0 |
 | pheno-shared | 7,857 | Shared Utilities | **ARCHIVED ✓ (2026-04-24)** | High-level shared utilities; duplicates phenotype-shared crate. Verified zero callers; moved to `.archive/`. | 0 |
-| pheno-utils | 2,021 | Utilities | `/repos/pheno/python/` | General-purpose CLI/codegen utilities; augments pheno-core utilities layer. | 0 |
+| pheno-utils | 2,021 | Utilities | `/repos/pheno/python/` | REHOMED ✓ (2026-04-25) | 0 |
 
 ---
 

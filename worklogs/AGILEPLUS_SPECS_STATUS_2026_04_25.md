@@ -1,7 +1,7 @@
 # AgilePlus kitty-specs Status Audit — 2026-04-25
 
 **Project:** [AgilePlus] · **Category:** GOVERNANCE · **Scope:** product-DAG-extension audit
-**Source:** `/Users/kooshapari/CodeProjects/Phenotype/repos/AgilePlus/kitty-specs/`
+**Source:** `kitty-specs/`
 **Method:** Read-only state extraction from `spec.md` frontmatter + `git log` first/last commit dates.
 
 ---

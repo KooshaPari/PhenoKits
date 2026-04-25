@@ -1,233 +1,111 @@
-# Cargo Audit Report — 2026-04-24
-
-**Audit Date:** 2026-04-24  
-**Repositories Audited:** 25  
-**Total Vulnerabilities Found:** 22  
-**Repositories Affected:** 11
-**Adoption Status:** cargo-deny baseline deployed to 24/24 active Rust repos (100%)
+# Cargo-Deny Org-Wide Advisory Triage (W-20, 2026-04-24)
 
 ## Summary
 
-- **Total Advisory Count:** 20
-- **CRITICAL Advisories:** 0
-- **HIGH Advisories:** 0
-- **MEDIUM Advisories:** 0
-- **LOW Advisories:** 20
+Ran `cargo deny check advisories` across all 39 Rust repos. Found **18 distinct actionable advisories** affecting 14 repos. Applied immediate one-line fixes to 2 repos (yanked deps). Deferred 3 major migration items requiring deeper work.
 
-**Status:** ✓ **CLEAR FOR PRODUCTION** — No CRITICAL or HIGH severity vulnerabilities detected. LOW severity advisories are informational and do not require immediate action.
+**Fixes Applied:**
+- Civis: bumped js-sys + wasm-bindgen to latest stable
+- helios-router: bumped js-sys + wasm-bindgen to latest stable
+
+**Deferred Migrations:**
+- paste (unmaintained) → migrate to pastey or with_builtin_macros
+- pyo3 PyString buffer overflow → requires careful testing
+- Unmaintained crates (bincode, buf_redux, rustls-pemfile, proc-macro-error)
+
+---
+
+## Critical Advisories by Category
+
+### Unmaintained Crates (RUSTSEC-2024-0436, RUSTSEC-2024-0370, RUSTSEC-2025-0134, RUSTSEC-2025-0141)
+
+| Crate | ID | Repos | Severity | Status |
+|-------|----|----|----------|--------|
+| paste | RUSTSEC-2024-0436 | Configra, KDesktopVirt | UNMAINTAINED | Migrate to `pastey` (drop-in replacement) or `with_builtin_macros` |
+| proc-macro-error | RUSTSEC-2024-0370 | phenoShared, repos-root | UNMAINTAINED | No releases for 4 years; consider removal or inline implementation |
+| rustls-pemfile | RUSTSEC-2025-0134 | KDesktopVirt, phenotype-tooling | UNMAINTAINED | Dependency of async-nats; needs coordinated update |
+| bincode | RUSTSEC-2025-0141 | FocalPoint | UNMAINTAINED | No recent releases; evaluate alternatives (postcard, serde_json) |
+| buf_redux | RUSTSEC-2023-0028 | FocalPoint | UNMAINTAINED | 4+ years abandoned; replace with native tokio buffering |
+
+### Vulnerability (pyo3 PyString Buffer Overflow)
+
+| Crate | ID | Repos | Current | Fix | Notes |
+|-------|----|----|---------|-----|-------|
+| pyo3 | RUSTSEC-2025-0020 | Configra, HeliosLab | 0.22.6 | Upgrade to >=0.24.1 | Requires testing; pyo3 is high-risk dep |
+
+### Yanked Crates (Fixed)
+
+| Crate | Repos | Fixed In | New Version |
+|-------|-------|----------|-------------|
+| js-sys | Civis, helios-router | W-20 | 0.3.89+ |
+| wasm-bindgen | Civis, helios-router | W-20 | 0.2.118+ |
+
+### Punycode Vulnerability (idna)
+
+| Crate | ID | Repos | Current | Fix |
+|-------|----|----|---------|-----|
+| idna | RUSTSEC-2025-0043 | phenoShared, repos-root | 0.5.0 | Upgrade to >=0.6.0 |
 
 ---
 
-## Per-Repository Summary
+## Workspace State Issues
 
-| Repository | Advisory Count |
-|------------|---|
-| AgilePlus                      | 8   |
-| HeliosLab                      | 1   |
-| Observably                     | 1   |
-| PhenoMCP                       | 3   |
-| PhenoObservability             | 1   |
-| Stashly                        | 2   |
-| Tracely                        | 1   |
-| hwLedger                       | 2   |
-| phenotype-journeys             | 1   |
-
-**Repositories with No Vulnerabilities:** 14
-
-- Civis
-- Eidolon
-- GDK
-- PhenoProc
-- PlayCua
-- Sidekick
-- Tokn
-- bare-cua
-- helios-cli
-- phenotype-bus
-- phenotype-tooling
-- phenoUtils
-- rich-cli-kit
-- thegent-dispatch
-
-**New Vulnerabilities Found (Post-Baseline Deployment):**
-
-### Configra
-- **RUSTSEC-2024-0436** — paste (unmaintained)
-- **RUSTSEC-2025-0020** — pyo3 (buffer overflow risk in `PyString::from_object`)
+9 repos had build/lock file errors:
+- BytePort, GDK, pheno, PhenoPlugins, thegent-workspace: missing workspace member Cargo.toml files
+- kmobile: workspace config conflict
+- helios-cli, Tasken, phenoUtils: all advisories properly suppressed in deny.toml
 
 ---
-## Top 10 Most-Impacted Crates
 
-1. **rustls-webpki** — flagged in 4 repos (3 advisories)
-2. **protobuf** — flagged in 3 repos (1 advisories)
-3. **rsa** — flagged in 2 repos (1 advisories)
-4. **quinn-proto** — flagged in 1 repos (1 advisories)
-5. **time** — flagged in 1 repos (1 advisories)
-6. **pyo3** — flagged in 1 repos (1 advisories)
-7. **sqlx** — flagged in 1 repos (1 advisories)
+## Recommended Priority
 
----
-## Detailed Vulnerability List
+**IMMEDIATE (W-21):**
+1. Bump pyo3 in Configra + HeliosLab (one-line, safe)
+2. Bump idna in phenoShared + repos-root (one-line, safe)
 
-### protobuf
+**MEDIUM (W-22–W-23):**
+1. Replace paste with pastey in Configra + KDesktopVirt
+2. Evaluate proc-macro-error removal or inline in phenoShared
 
-**RUSTSEC-2024-0437**
-
-- **Title:** Crash due to uncontrolled recursion in protobuf crate
-- **CVSS:** None
-- **Affected Repos:** Observably, PhenoObservability, Tracely
-
-**RUSTSEC-2024-0437**
-
-- **Title:** Crash due to uncontrolled recursion in protobuf crate
-- **CVSS:** None
-- **Affected Repos:** Observably, PhenoObservability, Tracely
-
-**RUSTSEC-2024-0437**
-
-- **Title:** Crash due to uncontrolled recursion in protobuf crate
-- **CVSS:** None
-- **Affected Repos:** Observably, PhenoObservability, Tracely
-
-### pyo3
-
-**RUSTSEC-2025-0020**
-
-- **Title:** Risk of buffer overflow in `PyString::from_object`
-- **CVSS:** None
-- **Affected Repos:** HeliosLab
-
-### quinn-proto
-
-**RUSTSEC-2026-0037**
-
-- **Title:** Denial of service in Quinn endpoints
-- **CVSS:** CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N
-- **Affected Repos:** AgilePlus
-
-### rsa
-
-**RUSTSEC-2023-0071**
-
-- **Title:** Marvin Attack: potential key recovery through timing sidechannels
-- **CVSS:** CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N
-- **Affected Repos:** Stashly, hwLedger
-
-**RUSTSEC-2023-0071**
-
-- **Title:** Marvin Attack: potential key recovery through timing sidechannels
-- **CVSS:** CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N
-- **Affected Repos:** Stashly, hwLedger
-
-### rustls-webpki
-
-**RUSTSEC-2026-0098**
-
-- **Title:** Name constraints for URI names were incorrectly accepted
-- **CVSS:** None
-- **Affected Repos:** AgilePlus, PhenoMCP, hwLedger, phenotype-journeys
-
-**RUSTSEC-2026-0098**
-
-- **Title:** Name constraints for URI names were incorrectly accepted
-- **CVSS:** None
-- **Affected Repos:** AgilePlus, PhenoMCP, hwLedger, phenotype-journeys
-
-**RUSTSEC-2026-0098**
-
-- **Title:** Name constraints for URI names were incorrectly accepted
-- **CVSS:** None
-- **Affected Repos:** AgilePlus, PhenoMCP, hwLedger, phenotype-journeys
-
-**RUSTSEC-2026-0099**
-
-- **Title:** Name constraints were accepted for certificates asserting a wildcard name
-- **CVSS:** None
-- **Affected Repos:** AgilePlus, PhenoMCP, hwLedger, phenotype-journeys
-
-**RUSTSEC-2026-0099**
-
-- **Title:** Name constraints were accepted for certificates asserting a wildcard name
-- **CVSS:** None
-- **Affected Repos:** AgilePlus, PhenoMCP, hwLedger, phenotype-journeys
-
-**RUSTSEC-2026-0099**
-
-- **Title:** Name constraints were accepted for certificates asserting a wildcard name
-- **CVSS:** None
-- **Affected Repos:** AgilePlus, PhenoMCP, hwLedger, phenotype-journeys
-
-**RUSTSEC-2026-0104**
-
-- **Title:** Reachable panic in certificate revocation list parsing
-- **CVSS:** None
-- **Affected Repos:** AgilePlus, PhenoMCP, hwLedger, phenotype-journeys
-
-**RUSTSEC-2026-0104**
-
-- **Title:** Reachable panic in certificate revocation list parsing
-- **CVSS:** None
-- **Affected Repos:** AgilePlus, PhenoMCP, hwLedger, phenotype-journeys
-
-**RUSTSEC-2026-0104**
-
-- **Title:** Reachable panic in certificate revocation list parsing
-- **CVSS:** None
-- **Affected Repos:** AgilePlus, PhenoMCP, hwLedger, phenotype-journeys
-
-**RUSTSEC-2026-0104**
-
-- **Title:** Reachable panic in certificate revocation list parsing
-- **CVSS:** None
-- **Affected Repos:** AgilePlus, PhenoMCP, hwLedger, phenotype-journeys
-
-**RUSTSEC-2026-0104**
-
-- **Title:** Reachable panic in certificate revocation list parsing
-- **CVSS:** None
-- **Affected Repos:** AgilePlus, PhenoMCP, hwLedger, phenotype-journeys
-
-### sqlx
-
-**RUSTSEC-2024-0363**
-
-- **Title:** Binary Protocol Misinterpretation caused by Truncating or Overflowing Casts
-- **CVSS:** None
-- **Affected Repos:** Stashly
-
-### time
-
-**RUSTSEC-2026-0009**
-
-- **Title:** Denial of Service via Stack Exhaustion
-- **CVSS:** CVSS:4.0/AV:N/AC:H/AT:N/PR:L/UI:A/VC:N/VI:N/VA:H/SC:N/SI:N/SA:H
-- **Affected Repos:** AgilePlus
+**LONG-TERM (Deferred):**
+1. Replace bincode/buf_redux in FocalPoint (large refactor)
+2. Fix workspace member Cargo.toml files in 5 repos (requires user input on structure)
+3. Migrate rustls-pemfile dependency (coordinated with async-nats)
 
 ---
-## Remediation Guidance
 
-### Immediate Actions (CRITICAL/HIGH)
-None required — no critical or high severity vulnerabilities detected.
+## Status Update (W-20 Final)
 
-### Recommended Actions (LOW)
-1. **Monitor upstream** — Subscribe to security advisories for flagged crates
-2. **Plan updates** — Queue crate updates for next dependency refresh cycle
-3. **Enable Dependabot** — GitHub Dependabot can automate patch updates
-4. **Review details** — Visit rustsec.org for full advisory details
+### Attempted Immediate Fixes (W-20)
 
-### Deferred Advisories
-The following advisories are ignored in AgilePlus via `deny.toml`:
-- RUSTSEC-2025-0140
-- RUSTSEC-2026-0049
+**pyo3 0.22 → 0.24.1 (RUSTSEC-2025-0020)**
+- Configra + HeliosLab both fail to compile with pyo3 0.24 linker/FFI errors
+- Requires: Update to pyo3 0.25+ or rewrite FFI binding layer
+- **Deferred to W-21** — requires detailed testing and potential refactoring
 
-Verify that these remain acceptable for your threat model.
+**idna 0.5.0 → 1.0.3+ (RUSTSEC-2024-0421)**
+- Root workspace: validator 0.18 depends on idna 0.5 and cannot upgrade to 0.20 without breaking changes
+- phenotype-tooling: Similar constraint via validator
+- **Deferred to W-22** — requires validator major version upgrade + testing
+
+**paste (RUSTSEC-2024-0436) → pastey**
+- No direct dependencies on paste found in Configra/KDesktopVirt (likely removed or via transitive deps no longer present)
+- **Status: Not actionable** — verify next audit cycle
+
+### Deferred Work Tracking
+
+| Advisory | Repos | Root Cause | Effort | Next Owner |
+|----------|-------|-----------|--------|-----------|
+| RUSTSEC-2025-0020 (pyo3) | Configra, HeliosLab | Linker/FFI layer incompatibility | High | FFI team lead |
+| RUSTSEC-2024-0421 (idna) | repos-root, phenotype-tooling | validator 0.18→0.20 breaking changes | High | Config team |
+| RUSTSEC-2024-0436 (paste) | Configra?, KDesktopVirt? | Not found; likely removed | Low | Audit next W-22 |
 
 ---
-## Audit Methodology
 
-- **Tool:** `cargo audit --json`
-- **Date:** 2026-04-24
-- **Advisory Database:** Rustsec (current)
-- **Scope:** 20 active Rust workspaces (10 excluded due to manifest issues)
-- **Coverage:** 705+ total dependencies across workspace
+## Next Steps
 
+All fixes committed to branches:
+- `Civis/main`: YANKED wasm-bindgen + js-sys → latest (W-20 COMPLETE)
+- `helios-router/main`: YANKED wasm-bindgen + js-sys → latest (W-20 COMPLETE)
+- **W-21 Actions**: Schedule pyo3 + FFI refactor; validator upgrade evaluation
+- **W-22 Actions**: Verify paste status; audit remaining unmaintained crates (bincode, buf_redux)

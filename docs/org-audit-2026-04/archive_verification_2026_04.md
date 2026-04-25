@@ -37,6 +37,7 @@
 | Pyron | 16,825 | 2026-04-04 | clean | ✓ | 2 (CHANGELOG, phenotype-tooling README) |
 | RIP-Fitness-App | 16,344 | 2026-04-05 | clean | ✓ | 1 (worklogs/ARCHITECTURE.md) |
 | Tossy | 9,551 | 2026-04-24 | clean | ✓ | 3 (pheno/HexaKit PROJECT_CLASSIFICATION, worklogs) |
+| **PhenoLibs** | **68,633** | 2026-04-25 | clean | ✓ | 6 (phenoData, phenotype-auth-ts, PhenoSpecs, phenoUtils README references only) |
 
 ---
 

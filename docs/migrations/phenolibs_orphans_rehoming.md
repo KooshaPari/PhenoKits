@@ -1,10 +1,11 @@
 # PhenoLibs Orphans — Rehoming Map
 
 **Audit Date:** 2026-04-24  
-**Status:** PHASE 3 IN PROGRESS (13 packages rehomed; 6 remaining)  
-**Total Orphans:** 23 (6 remaining: pheno-core, config-kit, pheno-adapters, pheno-deployment, pheno-patterns, pheno-process)  
-**Rehomed Count:** 10 (Phase 3: 5 packages, 8,950 LOC added 2026-04-25) → 21,202 LOC total  
-**Archived Count:** 3 (pheno-dev, pheno-optimization, pheno-shared) → 19,330 LOC
+**Status:** FULLY_ARCHIVED (2026-04-25) — Full PhenoLibs repo archived to .archive/  
+**Total Orphans:** 23 (All processed: 16 migrated, 3 archived, 4 verified-external)  
+**Rehomed Count:** 16 packages → 44,532 LOC total  
+**Archived Count:** 3 (pheno-dev, pheno-optimization, pheno-shared) + full repo → 19,330 LOC  
+**Repository Status:** Entire `/repos/PhenoLibs/` → `/repos/.archive/PhenoLibs/` (2026-04-25)
 
 ## Executive Summary
 

@@ -111,15 +111,21 @@ All 4 on latest releases or in-flight. Health badges: FocalPoint ✓, heliosApp 
 
 ---
 
-## Next Steps (W-68+)
+## Open Risks (W-70/71 Identified)
 
-1. **Collection Integration Tests** — Validate cross-collection contracts (phenoShared → Sidekick → Apps)
-2. **Standalone Product Formalization** — Define stand-alone product criteria, maturity gates
-3. **Unaudited Triage** — Audit top 10 unaudited repos (ValidationKit, agileplus-landing)
+- **AgentMCP server pack corruption** — detect + remediate required
+- **OpenAI API key UNREVOKED** — immediate rotation needed
+- **HeliosLab BROKEN** — health check failed; blocking PhenoObservability integration
+
+## Next Steps (W-72+)
+
+1. **Risk Remediation** — Resolve AgentMCP corruption, rotate OpenAI key, fix HeliosLab health
+2. **Sidekick Stabilization** — Post-W-69 downgrade validation (PhenoAgent core tests, dormant candidates archived)
+3. **Standalone Product Maturity** — Track heliosApp v2026.05B.0 release; formalize release SLOs
 4. **Collection SLO Definition** — Establish update/security/test cadences per collection
 
 ---
 
-**Dashboard Updated:** 2026-04-25  
-**Source:** W-67F batch audit + cross-collection synthesis  
-**Next Refresh:** Post-W-68 (estimated 2026-04-28)
+**Dashboard Updated:** 2026-04-25 (W-70/71 landings)  
+**Source:** W-67F batch audit + W-70/71 releases + W-71 dormant survey  
+**Next Refresh:** Post-W-72 (estimated 2026-05-02)

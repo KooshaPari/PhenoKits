@@ -123,6 +123,18 @@ have canonical homes, and archived repos stay quiet.
 - Guardrail: do not delete or merge Tracera-related paths until a row-level
   disposition exists.
 
+## Batch 9 Tracera Fresh Compare
+
+- Added `docs/governance/tracera-fresh-clone-compare-2026-04-26.md`.
+- Marked `SUNSET-011A` complete.
+- Fresh remote `main` is `5695f3984d31cde4cbc140219eada971b5ed8a40`.
+- Local `Tracera-recovered/fix/main-workflow-syntax` is
+  `f91232584284a2fa971b8b9b4c3122cf1b9dba34`.
+- Local recovered branch is `26` commits behind live `main` and `6` commits
+  ahead with patch-different recovery work.
+- Decision: do not promote `Tracera-recovered` directly over `main`; create a
+  branch from live `main` and cherry-pick reviewed recovery commits.
+
 ## Milestones
 
 ### M1 - Freeze and Manifest P0 Drift

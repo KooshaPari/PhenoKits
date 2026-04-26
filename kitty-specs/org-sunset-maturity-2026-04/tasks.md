@@ -41,7 +41,11 @@
 
 - [ ] SUNSET-009: Consolidate dated worklogs into category worklogs.
 - [ ] SUNSET-010: Review temporary/deleted governance docs for unique content before deletion.
-- [ ] SUNSET-011: Resolve `Tracera` vs `Tracera-recovered` canonical checkout and document final routing.
+- [x] SUNSET-011: Resolve `Tracera` vs `Tracera-recovered` canonical checkout and document final routing.
+  - Evidence: `docs/governance/tracera-canonical-routing-2026-04-26.md`
+- [ ] SUNSET-011A: Fresh-clone compare `KooshaPari/Tracera.git` against `Tracera-recovered`.
+- [ ] SUNSET-011B: Promote recovered checkout or push missing recovery branch.
+- [ ] SUNSET-011C: Route `phench/` to its own repository/product home.
 
 ## P3
 

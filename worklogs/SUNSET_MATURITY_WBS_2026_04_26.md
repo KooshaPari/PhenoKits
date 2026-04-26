@@ -110,6 +110,19 @@ have canonical homes, and archived repos stay quiet.
   flattened source only after preserving nested history.
 - Guardrail: do not commit the current parent gitlink update as-is.
 
+## Batch 8 Tracera Routing
+
+- Added `docs/governance/tracera-canonical-routing-2026-04-26.md`.
+- Marked `SUNSET-011` complete as a routing decision.
+- Decision: `Tracera-recovered/` is the canonical recovered TracerTM source
+  checkout.
+- `Tracera/` is a preserved legacy observability-platform/docs checkpoint, not
+  the canonical implementation checkout.
+- `phench/` is a separate Python service orchestration/benchmarking product
+  currently attached to the Tracera remote family; it must be routed separately.
+- Guardrail: do not delete or merge Tracera-related paths until a row-level
+  disposition exists.
+
 ## Milestones
 
 ### M1 - Freeze and Manifest P0 Drift

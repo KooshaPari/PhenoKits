@@ -2,8 +2,8 @@
 
 Entries tracking research summaries, audit findings, analysis, and investigation results.
 
-**Last updated:** 2026-04-25  
-**Entries:** 1
+**Last updated:** 2026-04-26  
+**Entries:** 2
 
 ---
 
@@ -20,3 +20,13 @@ Entries tracking research summaries, audit findings, analysis, and investigation
 **Deliverables:** 3 tables (local drift manifest, stale branches, governance gaps) + 7-task WBS (P0: preserve, P1: branch hygiene + enforcement, P2: docs)
 
 **Source:** [PHENOTYPE_LOCAL_DRIFT_MANIFEST_2026_04_25.md](./PHENOTYPE_LOCAL_DRIFT_MANIFEST_2026_04_25.md) + [PHENOTYPE_POST_PR_CLEANUP_AUDIT_WBS_2026_04_25.md](./PHENOTYPE_POST_PR_CLEANUP_AUDIT_WBS_2026_04_25.md)
+
+---
+
+## 2026-04-26 Sunset Maturity Audit
+
+**Summary:** Fresh audit after PR cleanup found 0 open PRs, 164 GitHub repos (101 active, 63 archived), and 112 local top-level git checkouts. Existing April 25 manifests remain the main evidence for local drift risk: 186 drifted repos, 126 dirty working trees, 108 ahead/behind cases, and 49 local-only branches.
+
+**Deliverables:** Sunset maturity audit, ADR, WBS, and AgilePlus-style spec pack under `kitty-specs/org-sunset-maturity-2026-04/`.
+
+**Source:** [../docs/governance/sunset-maturity-audit-2026-04-26.md](../docs/governance/sunset-maturity-audit-2026-04-26.md)

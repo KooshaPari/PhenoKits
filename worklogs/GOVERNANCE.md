@@ -2,8 +2,8 @@
 
 Entries tracking policy, compliance, quality gates, enforcement, branch protection, and organizational governance decisions.
 
-**Last updated:** 2026-04-25  
-**Entries:** 3
+**Last updated:** 2026-04-26  
+**Entries:** 4
 
 ---
 
@@ -32,3 +32,17 @@ Entries tracking policy, compliance, quality gates, enforcement, branch protecti
 **WBS:** P0 preserve/classify (freeze + manifest), P1 branch hygiene + governance enforcement, P2 docs/worklog consolidation.
 
 **Source:** [PHENOTYPE_LOCAL_DRIFT_MANIFEST_2026_04_25.md](./PHENOTYPE_LOCAL_DRIFT_MANIFEST_2026_04_25.md) + [PHENOTYPE_POST_PR_CLEANUP_AUDIT_WBS_2026_04_25.md](./PHENOTYPE_POST_PR_CLEANUP_AUDIT_WBS_2026_04_25.md)
+
+---
+
+## 2026-04-26 Sunset Maturity Operating Model
+
+**Summary:** PR cleanup is complete, but the ecosystem is not sunset-ready until every repo is classified as `ACTIVE`, `MAINTENANCE`, `SUNSET_READY`, `ARCHIVED`, or `QUARANTINE`. The model separates PR queue health from hidden local drift, shared-source sprawl, branch hygiene, and ruleset enforcement.
+
+**Key Decisions:**
+- Dirty or ambiguous repos default to `QUARANTINE`, not archive.
+- Archived repos must have no open PRs and no active Dependabot config.
+- Shared crates require a canonical home before forced adoption.
+- Live GitHub rulesets, not docs alone, define actual governance enforcement.
+
+**Source:** [SUNSET_MATURITY_WBS_2026_04_26.md](./SUNSET_MATURITY_WBS_2026_04_26.md), [../docs/governance/sunset-maturity-audit-2026-04-26.md](../docs/governance/sunset-maturity-audit-2026-04-26.md), [../docs/governance/adr-2026-04-26-sunset-maturity-operating-model.md](../docs/governance/adr-2026-04-26-sunset-maturity-operating-model.md)

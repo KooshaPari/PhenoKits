@@ -2,8 +2,8 @@
 
 Entries tracking architecture decisions, decomposition patterns, shared crate extraction, and structural refactoring.
 
-**Last updated:** 2026-04-25  
-**Entries:** 1
+**Last updated:** 2026-04-26  
+**Entries:** 2
 
 ---
 
@@ -18,3 +18,13 @@ Entries tracking architecture decisions, decomposition patterns, shared crate ex
 **Decision Required:** Review route hierarchy and consolidate overlapping surfaces before next api crate push.
 
 **Source:** [AGILEPLUS_TEST_FAILURE_TRIAGE_2026_04_25.md#agileplus-api](./AGILEPLUS_TEST_FAILURE_TRIAGE_2026_04_25.md) (lines 37–74)
+
+---
+
+## 2026-04-26 Repo Maturity State Architecture
+
+**Summary:** Adopted a five-state maturity model for repo lifecycle decisions: `ACTIVE`, `MAINTENANCE`, `SUNSET_READY`, `ARCHIVED`, and `QUARANTINE`. This prevents treating "no open PRs" as a sufficient condition for archive/sunset.
+
+**Impact:** Cross-repo automation must classify repos by evidence before mutation. Repos with large local drift, dirty gitlinks, or unresolved canonical-home questions are architecture risks and stay in `QUARANTINE`.
+
+**Source:** [../docs/governance/adr-2026-04-26-sunset-maturity-operating-model.md](../docs/governance/adr-2026-04-26-sunset-maturity-operating-model.md)

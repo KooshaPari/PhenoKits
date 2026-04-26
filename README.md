@@ -1,5 +1,7 @@
 # PhenoKits
 
+**Status:** maintenance
+
 **Multi-category artifact platform for the Phenotype software organization.**
 
 ## Overview

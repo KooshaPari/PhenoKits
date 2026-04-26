@@ -40,3 +40,7 @@ coverage/
 
 # Archives (for migrated artifacts)
 .archive/
+
+# Worktree directories (org policy)
+.worktrees/
+.claude/worktrees/

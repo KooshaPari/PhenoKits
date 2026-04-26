@@ -1,7 +1,9 @@
 ---
 title: Forced Adoption — Phase 1 Shared Crates (error-core, config-core, health)
-status: Draft
+status: PARTIAL_PROGRESS
+state: PARTIAL_PROGRESS
 date: 2026-04-25
+last-updated: 2026-04-25
 spec-id: forced-adoption-phase1-shared-crates
 owners: phenotype-org / shared-platform
 references:
@@ -9,6 +11,82 @@ references:
   - docs/governance/shared-crates-canonical-home-adr-2026-04.md
   - phenotype-infrakit PR #87 (Phase 1 LOC reduction, 2026-03-29)
 ---
+
+## Reality 2026-04-25 (post-merge update)
+
+Spec was authored and merged (PhenoKits PR #32) on 2026-04-25. Same-day
+post-merge inspection of the actual consumer set on `origin/main`
+revealed that the original audit's "8+ consumers per crate" framing was
+inflated by drift, mirrors, and search-grep false-positives. The real
+forced-adoption picture is materially smaller than spec assumed:
+
+| Crate | Migrated | In flight | Remaining viable | Spec target |
+|-------|----------|-----------|------------------|-------------|
+| `phenotype-error-core` | 2 — AuthKit (PR #42), ResilienceKit (PR #15) | 0 | 1 candidate | ≥3 |
+| `phenotype-config-core` | **0** | 0 | **0** — no real downstream consumers exist on origin/main | ≥3 (UNREACHABLE under current scope) |
+| `phenotype-health` | 1 — TestingKit (PR #4) | 1 — hwLedger (PR pending; would bring to 2 simultaneous + 3-of-3 if it lands) | TBD | ≥3 |
+
+**State transition:** `Draft → PARTIAL_PROGRESS`. The spec is partially
+satisfiable for `error-core` and `health` but **structurally
+unreachable for `config-core`** without either (a) descope of the
+config-core branch from this spec, or (b) creating a new real consumer
+(which is premature-extraction work, not adoption work). Recommendation
+captured under "Adoption Reality" below.
+
+## Adoption Reality
+
+Three findings from the post-merge reality check, recorded here so the
+next planner does not re-run the same broken audit:
+
+1. **Audit inflation.** `cross-project-reuse-audit-2026-04-25.md` §2
+   counted ~20 search hits per crate and labeled them "potential
+   consumers". On real-Cargo-consumer inspection (a `[dependencies]`
+   block in a non-infrakit, non-PhenoProc, non-PhenoObservability
+   `Cargo.toml`), the realized pool is ~2–3 per crate, not 8+. Most
+   hits were drift copies, vendored mirrors, or doc/spec/worklog
+   prose. Treat any future "N consumers exist" claim as suspect until
+   verified by `Cargo.toml` grep on `origin/main` only.
+2. **`config-core` has zero real consumers.** Not "few" — zero. The
+   crate consolidates a `figment`-backed `UnifiedConfigLoader` from
+   patterns that, in practice, the downstream repos either do not use
+   or have already inlined in shapes that don't fit the canonical
+   API. This is **premature extraction**: shipped before any consumer
+   demand existed, justified by a count that turned out to be
+   doc-as-adoption.
+3. **`error-core` and `health` are partially viable.** error-core has
+   2 of 3 needed migrations done (AuthKit + ResilienceKit); 1 more
+   suffices. health has 1 done (TestingKit) + 1 in flight (hwLedger);
+   hitting ≥3 requires one more candidate after hwLedger lands.
+
+### Recommended forward path (planner-only — no code in this spec)
+
+- **error-core:** keep WP scope; identify one additional candidate
+  (Discovery WP-001 / WP-004 substitute pool: Tracely, FocalPoint,
+  Metron, BlueScript). Reach ≥3 via 1 more migration PR.
+- **health:** land hwLedger PR (WP-014-equivalent for health, see
+  tasks.md annotations); then identify one more candidate to backstop.
+- **`config-core`: descope from this spec.** Either (a) move
+  config-core to a separate "extraction validation" spec that requires
+  finding/co-developing a real consumer before claiming reuse value,
+  or (b) deprecate the crate as premature extraction and reclaim the
+  ~400 LOC reduction claim from the original phenotype-infrakit PR
+  #87 retrospective. The decision belongs to the canonical-home owner;
+  this spec records the blocker, not the resolution.
+
+### Status of original Goals (G-01..G-04)
+
+- **G-01** (≥3 consumers per crate within one session): **partially
+  achieved** for error-core (2/3) and health (1/3 + 1 in flight);
+  **unreachable** for config-core under current consumer pool.
+- **G-02** (per-PR LOC delta): **achieved** in landed PRs (AuthKit #42,
+  ResilienceKit #15, TestingKit #4); LOC numbers tracked in PR bodies.
+- **G-03** (≥5 distinct consumer repos in aggregate): **partially
+  achieved** — 3 distinct repos so far (AuthKit, ResilienceKit,
+  TestingKit), with hwLedger pending.
+- **G-04** (audit re-run + doc update): **deferred** until error-core
+  and health hit ≥3 each; config-core branch will not satisfy the
+  original audit threshold and the audit doc must be amended to reflect
+  the inflation finding from "Adoption Reality" item #1 above.
 
 ## Problem Statement
 

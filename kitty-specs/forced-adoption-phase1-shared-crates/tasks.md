@@ -3,8 +3,29 @@ title: Tasks — Forced Adoption Phase 1 Shared Crates
 spec: spec.md
 plan: plan.md
 date: 2026-04-25
-status: Draft
+last-updated: 2026-04-25
+status: PARTIAL_PROGRESS
 ---
+
+## Reality Annotation 2026-04-25
+
+The original WP set (WP-011..WP-016) targeted a candidate consumer pool
+(AgilePlus, thegent, hwLedger, BytePort, PhenoKits) selected from the
+audit. Post-merge reality (see spec.md "Adoption Reality") is that:
+
+- The actually-migrated consumers were a **different set** than the
+  original WPs assumed: AuthKit, ResilienceKit, TestingKit landed via
+  ad-hoc PRs outside the planned (consumer × crate) cells.
+- `phenotype-config-core` has **no real downstream consumers** — every
+  config-core build WP below is structurally **BLOCKED** until a real
+  consumer is identified or the config-core branch is descoped.
+
+WPs are annotated below with `[STATUS: ...]` markers. Per spec
+directive, no WP is deleted — failed/superseded WPs are kept so the
+provenance of the forced-adoption sweep stays auditable. The
+realized-PR migrations (AuthKit, ResilienceKit, TestingKit, hwLedger)
+are tracked as new annotations under each crate's section rather than
+back-fitting them into pre-existing WP numbers.
 
 ## Work Package Index
 
@@ -120,6 +141,11 @@ WPs are organized by phase mapping back to plan.md DAG.
 
 #### WP-011 — AgilePlus adopts `phenotype-error-core`
 
+- **[STATUS: SUPERSEDED 2026-04-25]** Did not run. Realized error-core
+  consumers were AuthKit (PR #42, DONE) and ResilienceKit (PR #15,
+  DONE) — see "Realized error-core migrations" annotation below. WP-011
+  remains as a future candidate if AgilePlus is selected as the 3rd
+  error-core consumer.
 - **Phase:** 3 (B-01) → traces FR-03
 - **Scope:**
   - Add `phenotype-error-core` to AgilePlus root `Cargo.toml`
@@ -138,12 +164,23 @@ WPs are organized by phase mapping back to plan.md DAG.
 
 #### WP-012 — AgilePlus adopts `phenotype-config-core`
 
+- **[STATUS: BLOCKED 2026-04-25]** No real config-core consumer exists
+  on origin/main. Recommend descope of config-core from this spec
+  per spec.md "Adoption Reality" item #2 + "Recommended forward path".
+  Do not open this PR until either a real consumer is identified or
+  the config-core branch is moved to a separate extraction-validation
+  spec.
 - **Phase:** 3 (B-02; sequences after WP-011) → traces FR-04
 - **Acceptance:** Same shape as WP-011. Replace ≥1 bespoke config
   loader with `UnifiedConfigLoader`.
 
 #### WP-013 — thegent adopts `phenotype-health`
 
+- **[STATUS: SUPERSEDED 2026-04-25]** Did not run. Realized health
+  consumer is TestingKit (PR #4, DONE), with hwLedger PR in flight —
+  see "Realized health migrations" annotation below. WP-013 remains
+  as a future candidate if thegent is needed as the 3rd health
+  consumer after hwLedger lands.
 - **Phase:** 3 (B-03) → traces FR-05
 - **Scope:** thegent harness/dispatcher consumes `HealthChecker` from
   the canonical home selected in WP-003.
@@ -153,6 +190,11 @@ WPs are organized by phase mapping back to plan.md DAG.
 
 #### WP-014 — hwLedger adopts `phenotype-error-core`
 
+- **[STATUS: REASSIGNED 2026-04-25]** hwLedger's actual in-flight
+  migration is to `phenotype-health` (PR pending), not `error-core`.
+  The error-core slot for hwLedger remains a future candidate. The
+  health migration is tracked under "Realized health migrations"
+  annotation below.
 - **Phase:** 3 (B-04) → traces FR-06
 - **Acceptance:** Same shape as WP-011. Coordinate with hwLedger's
   existing vendored `phenotype-event-sourcing` per ADR — confirm no
@@ -160,13 +202,54 @@ WPs are organized by phase mapping back to plan.md DAG.
 
 #### WP-015 — BytePort adopts `phenotype-config-core`
 
+- **[STATUS: BLOCKED 2026-04-25]** Same blocker as WP-012 — no real
+  config-core consumer pool. Descope candidate.
 - **Phase:** 3 (B-05) → traces FR-07
 - **Acceptance:** Same shape as WP-011.
 
 #### WP-016 — PhenoKits adopts `phenotype-health`
 
+- **[STATUS: SUPERSEDED 2026-04-25]** Did not run. Realized health
+  consumers are TestingKit (DONE) and hwLedger (in flight). WP-016
+  remains as a future candidate for the 3rd health consumer if needed.
 - **Phase:** 3 (B-06) → traces FR-08
 - **Acceptance:** Same shape as WP-011.
+
+---
+
+### Realized migrations 2026-04-25 (out-of-band, not in original WP plan)
+
+These migrations landed via ad-hoc PRs outside the WP-011..WP-016
+schedule. They are recorded here so the adoption-matrix tracker
+reflects ground truth on `origin/main`, not the planned cells.
+
+#### Realized error-core migrations
+
+- **AuthKit × phenotype-error-core** — **DONE**, AuthKit PR #42
+  (merged). Replaces local error enum with canonical type per spec
+  FR-02 acceptance criteria. Counts toward FR-09 ≥3 floor.
+- **ResilienceKit × phenotype-error-core** — **DONE**, ResilienceKit
+  PR #15 (merged). Counts toward FR-09 ≥3 floor.
+- **Need:** 1 more error-core consumer to reach FR-09 (≥3). Candidate
+  pool: AgilePlus (per WP-011), hwLedger (per WP-014), or substitute
+  from {Tracely, FocalPoint, Metron, BlueScript}.
+
+#### Realized health migrations
+
+- **TestingKit × phenotype-health** — **DONE**, TestingKit PR #4
+  (merged). Counts toward FR-09 ≥3 floor.
+- **hwLedger × phenotype-health** — **IN_PROGRESS**, hwLedger PR
+  pending (not yet merged at 2026-04-25). When it lands, brings
+  realized health consumers to 2 with 1 in flight = effective 3-of-3
+  if a third is queued; or 2-of-3 if no further candidate is added.
+- **Need:** 1 more health consumer to lock FR-09 (≥3). Candidate
+  pool: thegent (per WP-013), PhenoKits (per WP-016), substitutes.
+
+#### Realized config-core migrations
+
+- **None.** Spec is structurally blocked on config-core; see spec.md
+  "Adoption Reality" item #2 and the descope recommendation under
+  "Recommended forward path".
 
 ---
 
@@ -216,16 +299,27 @@ WPs are organized by phase mapping back to plan.md DAG.
 
 ---
 
-## Adoption Matrix (live tracker — updated by WP-017 + WP-018)
+## Adoption Matrix (live tracker — updated 2026-04-25)
+
+Original planned matrix (kept for provenance):
 
 | Consumer | error-core | config-core | health |
 |----------|-----------|-------------|--------|
-| AgilePlus | WP-011 (planned) | WP-012 (planned) | — |
-| thegent | — | — | WP-013 (planned) |
-| hwLedger | WP-014 (planned) | — | — |
-| BytePort | — | WP-015 (planned) | — |
-| PhenoKits | — | — | WP-016 (planned) |
-| **Per-crate consumer count** | **≥2 (need 3rd from Phase 1 Discovery substitute)** | **≥2 (need 3rd)** | **≥2 (need 3rd)** |
+| AgilePlus | WP-011 (SUPERSEDED) | WP-012 (BLOCKED) | — |
+| thegent | — | — | WP-013 (SUPERSEDED) |
+| hwLedger | WP-014 (REASSIGNED to health) | — | — |
+| BytePort | — | WP-015 (BLOCKED) | — |
+| PhenoKits | — | — | WP-016 (SUPERSEDED) |
+
+Realized matrix (ground truth on origin/main 2026-04-25):
+
+| Consumer | error-core | config-core | health |
+|----------|-----------|-------------|--------|
+| AuthKit | DONE (PR #42) | — | — |
+| ResilienceKit | DONE (PR #15) | — | — |
+| TestingKit | — | — | DONE (PR #4) |
+| hwLedger | — | — | IN_PROGRESS (PR pending) |
+| **Per-crate consumer count** | **2 done / need 1 more for ≥3** | **0 — STRUCTURALLY BLOCKED** | **1 done + 1 in flight / need 1 more for ≥3** |
 
 **Gap:** the 6 currently planned WPs deliver only 2 consumers per
 crate. WP-001/WP-004 (Discovery) MUST select a 6th consumer to bring

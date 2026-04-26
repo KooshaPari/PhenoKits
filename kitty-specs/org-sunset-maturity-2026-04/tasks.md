@@ -2,7 +2,8 @@
 
 ## P0
 
-- [ ] SUNSET-001: Create current repo-state ledger with all active/archived repos and maturity state.
+- [x] SUNSET-001: Create current repo-state ledger with all active/archived repos and maturity state.
+  - Evidence: `docs/governance/current-repo-state-ledger-2026-04-26.md`
 - [x] SUNSET-002: Produce updated initial dispositions for `agentapi-plusplus`, `phenoSDK`, `PhenoProc`, `Dino`, `PhenoSpecs`, shelf root, and `AuthKit/go`.
   - Evidence: `worklogs/P0_DRIFT_DISPOSITION_2026_04_26.md`
 - [ ] SUNSET-003: Decide `AuthKit/go` policy: submodule, vendored nested repo, or flattened directory.

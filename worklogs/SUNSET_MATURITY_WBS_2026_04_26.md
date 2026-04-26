@@ -73,6 +73,29 @@ have canonical homes, and archived repos stay quiet.
 - Until `#109` lands, do not start release-prep or external consumer migrations
   for the dual-interface error contract.
 
+## Batch 6 Repo-State Ledger
+
+- Added `docs/governance/current-repo-state-ledger-2026-04-26.md`.
+- Marked `SUNSET-001` complete with a current local maturity-state ledger.
+- Current git-only scan covered 112 top-level repos:
+  - `14` active
+  - `24` maintenance
+  - `1` sunset-ready candidate
+  - `73` quarantine candidates
+- Broader shelf inventory including non-git containers recorded:
+  - `95` active/churned entries
+  - `12` maintenance entries
+  - `33` sunset-ready candidates
+  - `36` archive/worktree containers
+  - `3` quarantine containers
+- P0 action order from read-only branch-tip pass:
+  - salvage: `agentapi-plusplus`, `Dino`, `PhenoSpecs`
+  - split: `PhenoProc`, `AuthKit/go`
+  - quarantine: `phenoSDK`, shelf root
+- Next executable lane is `SUNSET-003` (`AuthKit/go` ownership policy) or
+  `SUNSET-011` (`Tracera` vs `Tracera-recovered` routing), because `phenoShared`
+  implementation PRs remain review-gated.
+
 ## Milestones
 
 ### M1 - Freeze and Manifest P0 Drift

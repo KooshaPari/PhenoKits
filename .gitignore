@@ -41,3 +41,6 @@ coverage/
 
 # Archives (for migrated artifacts)
 .archive/
+
+# Runtime state files
+.claude/scheduled_tasks.lock

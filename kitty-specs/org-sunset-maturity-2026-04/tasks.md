@@ -11,6 +11,12 @@
   - Evidence: `docs/governance/adr-2026-04-26-errors-dual-interface-strategy.md`
 - [x] SUNSET-004B: Define target file map and API surface for errors dual-interface implementation.
   - Evidence: `docs/governance/errors-dual-interface-target-state-2026-04-26.md`
+- [x] SUNSET-004C: Open dual-interface errors implementation PR in `phenoShared`.
+  - Evidence: `phenoShared#109`, `docs/governance/sunset-maturity-batch-5-review-gate-plan-2026-04-26.md`
+- [x] SUNSET-004D: Open config-core validation unblocker PR in `phenoShared`.
+  - Evidence: `phenoShared#110`, `docs/governance/sunset-maturity-batch-5-review-gate-plan-2026-04-26.md`
+- [ ] SUNSET-004E: Review-gated merge of `phenoShared#110` before workspace-wide validation claims.
+- [ ] SUNSET-004F: Review-gated merge of `phenoShared#109` before release-prep or consumer migrations.
 
 ## P1
 
@@ -20,6 +26,8 @@
 - [ ] SUNSET-006: Apply governance baseline to priority rule-less repos after CI truth is known.
 - [x] SUNSET-006A: Tighten `phenoShared` live ruleset without enabling self-blocking CODEOWNER review.
   - Evidence: `docs/governance/sunset-maturity-batch-3-execution-log-2026-04-26.md`
+- [x] SUNSET-006B: Record review-gated queue and merge order after ruleset tightening.
+  - Evidence: `docs/governance/sunset-maturity-batch-5-review-gate-plan-2026-04-26.md`
 - [ ] SUNSET-007: Inventory stale no-PR branches and capture tip SHAs.
 - [ ] SUNSET-008: Prune only merged or superseded stale branches.
 - [x] SUNSET-008A: Inventory worktree/recovery containers before pruning.

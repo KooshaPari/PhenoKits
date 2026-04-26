@@ -27,6 +27,22 @@ realized-PR migrations (AuthKit, ResilienceKit, TestingKit, hwLedger)
 are tracked as new annotations under each crate's section rather than
 back-fitting them into pre-existing WP numbers.
 
+## Gate Annotation 2026-04-26
+
+The shared-source side is now moving through `phenoShared`, but the repo
+ruleset intentionally requires one approving review. Forced-adoption work
+must wait for the relevant canonical PRs to merge:
+
+- `phenoShared#110` (`fix(config): restore config core validation`) must
+  merge before any renewed `phenotype-config-core` validation or adoption
+  claim.
+- `phenoShared#109` (`feat(errors): add dual-interface contracts`) must
+  merge before any new consumer migration for `phenotype-error-core` or
+  `@phenotype/errors`.
+- `phenotype-config-core` remains structurally blocked as an adoption
+  target even after `#110` unless a real downstream consumer is found.
+  Treat it as extraction-validation, not forced adoption.
+
 ## Work Package Index
 
 Each WP scopes **one consumer × one shared crate**. Acceptance criteria

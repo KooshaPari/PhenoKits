@@ -41,7 +41,8 @@ Out of scope:
 
 ## Acceptance Criteria
 
-- Org open PR queue remains empty after two sweeps.
+- Org open PR queue is either empty after two sweeps or every remaining PR has
+  a written gate reason, merge order, and next action.
 - Every P0 repo has a drift disposition.
 - Archived repos checked have no Dependabot configs.
 - Canonical shared crate plan is approved and executable.

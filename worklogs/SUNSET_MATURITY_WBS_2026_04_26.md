@@ -56,6 +56,23 @@ have canonical homes, and archived repos stay quiet.
 - Added `docs/governance/errors-dual-interface-target-state-2026-04-26.md` to pin
   the file map, public API shape, fixture strategy, and migration order.
 
+## Batch 5 Review Gate
+
+- Added `docs/governance/sunset-maturity-batch-5-review-gate-plan-2026-04-26.md`.
+- Opened `phenoShared#109` for the dual-interface error-contract implementation:
+  Rust `phenotype-error-core`, TypeScript `@phenotype/errors`, shared contracts,
+  and fixture parity tests.
+- Opened `phenoShared#110` for the `phenotype-config-core` validation blocker:
+  malformed `merge_configs`, object-safe `ConfigLoader`, missing dependencies,
+  and `Priority` newtype mismatch.
+- Current open PR queue is not empty; all open PRs are intentionally
+  `REVIEW_REQUIRED` under the tightened `phenoShared` ruleset.
+- Merge order once review is available: `#110`, `#109`, `#108`, `#107`, `#106`.
+- Until `#110` lands, do not make workspace-wide Rust validation claims for
+  `phenoShared`.
+- Until `#109` lands, do not start release-prep or external consumer migrations
+  for the dual-interface error contract.
+
 ## Milestones
 
 ### M1 - Freeze and Manifest P0 Drift
@@ -113,7 +130,8 @@ have canonical homes, and archived repos stay quiet.
 
 ## Acceptance Tests
 
-- `gh search prs --owner KooshaPari --state open --limit 200` returns no open PRs.
+- `gh search prs --owner KooshaPari --state open --limit 200` returns no open PRs,
+  or every remaining PR has a written gate reason and next action.
 - Archived repo sample has no `.github/dependabot.yml`.
 - Priority active repos have ruleset inventory saved.
 - P0 repos have no unclassified mixed local work.

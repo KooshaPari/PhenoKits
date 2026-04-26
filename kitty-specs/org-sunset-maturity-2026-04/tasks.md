@@ -14,6 +14,8 @@
 - [x] SUNSET-005A: Sample priority rulesets and record blocked vs actionable gaps.
   - Evidence: `docs/governance/ruleset-gap-ledger-2026-04-26.md`
 - [ ] SUNSET-006: Apply governance baseline to priority rule-less repos after CI truth is known.
+- [x] SUNSET-006A: Tighten `phenoShared` live ruleset without enabling self-blocking CODEOWNER review.
+  - Evidence: `docs/governance/sunset-maturity-batch-3-execution-log-2026-04-26.md`
 - [ ] SUNSET-007: Inventory stale no-PR branches and capture tip SHAs.
 - [ ] SUNSET-008: Prune only merged or superseded stale branches.
 - [x] SUNSET-008A: Inventory worktree/recovery containers before pruning.
@@ -30,3 +32,5 @@
 - [ ] SUNSET-012: For each `SUNSET_READY` repo, add successor/canonical-home README note.
 - [ ] SUNSET-013: Remove Dependabot configs before archive.
 - [ ] SUNSET-014: Publish final org maturity ledger and acceptance evidence.
+- [x] SUNSET-014A: Verify fresh PhenoKits clone for future governance work while shelf checkout remains quarantined.
+  - Evidence: `docs/governance/sunset-maturity-batch-3-execution-log-2026-04-26.md`

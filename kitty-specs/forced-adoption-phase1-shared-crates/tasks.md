@@ -3,9 +3,18 @@ title: Tasks — Forced Adoption Phase 1 Shared Crates
 spec: spec.md
 plan: plan.md
 date: 2026-04-25
-last-updated: 2026-04-25
-status: PARTIAL_PROGRESS
+last-updated: 2026-04-25T21:00Z
+status: DONE_FOR_2_OF_3
 ---
+
+## Closeout 2026-04-25 21:00Z
+
+Per spec.md "Closeout 2026-04-25 21:00Z": error-core and health
+each reached 3/3 consumers; config-core remains descoped. Adoption
+Matrix below updated to ground truth on `origin/main`. WP-017
+(aggregate matrix) is satisfied for the two non-descoped crates;
+WP-018/WP-019 (audit re-run + audit-doc update) remain open
+follow-ups for G-04.
 
 ## Reality Annotation 2026-04-25
 
@@ -230,20 +239,23 @@ reflects ground truth on `origin/main`, not the planned cells.
   FR-02 acceptance criteria. Counts toward FR-09 ≥3 floor.
 - **ResilienceKit × phenotype-error-core** — **DONE**, ResilienceKit
   PR #15 (merged). Counts toward FR-09 ≥3 floor.
-- **Need:** 1 more error-core consumer to reach FR-09 (≥3). Candidate
-  pool: AgilePlus (per WP-011), hwLedger (per WP-014), or substitute
-  from {Tracely, FocalPoint, Metron, BlueScript}.
+- **hwLedger / hwledger-core × phenotype-error-core** — **DONE**
+  2026-04-25, hwLedger PR #35 (merged). Brings error-core to **3/3**
+  for FR-09. Closes the error-core demand gap.
+- **Need:** none. error-core is closed at 3/3.
 
 #### Realized health migrations
 
 - **TestingKit × phenotype-health** — **DONE**, TestingKit PR #4
   (merged). Counts toward FR-09 ≥3 floor.
-- **hwLedger × phenotype-health** — **IN_PROGRESS**, hwLedger PR
-  pending (not yet merged at 2026-04-25). When it lands, brings
-  realized health consumers to 2 with 1 in flight = effective 3-of-3
-  if a third is queued; or 2-of-3 if no further candidate is added.
-- **Need:** 1 more health consumer to lock FR-09 (≥3). Candidate
-  pool: thegent (per WP-013), PhenoKits (per WP-016), substitutes.
+- **hwLedger / hwledger-server × phenotype-health** — **DONE**
+  2026-04-25, hwLedger PR #34 (merged).
+- **hwLedger / hwledger-agent × phenotype-health** — **DONE**
+  2026-04-25, hwLedger PR #34 (merged; same PR as hwledger-server,
+  two distinct crate-level consumers).
+- **Need:** none. health is closed at 3/3 (TestingKit PR #4,
+  hwledger-server PR #34, hwledger-agent PR #34). Closes the health
+  demand gap.
 
 #### Realized config-core migrations
 
@@ -311,23 +323,25 @@ Original planned matrix (kept for provenance):
 | BytePort | — | WP-015 (BLOCKED) | — |
 | PhenoKits | — | — | WP-016 (SUPERSEDED) |
 
-Realized matrix (ground truth on origin/main 2026-04-25):
+Realized matrix (ground truth on origin/main, closeout 2026-04-25 21:00Z):
 
-| Consumer | error-core | config-core | health |
-|----------|-----------|-------------|--------|
+| Consumer (crate) | error-core | config-core | health |
+|------------------|-----------|-------------|--------|
 | AuthKit | DONE (PR #42) | — | — |
 | ResilienceKit | DONE (PR #15) | — | — |
 | TestingKit | — | — | DONE (PR #4) |
-| hwLedger | — | — | IN_PROGRESS (PR pending) |
-| **Per-crate consumer count** | **2 done / need 1 more for ≥3** | **0 — STRUCTURALLY BLOCKED** | **1 done + 1 in flight / need 1 more for ≥3** |
+| hwLedger / hwledger-core | DONE (PR #35) | — | — |
+| hwLedger / hwledger-server | — | — | DONE (PR #34) |
+| hwLedger / hwledger-agent | — | — | DONE (PR #34) |
+| **Per-crate consumer count** | **3/3 — DONE** | **0/3 — DESCOPED (premature extraction)** | **3/3 — DONE** |
 
-**Gap:** the 6 currently planned WPs deliver only 2 consumers per
-crate. WP-001/WP-004 (Discovery) MUST select a 6th consumer to bring
-each crate to ≥3 (FR-09). Recommended substitutes: **Tracely**,
-**FocalPoint**, **Metron**, **BlueScript** (active per recent commit
-log; consult discovery.md for selection). The Phase 1 Discovery output
-expands the matrix with the chosen substitute(s) before any Phase 3
-WP opens.
+**Closeout note:** error-core and health each reached the FR-09 ≥3
+floor via the realized PRs above. The earlier "Gap" framing
+(needing one more consumer per crate, substitutes from Tracely /
+FocalPoint / Metron / BlueScript) is **resolved** by the hwLedger
+PRs (#34, #35) landing same-day. config-core remains descoped per
+spec.md "Adoption Reality" item #2; no further consumers were
+recruited under this spec.
 
 **Tracking note:** any descoped (consumer × crate) pair from Phase 2
 design (per spec NG-02) requires Discovery to add another candidate so

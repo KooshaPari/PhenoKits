@@ -1,9 +1,9 @@
 ---
 title: Forced Adoption — Phase 1 Shared Crates (error-core, config-core, health)
-status: PARTIAL_PROGRESS
-state: PARTIAL_PROGRESS
+status: DONE_FOR_2_OF_3
+state: DONE_FOR_2_OF_3
 date: 2026-04-25
-last-updated: 2026-04-25
+last-updated: 2026-04-25T21:00Z
 spec-id: forced-adoption-phase1-shared-crates
 owners: phenotype-org / shared-platform
 references:
@@ -11,6 +11,44 @@ references:
   - docs/governance/shared-crates-canonical-home-adr-2026-04.md
   - phenotype-infrakit PR #87 (Phase 1 LOC reduction, 2026-03-29)
 ---
+
+## Closeout 2026-04-25 21:00Z
+
+End-of-session reality on `origin/main`: **2 of 3 Phase 1 crates hit
+the FR-09 ≥3-consumer floor**; `phenotype-config-core` remains
+descoped per the recommendation already in this spec.
+
+| Crate | Realized consumers (count) | Status |
+|-------|----------------------------|--------|
+| `phenotype-error-core` | AuthKit (PR #42), ResilienceKit (PR #15), hwLedger (#35, hwledger-core) — **3/3** | DONE |
+| `phenotype-health` | TestingKit (PR #4), hwLedger (#34, hwledger-server), hwLedger (#34, hwledger-agent) — **3/3** | DONE |
+| `phenotype-config-core` | none — **0/3** | DESCOPED (premature extraction; see "Adoption Reality" item #2 and "Recommended forward path") |
+
+Spec is closed as **DONE_FOR_2_OF_3**: the demand-side gap that
+motivated this spec is closed for `error-core` and `health`. The
+`config-core` branch is not retried under this spec; resolution
+(separate extraction-validation spec or deprecate) is owned by the
+canonical-home owner per the existing recommendation.
+
+**PR list (closeout):**
+
+- AuthKit#42 — error-core adoption (merged)
+- ResilienceKit#15 — error-core adoption (merged)
+- hwLedger#35 — error-core adoption in `hwledger-core` (merged)
+- TestingKit#4 — health adoption (merged)
+- hwLedger#34 — health adoption in `hwledger-server` + `hwledger-agent`
+  (merged; counts as two distinct consumer crates within hwLedger
+  per FR-09 "real `[dependencies]` block in non-infrakit/PhenoProc/
+  PhenoObservability `Cargo.toml`")
+
+Notes for next planner:
+- FR-09 floor uses crate-level consumers, not repo-level; hwLedger
+  contributes one error-core consumer (`hwledger-core`) and two
+  health consumers (`hwledger-server`, `hwledger-agent`). If a future
+  audit re-tightens to repo-level, error-core stays 3/3 and health
+  drops to 2/3 — flag in audit re-run if methodology changes.
+- G-04 (audit re-run) still pending; tasks.md WP-018/WP-019 carry
+  the follow-up.
 
 ## Reality 2026-04-25 (post-merge update)
 

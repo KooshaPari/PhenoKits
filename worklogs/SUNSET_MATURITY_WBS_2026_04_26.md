@@ -96,6 +96,20 @@ have canonical homes, and archived repos stay quiet.
   `SUNSET-011` (`Tracera` vs `Tracera-recovered` routing), because `phenoShared`
   implementation PRs remain review-gated.
 
+## Batch 7 AuthKit Go Policy
+
+- Added `docs/governance/authkit-go-ownership-policy-2026-04-26.md`.
+- Marked `SUNSET-003` complete as a policy decision.
+- Classified `AuthKit/go` as an orphaned gitlink:
+  - parent stores `go` as mode `160000`;
+  - no `AuthKit/.gitmodules` exists;
+  - nested `AuthKit/go` has no remote;
+  - nested `HEAD` is `96355ff` with tag `v0.1.0`, ahead of the parent pointer
+    `afa7ab9`.
+- Decision: prefer a real submodule with a dedicated remote; fallback to
+  flattened source only after preserving nested history.
+- Guardrail: do not commit the current parent gitlink update as-is.
+
 ## Milestones
 
 ### M1 - Freeze and Manifest P0 Drift

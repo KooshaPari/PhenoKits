@@ -6,7 +6,10 @@
   - Evidence: `docs/governance/current-repo-state-ledger-2026-04-26.md`
 - [x] SUNSET-002: Produce updated initial dispositions for `agentapi-plusplus`, `phenoSDK`, `PhenoProc`, `Dino`, `PhenoSpecs`, shelf root, and `AuthKit/go`.
   - Evidence: `worklogs/P0_DRIFT_DISPOSITION_2026_04_26.md`
-- [ ] SUNSET-003: Decide `AuthKit/go` policy: submodule, vendored nested repo, or flattened directory.
+- [x] SUNSET-003: Decide `AuthKit/go` policy: submodule, vendored nested repo, or flattened directory.
+  - Evidence: `docs/governance/authkit-go-ownership-policy-2026-04-26.md`
+- [ ] SUNSET-003A: Create/identify `AuthKit/go` remote and register it as a real submodule.
+- [ ] SUNSET-003B: If no remote is created, flatten `AuthKit/go` only after preserving nested history.
 - [ ] SUNSET-004: Create shared-crate canonical-home implementation PR for Phase 1 crates into `phenoShared`.
 - [x] SUNSET-004A: Decide errors dual-interface strategy before implementing release prep.
   - Evidence: `docs/governance/adr-2026-04-26-errors-dual-interface-strategy.md`

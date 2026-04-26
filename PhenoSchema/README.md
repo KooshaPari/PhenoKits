@@ -94,3 +94,7 @@ PhenoSchema/
 - **Changelog**: [CHANGELOG.md](CHANGELOG.md)
 
 For validation testing and spec traceability, see [AGENTS.md](AGENTS.md).
+
+## License
+
+MIT — see [LICENSE](./LICENSE).

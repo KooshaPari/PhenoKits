@@ -1,13 +1,15 @@
 [workspace]
-members = [
+# This monorepo has no top-level Rust crates. Real Rust workspaces live in
+# subdirectories with their own Cargo.toml (e.g. HexaKit/, AgilePlus/,
+# phenotype-shared/). Keep this manifest as an empty virtual workspace so
+# stray `cargo` invocations at repo root do not pick up unrelated crates.
+members = []
+exclude = [
     "templates",
     "template-domain",
     "template-program-ops",
     "HexaKit",
-    "libs/rust",
-    "libs/go",
-    "libs/python",
-    "libs/typescript",
+    "libs",
 ]
 resolver = "2"
 

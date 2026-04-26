@@ -113,3 +113,7 @@ cp configs/observability/prometheus.yml ./
 - [HexaKit/](HexaKit/) - Template CLI and registry
 - [PhenoKit](https://github.com/KooshaPari/PhenoKit) - Core SDK
 - [PhenoSpecs](https://github.com/KooshaPari/PhenoSpecs) - Specifications
+
+## License
+
+MIT — see [LICENSE](./LICENSE).

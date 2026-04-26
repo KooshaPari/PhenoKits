@@ -7,6 +7,8 @@
   - Evidence: `worklogs/P0_DRIFT_DISPOSITION_2026_04_26.md`
 - [ ] SUNSET-003: Decide `AuthKit/go` policy: submodule, vendored nested repo, or flattened directory.
 - [ ] SUNSET-004: Create shared-crate canonical-home implementation PR for Phase 1 crates into `phenoShared`.
+- [x] SUNSET-004A: Decide errors dual-interface strategy before implementing release prep.
+  - Evidence: `docs/governance/adr-2026-04-26-errors-dual-interface-strategy.md`
 
 ## P1
 

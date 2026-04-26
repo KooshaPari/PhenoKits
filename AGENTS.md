@@ -23,3 +23,9 @@ If you ever feel uncertain whether a path is part of PhenoKits or a sibling repo
 ## Reference
 
 See [`README.md`](README.md) for the full category table, agent interaction matrix, and quick-start commands.
+
+For Codex model and subagent selection, follow
+[`docs/governance/codex-model-routing-policy-2026-04-26.md`](docs/governance/codex-model-routing-policy-2026-04-26.md):
+default to the cheapest reliable model/effort, prefer Spark-style bounded
+sidecars for routine fanout, and escalate to frontier/high-reasoning models
+only with evidence.

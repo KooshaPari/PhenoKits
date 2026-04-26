@@ -9,6 +9,8 @@
 - [ ] SUNSET-004: Create shared-crate canonical-home implementation PR for Phase 1 crates into `phenoShared`.
 - [x] SUNSET-004A: Decide errors dual-interface strategy before implementing release prep.
   - Evidence: `docs/governance/adr-2026-04-26-errors-dual-interface-strategy.md`
+- [x] SUNSET-004B: Define target file map and API surface for errors dual-interface implementation.
+  - Evidence: `docs/governance/errors-dual-interface-target-state-2026-04-26.md`
 
 ## P1
 

@@ -53,6 +53,8 @@ have canonical homes, and archived repos stay quiet.
     tests.
 - This avoids inventing a missing Rust crate from stale docs while preserving the
   existing TS package as a first-class interface.
+- Added `docs/governance/errors-dual-interface-target-state-2026-04-26.md` to pin
+  the file map, public API shape, fixture strategy, and migration order.
 
 ## Milestones
 

@@ -43,7 +43,7 @@ These repos must not be pushed, reset, or archived until their local work is spl
 | `Dino` | ahead 8 / behind 62; docs/spec scaffold plus SDK/test seed | fresh branch from current main; split docs from SDK/test |
 | `PhenoSpecs` | archive consolidation and registry/spec edits in one dirty tree | split archive deletions from registry/spec updates |
 | shelf root `repos` | coordination repo; child repos/worktrees create status spillover | treat as governance-only surface; never use root status as product truth |
-| `AuthKit/go` | dirty gitlink without clear `.gitmodules` policy | choose managed submodule, vendored nested repo, or flattened directory |
+| `AuthKit/go` | clean nested repo in this checkout, but no clear `.gitmodules` policy | choose managed submodule, vendored nested repo, or flattened directory |
 
 ### Cohort B - Shared Source Collapse
 
@@ -155,8 +155,10 @@ Next archived audit:
 
 - `gh search prs --owner KooshaPari --state open --limit 200`
 - `gh repo list KooshaPari --limit 1000 --json name,isArchived,isPrivate,defaultBranchRef,pushedAt,updatedAt,primaryLanguage`
+- `docs/governance/sunset-maturity-batch-2-execution-plan-2026-04-26.md`
+- `docs/governance/ruleset-gap-ledger-2026-04-26.md`
 - `docs/governance/actual-shared-crates-audit-2026-04-25.md`
-- `docs/governance/phase1-crates-post-archive-audit-2026-04-25.md`
 - `docs/governance/org-pr-cleanup-ledger-2026-04-25.md`
-- `worklogs/PHENOTYPE_LOCAL_DRIFT_MANIFEST_2026_04_25.md`
+- `worklogs/P0_DRIFT_DISPOSITION_2026_04_26.md`
+- `worklogs/WORKTREE_QUARANTINE_LEDGER_2026_04_26.md`
 - `worklogs/PHENOTYPE_POST_PR_CLEANUP_AUDIT_WBS_2026_04_25.md`

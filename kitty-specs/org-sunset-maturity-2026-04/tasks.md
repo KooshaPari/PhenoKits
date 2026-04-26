@@ -3,16 +3,21 @@
 ## P0
 
 - [ ] SUNSET-001: Create current repo-state ledger with all active/archived repos and maturity state.
-- [ ] SUNSET-002: Produce updated manifests for `agentapi-plusplus`, `phenoSDK`, `PhenoProc`, `Dino`, `PhenoSpecs`, shelf root, and `AuthKit/go`.
+- [x] SUNSET-002: Produce updated initial dispositions for `agentapi-plusplus`, `phenoSDK`, `PhenoProc`, `Dino`, `PhenoSpecs`, shelf root, and `AuthKit/go`.
+  - Evidence: `worklogs/P0_DRIFT_DISPOSITION_2026_04_26.md`
 - [ ] SUNSET-003: Decide `AuthKit/go` policy: submodule, vendored nested repo, or flattened directory.
 - [ ] SUNSET-004: Create shared-crate canonical-home implementation PR for Phase 1 crates into `phenoShared`.
 
 ## P1
 
 - [ ] SUNSET-005: Inventory rulesets for all active repos and classify missing/weak/strong.
+- [x] SUNSET-005A: Sample priority rulesets and record blocked vs actionable gaps.
+  - Evidence: `docs/governance/ruleset-gap-ledger-2026-04-26.md`
 - [ ] SUNSET-006: Apply governance baseline to priority rule-less repos after CI truth is known.
 - [ ] SUNSET-007: Inventory stale no-PR branches and capture tip SHAs.
 - [ ] SUNSET-008: Prune only merged or superseded stale branches.
+- [x] SUNSET-008A: Inventory worktree/recovery containers before pruning.
+  - Evidence: `worklogs/WORKTREE_QUARANTINE_LEDGER_2026_04_26.md`
 
 ## P2
 

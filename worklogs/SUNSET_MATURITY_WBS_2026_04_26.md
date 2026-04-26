@@ -41,6 +41,19 @@ have canonical homes, and archived repos stay quiet.
   absent in current `phenoShared`; decide Rust crate creation vs JS `packages/errors`
   release prep before implementation.
 
+## Batch 4 Decision
+
+- Added `docs/governance/adr-2026-04-26-errors-dual-interface-strategy.md`.
+- Chose a dual-interface path:
+  - Rust source of truth: `phenotype-error-core`.
+  - TypeScript interface: `packages/errors` / `@phenotype/errors`.
+  - Optional Rust facade: `crates/phenotype-errors` only if a real Rust consumer
+    requires that crate name.
+  - Shared parity mechanism: explicit schema/fixtures consumed by both Rust and TS
+    tests.
+- This avoids inventing a missing Rust crate from stale docs while preserving the
+  existing TS package as a first-class interface.
+
 ## Milestones
 
 ### M1 - Freeze and Manifest P0 Drift

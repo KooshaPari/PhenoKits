@@ -1,0 +1,78 @@
+# Sunset Maturity WBS - 2026-04-26
+
+## Goal
+
+Move the Phenotype repo ecosystem from "PR queue is clear" to a mature closeout state where
+each repo has a known state, local work is preserved or retired intentionally, shared sources
+have canonical homes, and archived repos stay quiet.
+
+## Current Backlog
+
+| Priority | Workstream | Lead repos | Done when |
+|---|---|---|---|
+| P0 | Local drift preservation | `agentapi-plusplus`, `phenoSDK`, `PhenoProc`, `Dino`, `PhenoSpecs`, shelf root, `AuthKit/go` | each has split/discard/publish disposition |
+| P0 | Shared-crate canonical homes | `phenoShared`, `pheno`, `PhenoLang`, `HexaKit`, `PhenoProc`, Kit repos | every shared crate has one canonical source |
+| P1 | Governance ruleset reconciliation | `AgilePlus`, `heliosApp`, `thegent`, `agentapi-plusplus`, `Tracera`, `phenoShared`, rule-less sampled repos | live rulesets match local docs |
+| P1 | Stale branch hygiene | `cliproxyapi-plusplus`, `heliosApp`, `AgilePlus`, `AuthKit` | no stale no-PR branch lacks a ledger entry |
+| P2 | Docs/worklog consolidation | shelf `docs/governance`, `worklogs`, repo-local docs | every claim has one durable source |
+| P3 | Archive/sunset enforcement | archived repos and low-activity candidates | archived repos have no PRs/dependabot and successor notes |
+
+## Milestones
+
+### M1 - Freeze and Manifest P0 Drift
+
+- Generate per-repo manifests for each P0 repo:
+  - branch and tracking status
+  - ahead/behind
+  - tracked/untracked counts
+  - nested gitlink state
+  - commit themes
+  - keep/split/discard recommendation
+- No mutation except creating ledger docs.
+- Exit: all P0 repos have written disposition recommendations.
+
+### M2 - Split Salvage Branches
+
+- Create one current-main branch per coherent work lane.
+- Replay only coherent commits/files.
+- Do not mix docs/governance, generated cleanup, vendor deletion, and source behavior.
+- Exit: each P0 repo has either clean salvage PRs or an explicit discard/quarantine decision.
+
+### M3 - Canonical Shared Source
+
+- Import Phase 1 crates into `phenoShared` from `pheno`.
+- Decide canonical home for duplicated Kit crates.
+- Convert brittle sibling path deps to versioned git/tag or registry deps.
+- Exit: shared-crate audit table has no unlabeled drift mirrors.
+
+### M4 - Governance Baseline
+
+- Inventory live rulesets for all active repos.
+- Apply baseline only after CI truth is known.
+- Update local rule docs and CODEOWNERS/PR templates in the same lane.
+- Exit: priority active repos have matching live rulesets and local governance docs.
+
+### M5 - Branch and Archive Hygiene
+
+- Inventory remote branches with no open PR.
+- Delete only merged/superseded branches with tip SHA captured.
+- For archived repos, remove Dependabot config before archive.
+- Exit: no open PRs, no archived Dependabot emitters, no stale no-PR branch older than 30 days without decision.
+
+## Execution Order
+
+1. P0 drift manifests.
+2. Shared-source canonical import plan.
+3. Governance ruleset inventory.
+4. Salvage branch creation.
+5. Branch pruning.
+6. Archive/sunset closeout.
+7. Final worklog consolidation.
+
+## Acceptance Tests
+
+- `gh search prs --owner KooshaPari --state open --limit 200` returns no open PRs.
+- Archived repo sample has no `.github/dependabot.yml`.
+- Priority active repos have ruleset inventory saved.
+- P0 repos have no unclassified mixed local work.
+- Worklogs index links to this WBS and the sunset maturity audit.

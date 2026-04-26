@@ -114,3 +114,8 @@ go test ./backend/...
 
 Complete. Follow-up is `SUNSET-011B`: create the live-main recovery branch and
 cherry-pick reviewed commits.
+
+`SUNSET-011B` is closed in
+`docs/governance/tracera-recovery-disposition-2026-04-26.md`: the two safe
+workflow recovery commits were already represented on live Tracera `main`, and
+the remaining recovered commits were skipped or deferred for scoped rework.

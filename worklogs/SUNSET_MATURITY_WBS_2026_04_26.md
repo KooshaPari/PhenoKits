@@ -28,6 +28,19 @@ have canonical homes, and archived repos stay quiet.
 - Confirmed priority ruleset gaps for `PhenoMCP`, `PhenoProc`, `PhenoKits`, `Dino`,
   `PhenoSpecs`, and `AuthKit` in the sampled GitHub ruleset API pass.
 
+## Batch 3 Evidence
+
+- Added `docs/governance/sunset-maturity-batch-3-execution-log-2026-04-26.md`.
+- Tightened `phenoShared` live ruleset to require one approval and review-thread
+  resolution.
+- Left `phenoShared` CODEOWNER review disabled because the current CODEOWNERS state
+  would self-block the only maintainer.
+- Verified a clean PhenoKits clone at `/tmp/phenokits-fresh.TDBzua/PhenoKits`;
+  continue governance PRs from that clone until the shelf checkout is repaired.
+- Blocked Rust `phenotype-errors` release prep because `crates/phenotype-errors` is
+  absent in current `phenoShared`; decide Rust crate creation vs JS `packages/errors`
+  release prep before implementation.
+
 ## Milestones
 
 ### M1 - Freeze and Manifest P0 Drift

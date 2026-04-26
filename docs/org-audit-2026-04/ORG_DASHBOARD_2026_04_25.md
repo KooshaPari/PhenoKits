@@ -1,6 +1,14 @@
 # Phenotype Org Dashboard (2026-04-25)
 
-**After W-67F Batch Audit — Cross-Collection Snapshot**
+**After W-67F Batch Audit → W-70/71 Landings — Cross-Collection Snapshot**
+
+## v26 Delta Summary (W-70/71)
+
+- Sidekick roster: 5 repos → 3 canonical + 0 candidates (W-69 downgrade cleanup complete)
+- FocalPoint v0.0.11 stable; heliosApp v2026.05A.0 → 05B.0 in-flight release
+- Tracera v0.1.0 shipped; phenotype-omlx v0.3.x active
+- W-67 audits + W-71 dormant-pattern survey integrated into health assessments
+- AgentMCP server pack corruption flagged; OpenAI key UNREVOKED; HeliosLab BROKEN (open risks)
 
 ---
 
@@ -25,11 +33,11 @@
 |-----------|-------|----------|----------|------------|
 | **phenoShared** | 6 | ~80K | High | AuthKit, phenoAI, PhenoSchema |
 | **PhenoObservability** | 5 | ~200K | High | ObservabilityKit, HeliosLab |
-| **Sidekick** | 5 | ~120K | Active | PhenoAgent, phenotype-skills |
+| **Sidekick** | 3 | ~80K | Active | PhenoAgent (core retained), phenotype-skills downgraded |
 | **Stashly** | 3 | ~50K | Stable | PhenoCompose, BytePort |
-| **Standalone Products** | 4 | ~640K | Mixed | phenotype-omlx (shipped), FocalPoint |
+| **Standalone Products** | 4 | ~640K | Mixed | phenotype-omlx (shipped), FocalPoint v0.0.11, heliosApp v2026.05B.0, Tracera v0.1.0 |
 
-**Organization Total: 23 repos | ~1.09M LOC (core collections + standalones)**
+**Organization Total: 21 repos | ~1.05M LOC (core collections + standalones; post-W-69 rationalization)**
 
 ---
 
@@ -38,11 +46,11 @@
 ### Collection Growth
 
 ```
-PhenoObservability:   3 repos → 5 repos   (+2: ObservabilityKit, HeliosLab inferred)
-Sidekick:             2 repos → 5 repos   (+3: PhenoAgent, phenotype-skills, MCP tooling)
+W-67F Growth:         3 repos → 5 repos (PhenoObservability, Sidekick expansion)
+W-70/71 Rationalization: 5 repos → 3 repos (Sidekick: PhenoAgent retained, skills/MCP downgraded)
 phenoShared:          3 repos → 6 repos   (+3: phenoAI, AuthKit, PhenoSchema)
-Stashly:              1 repo  → 3 repos   (+2: PhenoCompose, BytePort inferred)
-Standalone Products:  3 repos → 4 repos   (+1: phenotype-omlx / consumer product)
+Stashly:              1 repo  → 3 repos   (+2: PhenoCompose, BytePort)
+Standalone Products:  3 repos → 4 repos   (phenotype-omlx, FocalPoint, heliosApp, Tracera)
 ```
 
 ### LOC Contribution (W-67F Audited)
@@ -71,7 +79,7 @@ Standalone Products:  3 repos → 4 repos   (+1: phenotype-omlx / consumer produ
 - **PhenoObservability** — Multi-repo integration, active traces/metrics collection
 
 **Tier 2 — Active Development:**
-- **Sidekick** — Scaffold to active (PhenoAgent 22K LOC, phenotype-skills test coverage)
+- **Sidekick** — Core agent daemon (PhenoAgent 22K LOC); skills/MCP tooling downgraded post-W-69
 - **Stashly** — Stable runtime, merged from multiple isolation sources
 
 **Tier 3 — Standalone Ecosystem:**
@@ -80,14 +88,14 @@ Standalone Products:  3 repos → 4 repos   (+1: phenotype-omlx / consumer produ
 
 ### Standalone Product Pattern Emerging
 
-With phenotype-omlx, org now has **4 standalone consumer products outside microservice ecosystem:**
+**4 standalone consumer products (independent deployment model, no Sidekick/PhenoObservability dependency):**
 
-1. **phenotype-omlx** (W-67F, NEW) — macOS LLM inference → omlx.ai
-2. **FocalPoint** (W-67D) — Phenotype IDE
-3. **heliosApp** — Helios distributed runtime
-4. **Tracera** — Tracing visualization
+1. **phenotype-omlx** (v0.3.x active, 138.8K LOC) — macOS LLM inference → omlx.ai
+2. **FocalPoint** (v0.0.11 stable, 650K LOC) — Phenotype IDE, all-linters-passing
+3. **heliosApp** (v2026.05A → 05B in-flight) — Helios distributed runtime
+4. **Tracera** (v0.1.0 shipped) — Tracing visualization
 
-These do NOT depend on Sidekick/PhenoObservability stack — independent deployment model.
+All 4 on latest releases or in-flight. Health badges: FocalPoint ✓, heliosApp pending 05B merge, others active.
 
 ---
 

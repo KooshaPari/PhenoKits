@@ -15,7 +15,7 @@ states are mixed wave artifacts and need split/recovery branches before cleanup.
 | `agentapi-plusplus` | Split | 4,681 tracked changes, nearly all vendor deletions, mixed with 7 local commits of docs/import/test hygiene | Create separate salvage branches for vendor cleanup and governance/docs/test changes. |
 | `phenoSDK` | Split | 2,189 tracked changes, 11 untracked docs, generated-doc deletion plus decomposition/governance commits | Separate deprecation/governance docs from generated artifact cleanup and module removal. |
 | `PhenoProc` | Split | ahead 8 / behind 12, 38 tracked changes, 68 untracked paths, 24 dirty gitlinks | Freeze current tree; make a nested-gitlink manifest before rebasing or pushing. |
-| `AuthKit` | Keep, then rebase carefully | coherent docs/governance bootstrap lane, but behind 37 and one dirty `go` gitlink | Preserve local commits; inspect `go` gitlink; rebase in a clean worktree. |
+| `AuthKit` | Done for docs/governance lane | docs/governance bootstrap was isolated and merged as `AuthKit#43`; dirty `go` gitlink remains intentionally out of scope | Handle `go` gitlink separately only after confirming nested repo/submodule policy. |
 | `Dino` | Split | ahead 8 / behind 62, docs/spec scaffold plus SDK/test seed | Split governance/docs from SDK/test work, then rebase from current main. |
 | `PhenoSpecs` | Split | archive consolidation and registry/spec hygiene in one dirty tree | Split archive deletions from registry/SPEC/worklog updates. |
 | shelf root `repos` | Split/quarantine | root checkout sees child repos/worktrees as untracked spillover; 15 tracked doc/spec deletions | Do not use root status as product truth; isolate governance doc cleanup only. |
@@ -128,6 +128,8 @@ states are mixed wave artifacts and need split/recovery branches before cleanup.
 
 ### `AuthKit`
 
+Status update: docs/governance bootstrap lane was committed, pushed, and admin-merged as `AuthKit#43` on 2026-04-26. The local `go` gitlink was deliberately excluded because it points at nested commit `96355ff` without a `.gitmodules` entry in the superproject.
+
 - Path: `/Users/kooshapari/CodeProjects/Phenotype/repos/AuthKit`
 - Branch: `main`
 - Tracking: `origin/main`
@@ -149,11 +151,11 @@ states are mixed wave artifacts and need split/recovery branches before cleanup.
   - `e22b243 chore(governance): adopt standard CLAUDE.md + AGENTS.md + worklog`
   - `dca4478 docs(fr): scaffold FUNCTIONAL_REQUIREMENTS.md with 1 FR stubs`
 - Category: coherent docs/governance bootstrap and scaffold alignment
-- Disposition: keep, then rebase carefully
+- Disposition: docs/governance lane complete; `go` gitlink remains separate
 - Next action:
-  1. Inspect `go` gitlink before rebase.
-  2. Rebase in a clean worktree because the branch is 37 behind.
-  3. Keep the docs/governance lane together unless conflicts force splitting.
+  1. Decide whether `go` should become a managed submodule, a vendored nested repo, or a normal directory.
+  2. If keeping gitlink semantics, add/repair `.gitmodules` before updating the pointer.
+  3. If flattening it, convert in a separate branch and validate `go test` after fixing `go.work` / `go.sum`.
 
 ### `Dino`
 
@@ -229,13 +231,13 @@ states are mixed wave artifacts and need split/recovery branches before cleanup.
 
 ## Next Execution Order
 
-1. `AuthKit`: lowest-risk keep lane; preserve and rebase carefully after `go` gitlink check.
-2. `PhenoSpecs`: split archive deletion from registry/spec updates.
-3. `Dino`: split docs/governance from SDK/test seed.
-4. `PhenoProc`: produce nested gitlink manifest before any rebase.
-5. `agentapi-plusplus`: split vendor deletion from docs/test/import fixes.
-6. `phenoSDK`: split deprecation/governance from generated artifact cleanup and module removals.
-7. Shelf root: quarantine tracked governance cleanup from child-repo untracked spillover.
+1. `PhenoSpecs`: split archive deletion from registry/spec updates.
+2. `Dino`: split docs/governance from SDK/test seed.
+3. `PhenoProc`: produce nested gitlink manifest before any rebase.
+4. `agentapi-plusplus`: split vendor deletion from docs/test/import fixes.
+5. `phenoSDK`: split deprecation/governance from generated artifact cleanup and module removals.
+6. Shelf root: quarantine tracked governance cleanup from child-repo untracked spillover.
+7. `AuthKit/go`: resolve nested repo/gitlink policy separately from docs/governance.
 
 ## Non-Negotiables
 

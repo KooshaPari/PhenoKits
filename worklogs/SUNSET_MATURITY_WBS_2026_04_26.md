@@ -17,6 +17,17 @@ have canonical homes, and archived repos stay quiet.
 | P2 | Docs/worklog consolidation | shelf `docs/governance`, `worklogs`, repo-local docs | every claim has one durable source |
 | P3 | Archive/sunset enforcement | archived repos and low-activity candidates | archived repos have no PRs/dependabot and successor notes |
 
+## Batch 2 Evidence
+
+- Added `docs/governance/sunset-maturity-batch-2-execution-plan-2026-04-26.md`.
+- Added `worklogs/P0_DRIFT_DISPOSITION_2026_04_26.md`.
+- Added `worklogs/WORKTREE_QUARANTINE_LEDGER_2026_04_26.md`.
+- Verified open PR queue is empty after closing/merging the final PhenoKits PRs.
+- Confirmed 44 worktree/recovery containers and 142 nested `.git` directories within
+  depth 3; no deletion is authorized until each container has a row-level disposition.
+- Confirmed priority ruleset gaps for `PhenoMCP`, `PhenoProc`, `PhenoKits`, `Dino`,
+  `PhenoSpecs`, and `AuthKit` in the sampled GitHub ruleset API pass.
+
 ## Milestones
 
 ### M1 - Freeze and Manifest P0 Drift
@@ -30,6 +41,9 @@ have canonical homes, and archived repos stay quiet.
   - keep/split/discard recommendation
 - No mutation except creating ledger docs.
 - Exit: all P0 repos have written disposition recommendations.
+- Status 2026-04-26: initial disposition ledger created from live `git status`
+  evidence because the older `PHENOTYPE_LOCAL_DRIFT_MANIFEST_2026_04_25.md`
+  was not present in this checkout; per-repo branch-tip manifests still pending.
 
 ### M2 - Split Salvage Branches
 

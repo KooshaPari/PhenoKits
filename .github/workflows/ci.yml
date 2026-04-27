@@ -28,4 +28,4 @@ jobs:
 
       - name: Validate docs package metadata
         working-directory: docs/guides/docs
-        run: bun install
+        run: bun install --frozen-lockfile

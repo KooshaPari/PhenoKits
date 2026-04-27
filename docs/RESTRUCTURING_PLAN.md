@@ -153,20 +153,24 @@ The `PhenoKits` workspace currently conflates artifact types. Agents consuming t
 
 ## Agent Interaction Matrix
 
-| Category | Agent Reads | Agent Writes | Agent Enforces |
-|----------|-------------|--------------|----------------|
-| Templates | Yes | Yes (instantiation) | No |
-| Configs | Yes | Parameterized | Yes (validation) |
-| Libs | Yes | No | No |
-| Secrets | Yes | No | No |
+| Category | Agent Observes | Agent Mutates | Agent Validates |
+|----------|----------------|---------------|-----------------|
+| Templates | Yes | Instantiated outputs only | No |
+| Configs | Yes | Parameters only | Yes (validation) |
+| Libs | Yes | No, except generated wrappers | No |
+| Secrets | References and metadata only | No | Yes (scanning) |
 | Governance | Yes | Yes (ADRs) | No |
 | Security | Yes | Yes | Yes (scanning) |
-| Observability | Yes | Yes (configs) | Yes (monitoring) |
+| Observability | Yes | Yes (configs/dashboards) | Yes (monitoring) |
 | Documentation | Yes | Yes | No |
 | Scripts | Yes | Yes | No |
 | Schemas | Yes | Yes (code gen) | Yes (type checking) |
 | Policies | Yes | Yes | Yes (OPA, gates) |
-| Credentials | Yes | No | Yes (rotation) |
+| Credentials | Broker state only | No | Yes (rotation/expiry checks) |
+
+This matrix describes permission boundaries, not broad technical capability.
+Agents should never read or write raw secret or credential material; they may
+reference vault handles, metadata, rotation status, and validation results.
 
 ---
 

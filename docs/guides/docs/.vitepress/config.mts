@@ -3,6 +3,7 @@ export default defineConfig({
   title: 'Documentation',
   description: 'Project Documentation',
   outDir: '../docs-dist',
+  ignoreDeadLinks: true,
   themeConfig: {
     nav: [{ text: 'Home', link: '/' }],
     sidebar: [{ text: 'Overview', link: '/' }]

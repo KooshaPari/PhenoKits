@@ -37,6 +37,7 @@ uv.lock
 coverage/
 *.prof
 *.profraw
+docs/guides/docs-dist/
 
 # Archives (for migrated artifacts)
 .archive/

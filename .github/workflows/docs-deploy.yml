@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   deploy:
-    uses: KooshaPari/phenoShared/.github/workflows/vitepress-pages.yml
+    uses: KooshaPari/phenoShared/.github/workflows/vitepress-pages.yml@main
     with:
       concurrency_group: pages-phenokits
       docs_dir: docs

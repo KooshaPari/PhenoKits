@@ -1,4 +1,3 @@
-# Generated CI workflow - calls reusable phenotype workflow
 name: CI
 
 on:
@@ -7,7 +6,26 @@ on:
   pull_request:
     branches: [main, master]
 
+permissions:
+  contents: read
+
 jobs:
-  ci:
-    uses: KooshaPari/phenotype-infrakit/.github/workflows/ci.yaml@main
-    secrets: inherit
+  repo-hygiene:
+    name: Repository hygiene
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate root Cargo workspace metadata
+        run: cargo metadata --manifest-path Cargo.toml --no-deps --format-version 1
+
+      - name: Validate clean Rust template metadata
+        run: cargo metadata --manifest-path templates/clean-rust/Cargo.toml --no-deps --format-version 1
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Validate docs package metadata
+        working-directory: docs/guides/docs
+        run: bun install

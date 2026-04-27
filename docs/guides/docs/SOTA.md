@@ -133,7 +133,7 @@ Yeoman's composition model influenced the layer contract design, though template
 ```json
 {
   "project_name": "My Project",
-  "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '_') }}",
+  "project_slug": "&#123;&#123; cookiecutter.project_name.lower().replace(' ', '_') &#125;&#125;",
   "version": "0.1.0"
 }
 ```
@@ -202,8 +202,8 @@ Copier's reconciliation approach directly influenced the reconcile.rules.yaml de
 plop.setGenerator('component', {
   prompts: [...],
   actions: [
-    { type: 'add', path: 'src/{{name}}.js', templateFile: 'templates/component.hbs' },
-    { type: 'modify', path: 'src/index.js', pattern: /\/\/ IMPORTS/, template: 'import {{name}} from \'./{{name}}\';\n// IMPORTS' }
+    { type: 'add', path: 'src/&#123;&#123;name&#125;&#125;.js', templateFile: 'templates/component.hbs' },
+    { type: 'modify', path: 'src/index.js', pattern: /\/\/ IMPORTS/, template: 'import &#123;&#123;name&#125;&#125; from \'./&#123;&#123;name&#125;&#125;\';\n// IMPORTS' }
   ]
 });
 ```
@@ -384,15 +384,15 @@ Nx's generator system and project graph influenced the reconciliation and depend
 
 | Engine | Syntax | Logic | Safety | Performance |
 |--------|--------|-------|--------|-------------|
-| Jinja2 | `{{ var }}` | Full Python | Medium | Good |
-| Mustache | `{{var}}` | Logic-less | High | Excellent |
-| Handlebars | `{{var}}` | Helpers | High | Excellent |
-| Go templates | `{{.Var}}` | Functions | High | Excellent |
-| Tera | `{{ var }}` | Rust-like | High | Excellent |
+| Jinja2 | `&#123;&#123; var &#125;&#125;` | Full Python | Medium | Good |
+| Mustache | `&#123;&#123;var&#125;&#125;` | Logic-less | High | Excellent |
+| Handlebars | `&#123;&#123;var&#125;&#125;` | Helpers | High | Excellent |
+| Go templates | `&#123;&#123;.Var&#125;&#125;` | Functions | High | Excellent |
+| Tera | `&#123;&#123; var &#125;&#125;` | Rust-like | High | Excellent |
 | ERB | `<%= var %>` | Full Ruby | Low | Medium |
 
 **Recommendation for template-commons:**
-Mustache/Handlebars-style `{{VARIABLE}}` syntax selected for:
+Mustache/Handlebars-style `&#123;&#123;VARIABLE&#125;&#125;` syntax selected for:
 - Universal compatibility across languages
 - No accidental execution of logic
 - Editor support in all major IDEs
@@ -1098,7 +1098,7 @@ internal-lib/
 // Standard structure from popular templates
 template-project/
 ├── cmd/
-│   └── {{project_name}}/
+│   └── &#123;&#123;project_name&#125;&#125;/
 │       └── main.go
 ├── internal/
 │   └── ...
@@ -1137,7 +1137,7 @@ Strong need for commons layer providing CI/CD, security, documentation that work
 ```
 template-project/
 ├── src/
-│   └── {{package_name}}/
+│   └── &#123;&#123;package_name&#125;&#125;/
 │       ├── __init__.py
 │       └── ...
 ├── tests/
@@ -1352,7 +1352,7 @@ breaking:
       # Auto-migrate if sed available
       if command -v sed &> /dev/null; then
         find . -name "*.md" -o -name "*.yml" -o -name "*.yaml" | \
-          xargs sed -i 's/{{PROJECT_NAME}}/{{SERVICE_NAME}}/g'
+          xargs sed -i 's/&#123;&#123;PROJECT_NAME&#125;&#125;/&#123;&#123;SERVICE_NAME&#125;&#125;/g'
       fi
 ```
 
@@ -1726,4 +1726,3 @@ Hook depends on tool not installed.
 ---
 
 *End of State of the Art Research Document - Extended Edition*
-
